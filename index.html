@@ -133,13 +133,22 @@ body.fs .pal{max-height:none}
 .board{position:absolute;top:0;left:0;min-width:0;transform-origin:0 0}
 .board-scroll{max-height:calc(100vh - 210px);overflow:auto}
 body.fs .board-scroll{max-height:calc(100vh - 190px)}
+.toolbar{gap:14px 18px;align-items:flex-end}
+.tg{display:flex;flex-direction:column;gap:4px}
+.tl{font:700 .68rem var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.gmodal{position:fixed;inset:0;z-index:60;background:rgba(10,14,24,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.gbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:860px;width:100%;max-height:90vh;display:flex;flex-direction:column;padding:16px}
+.gbody{overflow:auto;font-size:.95rem}
+.gbody table{border-collapse:collapse;width:100%;margin:8px 0;display:block;overflow-x:auto}
+.gbody th,.gbody td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+.gbody th{background:var(--surface2)}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <div class="brand"><small>App</small>Sintaxis</div>
-  <div class="stats"><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
+  <div class="stats"><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
 </header>
 
 <section class="card" id="p-frase">
@@ -165,16 +174,10 @@ body.fs .board-scroll{max-height:calc(100vh - 190px)}
     <div class="guide" id="guide"><b>Cómo funciona:</b> 1) Pulsa <b>Lápiz</b> y subraya o rodea lo que quieras: las líneas se enderezan solas. 2) Pulsa <b>Asignar</b>, toca una palabra (o varias) y elige su función a la derecha. 3) Pulsa <b>Comprobar</b>: verde es correcto, rojo es error. <button class="btn" id="gx">Entendido</button></div>
     <section class="card" id="p-board">
       <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
-        <button class="tb big" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
-        <button class="tb big" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Asignar</button>
-        <button class="tb big" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button>
-        <button class="tb big" id="t-hand" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>Mover</button>
-        <button class="tb big" id="z-out" aria-label="Alejar">−</button><button class="tb big" id="z-fit" aria-label="Ajustar a la pantalla">Ajustar</button><button class="tb big" id="z-in" aria-label="Acercar">+</button>
-        <span class="sep"></span>
-        <button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button>
-        <button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button>
-        <button class="tb big" id="t-fs"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fslab">Pantalla completa</span></button>
-        <button class="tb" id="t-str" aria-pressed="true">Enderezar líneas</button>
+        <div class="tg"><span class="tl">Analizar</span><button class="tb big" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Asignar</button></div>
+        <div class="tg"><span class="tl">Dibujar</span><div class="row" style="gap:6px"><button class="tb big" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button><button class="tb big" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button><button class="tb" id="t-str" aria-pressed="true">Enderezar</button></div></div>
+        <div class="tg"><span class="tl">Vista</span><div class="row" style="gap:6px"><button class="tb big" id="t-hand" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>Mover</button><button class="tb big" id="z-out" aria-label="Alejar">−</button><button class="tb big" id="z-fit" aria-label="Ajustar a la pantalla">Ajustar</button><button class="tb big" id="z-in" aria-label="Acercar">+</button><button class="tb big" id="t-fs"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fslab">Pantalla completa</span></button></div></div>
+        <div class="tg"><span class="tl">Editar</span><div class="row" style="gap:6px"><button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button><button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button></div></div>
       </div>
       <div class="board-scroll" id="bsc"><div class="zbox" id="zbox"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div></div>
       <div class="selbar" id="selbar"></div>
@@ -205,23 +208,24 @@ body.fs .board-scroll{max-height:calc(100vh - 190px)}
     <div class="ficha" id="ficha">Toca una función para asignarla a la selección, o arrástrala hasta una palabra (ratón o lápiz).</div>
   </aside>
 </div>
+<div id="gmodal" class="gmodal" hidden><div class="gbox"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Guía de sintaxis</h2><button class="btn" id="gclose">Cerrar</button></div><div class="row" id="gtabs" style="margin:10px 0"></div><div id="gbody" class="gbody"></div></div></div>
 </div>
 <script>
 // <pure>
 const FAM={verbo:'--f-verbo',suj:'--f-suj',arg:'--f-arg',adj:'--f-adj',nom:'--f-nom',se:'--f-se',dis:'--f-dis',apo:'--f-apo'};
-const GROUPS=[['Núcleo y sujeto',['verbo','suj','sujPac']],['Argumentos y predicativos',['cd','ci','creg','atr','predSuj','predCD','cla']],['Adjuntos',['cct','ccl','ccm','ccc','ccf','ccCant','ccComp','ccInst','ag']],['Dentro del grupo',['cn','cadj']],['El «se»',['sePR','seImp','seVM','sePron','seRef']],['Disjuntos',['modOrac','conn']],['Apoyo (no puntúa)',['gn','gprep','gadj','gadv','mod']]];
-const cc=(id,short,what,al)=>[id,'CC de '+what,short,'adj','Adjunto opcional de '+what+'. Se puede omitir y se sustituye por un adverbio (allí, ayer, así).',al];
+const GROUPS=[['Núcleo y sujeto',['verbo','suj','sujPac']],['Argumentos (los pide el verbo)',['cd','ci','creg','atr','predSuj','predCD','cla']],['Adjuntos (opcionales)',['cct','ccl','ccm','ccc','ccf','ccCant','ccComp','ccInst','ag']],['Dentro del grupo',['cn','cadj']],['«se» con función (CD o CI)',['seRefl','seRec','seSus']],['«se» sin función',['sePron','seVM','seDat']],['«se» como marca de la oración',['sePR','seImp']],['Disjuntos',['modOrac','conn']],['Tipo de grupo (no puntúa)',['gn','gprep','gadj','gadv']],['Partes del grupo (no puntúa)',['det','nuc','enl','ter']]];
+const cc=(id,short,what,al)=>[id,'CC de '+what,short,'adj','Opcional: responde a «'+what+'». Se sustituye por un adverbio y se puede quitar o mover solo.',al];
 const FDEF=[
-['verbo','Núcleo del predicado (verbo)','Verbo','verbo','Palabra o perífrasis que expresa la acción, estado o proceso y concuerda con el sujeto.',['verbo','nucleo del predicado verbal','nucleo del predicado','predicado verbal','np']],
-['suj','Sujeto','Suj.','suj','Elemento con el que concuerda el verbo en número y persona. Prueba: cambia el número del verbo y mira qué palabra cambia con él.',['sujeto','suj']],
-['sujPac','Sujeto paciente','Suj. pac.','suj','Sujeto de una pasiva (con «ser» o refleja): recibe la acción y el verbo concuerda con él.',['sujeto paciente']],
-['cd','Complemento directo','CD','arg','Argumento del verbo transitivo. Se sustituye por lo/la/los/las; si es de persona lleva «a».',['complemento directo','c directo','cd']],
-['ci','Complemento indirecto','CI','arg','Destinatario o beneficiario de la acción. Se sustituye por le/les (se).',['complemento indirecto','c indirecto','ci']],
-['creg','Complemento de régimen','C. Rég.','arg','Grupo preposicional exigido por el verbo con preposición fija (confiar en). Se sustituye por preposición + pronombre tónico («en ello»), no por un adverbio.',['complemento de regimen','c regimen','suplemento','creg','c reg']],
-['atr','Atributo','Atr.','arg','Complemento de un verbo copulativo (ser, estar, parecer) que atribuye una cualidad al sujeto.',['atributo','atr']],
-['predSuj','C. predicativo del sujeto','C. Pred. Suj.','arg','Dice cómo es o cómo está el sujeto mientras ocurre la acción y concuerda con él en género y número («llegaron agotados»).',['complemento predicativo del sujeto paciente','complemento predicativo del sujeto','predicativo del sujeto','c pred suj','pred suj']],
-['predCD','C. predicativo del CD','C. Pred. CD','arg','Dice cómo es o cómo está el complemento directo y concuerda con él («Considero a María inteligente»).',['complemento predicativo del cd','complemento predicativo del complemento directo','predicativo del cd','c pred cd','pred cd']],
-['cla','Locativo argumental','CLA','arg','Complemento de lugar exigido por el verbo (poner, dirigirse, residir). Sin él la oración queda incompleta.',['complemento locativo argumental','locativo argumental','cla']],
+['verbo','Núcleo del predicado (verbo)','Verbo','verbo','Un verbo conjugado = una oración. Es el núcleo del predicado y concuerda con el sujeto.',['verbo','nucleo del predicado verbal','nucleo del predicado','predicado verbal','np']],
+['suj','Sujeto','Suj.','suj','Cambia el verbo a singular o plural: lo que cambia con él es el sujeto. Es un grupo nominal (GN).',['sujeto','suj']],
+['sujPac','Sujeto paciente','Suj. pac.','suj','Sujeto que recibe la acción (pasiva con «ser» o pasiva refleja). El verbo concuerda con él.',['sujeto paciente']],
+['cd','Complemento directo','CD','arg','Prueba: se sustituye por lo, la, los, las y pasa a sujeto en la pasiva. Con persona lleva «a». Un transitivo sin CD es agramatical (*Ana trajo).',['complemento directo','c directo','cd']],
+['ci','Complemento indirecto','CI','arg','Prueba: se sustituye por le, les. Suele llevar a/para (Di el libro a Pedro → Le di el libro).',['complemento indirecto','c indirecto','ci']],
+['creg','Complemento de régimen','C. Rég.','arg','Preposición fija que exige el verbo (depende DE ti). Se sustituye por preposición + pronombre: en ti, en eso.',['complemento de regimen','c regimen','suplemento','creg','c reg']],
+['atr','Atributo','Atr.','arg','Con verbos copulativos (ser, estar, parecer) o pseudocopulativos (quedarse, ponerse). Obligatorio; se sustituye por lo (Marta lo es).',['atributo','atr']],
+['predSuj','C. predicativo del sujeto','C. Pred. Suj.','arg','Concuerda con el sujeto y no admite «lo» (Llegaron cansados). Normalmente opcional.',['complemento predicativo del sujeto paciente','complemento predicativo del sujeto','predicativo del sujeto','c pred suj','pred suj']],
+['predCD','C. predicativo del CD','C. Pred. CD','arg','Concuerda con el CD (Dejó la puerta abierta). Con algunos verbos es obligatorio (Consideran a Luis un genio).',['complemento predicativo del cd','complemento predicativo del complemento directo','predicativo del cd','c pred cd','pred cd']],
+['cla','Locativo argumental','CLA','arg','Lugar obligatorio (*Vivo). La preposición varía (en, cerca de, junto a) y se sustituye por «allí». También llamado «CC de lugar obligatorio».',['complemento locativo argumental','locativo argumental','cla']],
 cc('cct','CCT','tiempo',['complemento circunstancial de tiempo','cc de tiempo','cct']),
 cc('ccl','CCL','lugar',['complemento circunstancial de lugar','cc de lugar','ccl']),
 cc('ccm','CCM','modo',['complemento circunstancial de modo','cc de modo','ccm']),
@@ -230,21 +234,27 @@ cc('ccf','CCF','finalidad',['complemento circunstancial de finalidad','cc de fin
 cc('ccCant','CCCant','cantidad',['complemento circunstancial de cantidad','cc de cantidad']),
 cc('ccComp','CCComp','compañía',['complemento circunstancial de compania','cc de compania']),
 cc('ccInst','CCInst','instrumento',['complemento circunstancial de instrumento','cc de instrumento']),
-['ag','Complemento agente','C. Ag.','adj','En una pasiva indica quién realiza la acción: «fue aprobado por el comité».',['complemento agente','c agente','c ag']],
-['cn','Complemento del nombre','CN','nom','Modifica a un sustantivo: adjetivo, grupo preposicional («de la norma») u oración de relativo.',['complemento del nombre','complemento nominal','cn']],
-['cadj','Complemento del adjetivo','C. Adj.','nom','Complementa a un adjetivo («lleno de agua»).',['complemento del adjetivo','c adj']],
-['sePR','«se» de pasiva refleja','Se pas. refl.','se','El verbo concuerda con el sujeto paciente: «Se consideran fundamentales el cumplimiento y la aplicación».',['marca de pasiva refleja','pasiva refleja','se pasiva refleja']],
-['seImp','«se» impersonal','Se impers.','se','La oración no tiene sujeto y el verbo va en 3.ª singular: «Se habló de los problemas»; «Se atiende a los pacientes» (CD de persona con «a»).',['marca de impersonalidad','se impersonal','impersonal','impersonalidad']],
-['seVM','«se» de voz media','Se voz media','se','El sujeto experimenta un cambio de estado: «El atleta se quedó exhausto».',['voz media','se de voz media']],
-['sePron','«se» pronominal','Se pron.','se','El pronombre forma parte del verbo (arrepentirse, dirigirse) y no expresa acción reflexiva.',['se pronominal','verbo pronominal','pronominal']],
-['seRef','«se» reflexivo / recíproco','Se refl.','se','«se» es CD o CI y coincide con el sujeto («Juan se peina») o se reparte entre varios («se saludaron»).',['reflexivo','reciproco']],
-['modOrac','Modificador oracional','Mod. orac.','dis','Disjunto: actitud del hablante ante lo que dice («Afortunadamente», «Sinceramente»). Suele ir entre comas.',['modificador oracional','disjunto']],
-['conn','Conector discursivo','Conector','dis','Marcador que organiza el discurso («Por consiguiente», «además»).',['conector discursivo','conector','marcador discursivo']],
-['gn','Grupo nominal','GN','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo nominal','gn']],
-['gprep','Grupo preposicional','GPrep','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo preposicional','gprep']],
-['gadj','Grupo adjetival','GAdj','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo adjetival','gadj']],
-['gadv','Grupo adverbial','GAdv','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo adverbial','gadv']],
-['mod','Modificador','Mod.','apo','Palabra que modifica a un núcleo (adjetivo, adverbio). Apoyo visual, no puntúa.',['modificador']]
+['ag','Complemento agente','C. Ag.','adj','Solo en pasiva y con «por» (pintado por Goya): quién realiza la acción.',['complemento agente','c agente','c ag']],
+['cn','Complemento del nombre','CN','nom','Adyacente del nombre: adjetivo, GPrep, aposición o relativa. Se mueve con el nombre (el libro de poemas).',['complemento del nombre','complemento nominal','cn']],
+['cadj','Complemento del adjetivo','C. Adj.','nom','Complementa a un adjetivo (orgulloso de su hijo).',['complemento del adjetivo','c adj']],
+['seRefl','«se» reflexivo','Se refl.','se','Prueba: «a sí mismo». Pedro se lava (CD); Pedro se lava las manos (CI). CD si no hay otro CD; CI si ya lo hay. Etiqueta también CD o CI.',['reflexivo']],
+['seRec','«se» recíproco','Se recíp.','se','Prueba: «el uno al otro». María y Juan se miran (CD); Se escriben cartas (CI). Etiqueta también CD o CI.',['reciproco']],
+['seSus','«se» sustituto de le/les','Se = le','se','Es «le/les» delante de lo, la, los, las: Se lo di = Le di el libro (CI).',['sustituto']],
+['sePron','«se» pronominal','Se pron.','se','Sin función, forma parte del verbo: no existe sin «se» o cambia de significado (arrepentirse, irse). Con C. de régimen: se arrepintió DE sus palabras.',['se pronominal','verbo pronominal','pronominal']],
+['seVM','«se» de voz media','Se v. media','se','Sin función: hay un transitivo equivalente y nadie provoca la acción (La puerta se abrió; El atleta se quedó exhausto).',['voz media','se de voz media']],
+['seDat','«se» dativo ético o de interés','Se dativo','se','Sin función: se puede quitar y solo se pierde el matiz afectivo (Se leyó el libro en dos días).',['dativo etico','dativo de interes','dativo']],
+['sePR','«se» de pasiva refleja (MPR)','Se MPR','se','Marca: hay sujeto paciente y el verbo concuerda con él (Se venden las casas). Se vende piso también es MPR.',['marca de pasiva refleja','pasiva refleja','se pasiva refleja','mpr']],
+['seImp','«se» impersonal (MI)','Se MI','se','Marca: no hay sujeto y el verbo queda fijo en 3.ª singular (Se vive bien; Se atendió a los pacientes).',['marca de impersonalidad','se impersonal','impersonal','impersonalidad','mi']],
+['modOrac','Modificador oracional','Mod. orac.','dis','Disjunto: actitud del hablante («Afortunadamente», «Sinceramente»). Suele ir entre comas.',['modificador oracional','disjunto']],
+['conn','Conector discursivo','Conector','dis','Organiza el discurso («Por consiguiente», «además»).',['conector discursivo','conector','marcador discursivo']],
+['gn','Grupo nominal','GN','apo','Su núcleo es un nombre o pronombre (mis amigos del colegio). Etiqueta de apoyo, no puntúa.',['grupo nominal','gn','sintagma nominal','sn']],
+['gprep','Grupo preposicional','GPrep','apo','Enlace (preposición) + término (un GN): con mis amigos. No puntúa.',['grupo preposicional','gprep','sintagma preposicional','sprep']],
+['gadj','Grupo adjetival','GAdj','apo','Su núcleo es un adjetivo (muy orgulloso de ti). No puntúa.',['grupo adjetival','gadj','sintagma adjetival','sadj']],
+['gadv','Grupo adverbial','GAdv','apo','Su núcleo es un adverbio (bastante lejos de casa). No puntúa.',['grupo adverbial','gadv','sintagma adverbial','sadv']],
+['det','Determinante','Det.','apo','Va antes del nombre: artículo, posesivo, demostrativo… No puntúa.',['determinante','det']],
+['nuc','Núcleo (N)','Núcleo','apo','Palabra principal del grupo; da nombre al grupo. No puntúa.',['nucleo']],
+['enl','Enlace (preposición)','Enlace','apo','Preposición que abre un GPrep (con, de, en…). No puntúa.',['enlace']],
+['ter','Término (GN)','Término','apo','Lo que va tras el enlace dentro de un GPrep; normalmente un GN. No puntúa.',['termino']]
 ];
 const FN={};FDEF.forEach(d=>{FN[d[0]]={id:d[0],label:d[1],short:d[2],fam:d[3],def:d[4],al:d[5],apo:d[3]==='apo'}});
 const key=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
@@ -305,9 +315,9 @@ $('words').addEventListener('pointerdown',e=>{const w=e.target.closest('.w');if(
 $('words').addEventListener('pointermove',e=>{if(!dr||dr.touch||!(e.buttons&1))return;const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(!w)return;const i=+w.dataset.i;if(i!==dr.a||dr.moved){dr.moved=true;S.sel={a:dr.a,b:i};renderSel()}});
 window.addEventListener('pointerup',()=>{if(dr&&!dr.moved)tap(dr.a);dr=null});
 $('words').addEventListener('keydown',e=>{const w=e.target.closest('.w');if(!w)return;const i=+w.dataset.i;if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(i)}else if(e.key==='ArrowRight'&&w.nextSibling)w.nextSibling.focus();else if(e.key==='ArrowLeft'&&w.previousSibling)w.previousSibling.focus()});
-function renderSel(){const r=selRange();const bar=$('selbar');document.querySelectorAll('.w').forEach((el,i)=>el.classList.toggle('sel',!!r&&i>=r[0]&&i<=r[1]));bar.innerHTML='';if(!r){bar.textContent='Toca una palabra o arrastra sobre varias y elige su función a la derecha.';return}const t=S.words.slice(r[0],r[1]+1).map(x=>x.t).join(' ');const s=document.createElement('strong');s.textContent='«'+t+'»';const b=document.createElement('button');b.className='btn';b.textContent='Deseleccionar';b.onclick=()=>{S.sel=null;renderSel()};bar.append('Selección: ',s,b)}
-function assign(f,range){const r=range||selRange();if(!r){say('Primero selecciona una palabra o un grupo de palabras en la frase.',$('selbar'));return}if(S.anns.some(a=>a.s===r[0]&&a.e===r[1]&&a.f===f)){S.sel=null;renderSel();return}snap();S.anns.push({id:S.nid++,s:r[0],e:r[1],f});S.sel=null;changed()}
-function removeAnn(id){snap();S.anns=S.anns.filter(a=>a.id!==id);changed()}
+function renderSel(){const r=selRange();const bar=$('selbar');document.querySelectorAll('.w').forEach((el,i)=>el.classList.toggle('sel',!!r&&i>=r[0]&&i<=r[1]));bar.innerHTML='';if(!r){bar.textContent='1) Toca una palabra (o arrastra sobre varias).  2) Elige su función a la derecha.  3) Si quieres, añade también su grupo (GN, GPrep…).';return}const t=S.words.slice(r[0],r[1]+1).map(x=>x.t).join(' ');const s=document.createElement('strong');s.textContent='«'+t+'»';const b=document.createElement('button');b.className='btn';b.textContent='Deseleccionar';b.onclick=()=>{S.sel=null;renderSel()};bar.append('Selección: ',s,b)}
+function assign(f,range){const r=range||selRange();if(!r){say('Primero selecciona una palabra o un grupo de palabras en la frase.',$('selbar'));return}if(S.anns.some(a=>a.s===r[0]&&a.e===r[1]&&a.f===f))return;snap();S.anns.push({id:S.nid++,s:r[0],e:r[1],f});S.sel={a:r[0],b:r[1]};changed()}
+function removeAnn(ids){ids=[].concat(ids);snap();S.anns=S.anns.filter(a=>!ids.includes(a.id));changed()}
 /* palette interactions + drag */
 let pd=null;
 $('plist').addEventListener('pointerdown',e=>{const c=e.target.closest('.chip');if(!c)return;pd={f:c.dataset.f,x:e.clientX,y:e.clientY,drag:false,mouse:e.pointerType!=='touch',g:null,c}});
@@ -319,19 +329,21 @@ $('q').addEventListener('input',e=>buildPalette(e.target.value));
 /* marks */
 function renderAll(){renderMarks();renderSel();stepState()}
 function renderMarks(){const ws=[...$('words').children];const box=$('marks');box.innerHTML='';if(!ws.length)return;ws.forEach(w=>w.classList.remove('bad'));
-  const items=S.anns.map(a=>({...a,g:false})).concat(S.ghosts.map((g,i)=>({id:'g'+i,s:g.s,e:g.e,f:g.f,g:true})));
-  items.forEach(it=>{const a=ws[it.s],b=ws[it.e];it.x1=a.offsetLeft;it.x2=b.offsetLeft+b.offsetWidth;const lw=FN[it.f].short.length*7.4+(it.g?26:44);it.lw=lw;const cx=(it.x1+it.x2)/2;it.l=Math.min(it.x1,cx-lw/2);it.r=Math.max(it.x2,cx+lw/2)});
+  const items=[];S.anns.forEach(a=>{if(FN[a.f].apo&&S.anns.some(m=>m!==a&&m.s===a.s&&m.e===a.e&&!FN[m.f].apo))return;items.push({...a,g:false,ids:[a.id],extra:[]})});
+  S.anns.forEach(a=>{if(!FN[a.f].apo)return;const m=items.find(x=>x.s===a.s&&x.e===a.e&&!FN[x.f].apo);if(m){m.ids.push(a.id);m.extra.push(FN[a.f].short)}});
+  S.ghosts.forEach((g,i)=>items.push({id:'g'+i,s:g.s,e:g.e,f:g.f,g:true,ids:[],extra:[]}));
+  items.forEach(it=>{const a=ws[it.s],b=ws[it.e];it.x1=a.offsetLeft;it.x2=b.offsetLeft+b.offsetWidth;it.txt=FN[it.f].short+(it.extra.length?' · '+it.extra.join(' · '):'');const lw=it.txt.length*7.4+(it.g?26:44);it.lw=lw;const cx=(it.x1+it.x2)/2;it.l=Math.min(it.x1,cx-lw/2);it.r=Math.max(it.x2,cx+lw/2)});
   items.sort((p,q)=>(p.e-p.s)-(q.e-q.s)||p.s-q.s);const rows=[];items.forEach(it=>{for(let L=0;;L++){const r=rows[L]||(rows[L]=[]);if(!r.some(o=>it.l<o.r+6&&o.l<it.r+6)){r.push(it);it.lv=L;break}}});
   box.style.height=(rows.length*46+8)+'px';
   items.forEach(it=>{const st=it.g?'ghost':S.st[it.id]||'';const c=fcol(it.f);const top=it.lv*46;const br=document.createElement('div');br.className='br '+(it.g?'ghost ':'')+(st==='ok'||st==='bad'?st:'');br.style.cssText='--c:'+c+';left:'+it.x1+'px;width:'+(it.x2-it.x1)+'px;top:'+top+'px';box.appendChild(br);
     const lb=document.createElement('div');lb.className='lb '+(it.g?'ghost ':'')+(st==='ok'||st==='bad'?st:'');const cx=(it.x1+it.x2)/2;lb.style.cssText='--c:'+c+';left:'+(cx-it.lw/2)+'px;top:'+(top+13)+'px';
-    const mark=st==='ok'?'✓ ':st==='bad'?'✗ ':'';lb.append(mark+FN[it.f].short);
-    if(!it.g){const x=document.createElement('button');x.textContent='×';x.title='Quitar';x.setAttribute('aria-label','Quitar '+FN[it.f].label);x.onclick=()=>removeAnn(it.id);lb.appendChild(x)}
+    const mark=st==='ok'?'✓ ':st==='bad'?'✗ ':'';lb.append(mark+it.txt);
+    if(!it.g){const x=document.createElement('button');x.textContent='×';x.title='Quitar';x.setAttribute('aria-label','Quitar '+FN[it.f].label);x.onclick=()=>removeAnn(it.ids);lb.appendChild(x)}
     lb.title=FN[it.f].label;box.appendChild(lb);
     if(st==='bad')for(let i=it.s;i<=it.e;i++)ws[i].classList.add('bad')});
   sizeInk()}
 window.addEventListener('resize',()=>{renderMarks()});
-if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>renderMarks());
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitWords());
 /* canvas */
 const cv=$('ink'),cx2=cv.getContext('2d');let cur=null,erasing=false,erased=false;
 function sizeInk(){applyZoom();const b=$('board');const w=b.offsetWidth,h=b.offsetHeight,d=window.devicePixelRatio||1;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.width=w+'px';cv.style.height=h+'px'}cx2.setTransform(d,0,0,d,0,0);drawAll()}
@@ -357,9 +369,9 @@ document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&
 /* AI (Claude vía capability sample; punto de enganche para un proxy de Gemini) */
 let sampleFn=null;
 (async()=>{try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){sampleFn=null}})();
-async function askJSON(prompt,opts){if(sampleFn)return sampleFn.json(prompt,opts);let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})})}catch(e){throw{code:'upstream_error'}}if(!r.ok)throw{code:r.status===429?'rate_limited':'upstream_error'};return r.json()}
+async function askJSON(prompt,opts){if(sampleFn)return sampleFn.json(prompt,opts);let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})})}catch(e){throw{code:'upstream_error'}}let j=null;try{j=await r.json()}catch(e){}if(!r.ok)throw{code:r.status===429?'rate_limited':'upstream_error',detail:(r.status===404?'No se encuentra /api/ai: sube también la carpeta api. ':'')+((j&&j.error)||('Error '+r.status))};return j}
 const FLIST=()=>Object.values(FN).filter(f=>!f.apo).map(f=>f.id+': '+f.label).join('; ');
-const aiErr=e=>({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
+const aiErr=e=>(e&&e.detail)?('IA: '+e.detail):({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
 async function aiGenerate(){const tema=$('tema').selectedOptions[0].textContent,nivel=$('lvlsel').value;$('gen').disabled=true;say('Generando…');
   try{const r=await askJSON('Eres profesor de Lengua Castellana (España). Crea UNA oración simple en español para practicar análisis sintáctico. Nivel: '+nivel+'. Tema: '+tema+'. Responde solo con JSON: {"frase":"...","solucion":[{"seg":"palabras consecutivas copiadas literalmente de la frase, sin puntuación","f":"id","opt":false}],"nota":"explicación breve, máximo 250 caracteres"}. Incluye verbo, sujeto si lo hay y todos los complementos; marca opt:true en los análisis internos (CN, C. Adj.). Funciones válidas (id: nombre): '+FLIST(),{modelTier:'default',cache:false});
     if(!r||typeof r.frase!=='string'||!Array.isArray(r.solucion))throw{code:'invalid_json'};const w=tokenize(r.frase);const items=buildSol(w,r.solucion);if(items.length<2)throw{code:'invalid_json'};S.aic[sKey(r.frase)]={items,note:String(r.nota||'')};say('');$('txt').value=r.frase;setSentence(r.frase,{items,source:'ai'},String(r.nota||''))}catch(e){say(aiErr(e))}finally{$('gen').disabled=false}}
@@ -431,7 +443,7 @@ $('gx').onclick=()=>{$('guide').hidden=true;try{localStorage.setItem('asx:guide'
 S.zoom=1;
 function applyZoom(){const b=$('board'),z=$('zbox'),sc=$('bsc');if(!b||!z||!sc)return;b.style.transform='scale('+S.zoom+')';b.style.minWidth=(sc.clientWidth/S.zoom)+'px';z.style.width=Math.max(sc.clientWidth,b.offsetWidth*S.zoom)+'px';z.style.height=(b.offsetHeight*S.zoom)+'px'}
 function zoomBy(f){S.zoom=Math.max(.5,Math.min(3,S.zoom*f));applyZoom()}
-function fitWords(){const w=$('words');if(!w.children.length)return;S.zoom=1;w.style.fontSize='40px';const avail=$('bsc').clientWidth-48;const need=w.offsetWidth;let px=40*Math.min(1,avail/need);px=Math.max(14,Math.min(px,46));w.style.fontSize=px.toFixed(1)+'px';renderMarks()}
+function fitWords(){const w=$('words');if(!w.children.length)return;S.zoom=1;const avail=Math.max(200,$('bsc').clientWidth-52);let px=40;w.style.fontSize=px+'px';for(let k=0;k<3;k++){const need=w.offsetWidth;if(need<=avail&&k>0)break;px=Math.max(13,Math.min(46,px*avail/need*0.985));w.style.fontSize=px.toFixed(1)+'px'}renderMarks()}
 $('z-in').onclick=()=>zoomBy(1.25);$('z-out').onclick=()=>zoomBy(.8);$('z-fit').onclick=()=>{fitWords();$('bsc').scrollTo(0,0)};
 $('bsc').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoomBy(e.deltaY<0?1.1:1/1.1)}},{passive:false});
 window.addEventListener('resize',fitWords);
@@ -439,6 +451,18 @@ function setFS(on){document.body.classList.toggle('fs',on);$('fslab').textConten
 $('t-fs').onclick=()=>setFS(!document.body.classList.contains('fs'));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('fs'))setFS(false)});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('fs'))setFS(false)});
+
+/* guía */
+const GUIDE={
+'Ruta':'<p>Una oración es un conjunto de cajas dentro de cajas. Empieza por la caja grande y baja.</p><table><tr><th>Nivel</th><th>Qué pones</th><th>Cómo lo encuentras</th></tr><tr><td>1. Oración</td><td>Un verbo conjugado = una oración</td><td>Subraya los verbos conjugados</td></tr><tr><td>2. Sujeto / Predicado</td><td>Sujeto (GN) y predicado (GV)</td><td>Cambia el verbo a singular/plural: lo que cambia es el sujeto</td></tr><tr><td>3. Dentro del predicado</td><td>Argumentos (los pide el verbo) y adjuntos (CC, opcionales)</td><td>Prueba de sustitución y de supresión: si no puedo quitarlo, es argumento</td></tr><tr><td>4. Dentro del grupo</td><td>Determinante + núcleo + adyacentes</td><td>¿Se mueve con el nombre? Entonces es adyacente</td></tr></table><p>Cada caja tiene dos etiquetas: <b>función</b> (qué hace: CD, CI…) y <b>grupo</b> (qué es). El grupo se decide por su núcleo: nombre → GN, preposición → GPrep, adverbio → GAdv, adjetivo → GAdj. Un <b>GPrep</b> se parte en <b>enlace</b> (la preposición) + <b>término</b> (un GN).</p><p>Ejemplo: <i>una novela</i> = CD · GN; <i>a Ana</i> = CI · GPrep; <i>ayer</i> = CC · GAdv; <i>limpia</i> = atributo · GAdj.</p><p>Para etiquetar una palabra con función y grupo a la vez: selecciónala, elige la función y, sin cambiar la selección, elige también el grupo. Se mostrarán juntas (CD · GN).</p>',
+'Complementos':'<table><tr><th>Función</th><th>Prueba</th><th>Ejemplo</th></tr><tr><td>CD</td><td>lo, la, los, las. Pasa a sujeto en la pasiva</td><td>Leo novelas → Las leo</td></tr><tr><td>CI</td><td>le, les. Suele llevar a/para</td><td>Di el libro a Pedro → Le di el libro</td></tr><tr><td>Atributo</td><td>Verbos copulativos. Se sustituye por lo</td><td>Marta es lista → Marta lo es</td></tr><tr><td>C. predicativo</td><td>Opcional. No admite lo. Concuerda con un nombre</td><td>Llegaron cansados</td></tr><tr><td>C. de régimen</td><td>Preposición fija que exige el verbo</td><td>Depende de ti</td></tr><tr><td>Locativo argumental</td><td>Lugar obligatorio. Se sustituye por allí</td><td>Vivo en Madrid</td></tr><tr><td>C. agente</td><td>Solo en pasiva. Lleva por</td><td>Pintado por Goya</td></tr><tr><td>CC (adjunto)</td><td>Opcional. Cuándo, dónde, cómo, por qué… Se sustituye por un adverbio</td><td>Salí por la mañana</td></tr></table><p><b>Otros núcleos:</b> nombre → adyacentes (adjetivo, GPrep = C. del nombre, aposición, relativa); adjetivo → C. del adjetivo (orgulloso de su hijo); adverbio → C. del adverbio (lejos de casa).</p><p><b>¿Nombre o verbo?</b> Compré el libro de poemas: «de poemas» va con el nombre (Lo compré). Compré el libro en Madrid: «en Madrid» es CC y se mueve solo.</p><p><b>Pares mínimos:</b> Pintó la pared (CD) / Pintó en la pared (CC). Está cansado (atributo) / Llegó cansado (predicativo).</p>',
+'Atributo o predicativo':'<table><tr><th></th><th>Atributo</th><th>C. predicativo</th></tr><tr><td>Verbo</td><td>Copulativo (ser, estar, parecer) o pseudocopulativo (quedarse, ponerse, resultar)</td><td>Predicativo</td></tr><tr><td>¿Obligatorio?</td><td>Sí (*Marta es)</td><td>Opcional (Llegaron)</td></tr><tr><td>Sustitución</td><td>Por lo: Lo está</td><td>No admite lo</td></tr><tr><td>Concuerda con</td><td>El sujeto</td><td>El sujeto o el CD</td></tr><tr><td>Ejemplos</td><td>La casa está limpia</td><td>Los niños llegaron contentos; Dejó la puerta abierta</td></tr></table><p>Algunos verbos exigen predicativo del CD (Consideran a Luis un genio): entonces tampoco se puede suprimir.</p>',
+'Régimen, locativo, CCL':'<table><tr><th></th><th>C. de régimen</th><th>Locativo argumental</th><th>CC de lugar</th></tr><tr><td>Ejemplo</td><td>Confío en ti</td><td>Vivo en Madrid</td><td>Estudio en la biblioteca</td></tr><tr><td>¿Obligatorio?</td><td>Sí</td><td>Sí (*Vivo)</td><td>No</td></tr><tr><td>Preposición</td><td>Fija</td><td>Variable (en, cerca de, junto a)</td><td>Variable</td></tr><tr><td>Sustitución</td><td>Prep. + pronombre: en ti, en eso</td><td>Adverbio: allí</td><td>Adverbio: allí</td></tr><tr><td>«y eso pasó/hizo…»</td><td>No</td><td>No</td><td>Sí</td></tr></table><p><b>Pista:</b> primero suprime. Si no se puede, es argumento. Luego mira la preposición: ¿cambia sin que cambie el sentido? Es locativo. ¿Es siempre la misma? Es régimen.</p>',
+'El «se»':'<p><b>Bloque 1 · con función (CD o CI):</b> reflexivo («a sí mismo»: Pedro se lava), recíproco («el uno al otro»: María y Juan se miran), sustituto (es «le/les» delante de lo, la, los, las: Se lo di).</p><p><b>Bloque 2 · sin función:</b> pronominal (el verbo no existe sin «se»: se arrepintió), voz media (hay un transitivo equivalente y nadie provoca la acción: La puerta se abrió), dativo ético o de interés (se puede quitar y solo pierdes el matiz: Se leyó el libro).</p><p><b>Bloque 3 · marca gramatical:</b> pasiva refleja MPR (hay sujeto paciente y el verbo concuerda: Se venden las casas), impersonal MI (sin sujeto, verbo fijo en 3.ª singular: Se atendió a los pacientes).</p><table><tr><th>Paso</th><th>Pregunta</th><th>Valor</th></tr><tr><td>1</td><td>¿Es «le/les» delante de lo, la, los, las?</td><td>Sustituto (CI)</td></tr><tr><td>2</td><td>¿Admite «a sí mismo» o «el uno al otro»?</td><td>Reflexivo o recíproco</td></tr><tr><td>3</td><td>¿El verbo no existe sin «se» o cambia de significado?</td><td>Pronominal</td></tr><tr><td>4</td><td>¿Hay transitivo equivalente y nadie provoca la acción?</td><td>Voz media</td></tr><tr><td>5</td><td>¿Puedo quitarlo y solo pierdo el matiz afectivo?</td><td>Dativo ético</td></tr><tr><td>6</td><td>¿Concuerda el verbo con un sujeto paciente, o queda fijo en singular?</td><td>MPR · MI</td></tr></table><p><b>Trampas:</b> Se vende piso es pasiva refleja (piso es el sujeto). Se enfadó es pronominal. Dativo y CI: sigue el criterio de tu libro.</p>',
+'Oraciones':'<table><tr><th>Tipo</th><th>Relación</th><th>Ejemplo</th></tr><tr><td>Yuxtaposición</td><td>Independientes sin nexo</td><td>Llegué, vi, vencí.</td></tr><tr><td>Coordinación</td><td>Independientes con nexo (y, o, pero, sino)</td><td>Estudio y trabajo.</td></tr><tr><td>Subordinación</td><td>Una depende de otra y cumple una función</td><td>Quiero que vengas.</td></tr></table><p>Subordinadas: sustantiva (se sustituye por «eso»), adjetiva o de relativo (modifica a un nombre), adverbial (se sustituye por un adverbio; hace de CC). ¿La segunda se entiende sola? Sí → yuxtapuesta o coordinada. No → subordinada.</p>'};
+function openGuide(){const g=$('gmodal');if(!g.dataset.b){g.dataset.b=1;const tabs=$('gtabs'),body=$('gbody');Object.keys(GUIDE).forEach((k,i)=>{const b=document.createElement('button');b.className='btn';b.textContent=k;b.onclick=()=>{[...tabs.children].forEach(x=>x.classList.remove('pri'));b.classList.add('pri');body.innerHTML=GUIDE[k];body.scrollTop=0};tabs.appendChild(b);if(!i)b.click()})}g.hidden=false}
+$('guidebtn').onclick=openGuide;$('gclose').onclick=()=>{$('gmodal').hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('gmodal').hidden=true});
 
 </script>
 </body></html>
