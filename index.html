@@ -161,7 +161,7 @@ body.fs .board-scroll{height:calc(100vh - 150px)}
 .lt{cursor:text}
 .drawer{position:fixed;left:max(8px,env(safe-area-inset-left,0px));top:56px;bottom:8px;width:min(330px,calc(100vw - 16px));z-index:45;max-height:none;box-shadow:0 12px 40px rgba(0,0,0,.28)}
 .drawer .plist{flex:1;max-height:none}
-.work{display:block!important;grid-template-columns:none!important}
+.work:not([hidden]){display:block;grid-template-columns:none}
 .work>*{max-width:100%}
 .toolbar{display:flex;flex-wrap:wrap}
 .acts{margin-top:12px}
@@ -171,6 +171,15 @@ body.s1 #p-frase{max-width:760px;margin:8vh auto 0;width:100%;padding:24px}
 body.s1 #p-frase h2{font-size:1.6rem}
 body.s1 #txt{font-size:1.4rem;min-height:110px}
 body.s1 #p-frase .btn{padding:11px 18px;font-size:1rem}
+.hero,.how{display:none}
+body.s1 .hero{display:block;max-width:760px;margin:6vh auto 0;width:100%;text-align:left}
+body.s1 .hero h1{font:600 clamp(1.9rem,4.5vw,2.8rem)/1.15 var(--serif);margin:0 0 10px;text-wrap:balance}
+body.s1 .hero .u{font-style:italic;border-bottom:4px solid var(--f-verbo)}
+body.s1 .hero p{margin:0;color:var(--muted);font-size:1.05rem;max-width:56ch}
+body.s1 #p-frase{margin-top:22px}
+body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:760px;margin:6px auto 0;width:100%}
+.how div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.how b{font-family:var(--serif)}.how span{color:var(--muted);font-size:.9rem}
 </style>
 </head>
 <body>
@@ -180,6 +189,10 @@ body.s1 #p-frase .btn{padding:11px 18px;font-size:1rem}
   <div class="stats"><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
 </header>
 
+<section class="hero" id="hero">
+  <h1>Aprende análisis sintáctico <span class="u">practicando</span></h1>
+  <p>Escribe una frase, márcala en una pizarra y comprueba tu análisis con el banco de la app, tus solucionarios o la IA.</p>
+</section>
 <section class="card" id="p-frase">
   <div id="inp">
     <h2>¿Qué frase vas a analizar?</h2>
@@ -198,6 +211,11 @@ body.s1 #p-frase .btn{padding:11px 18px;font-size:1rem}
   
 </section>
 
+<section class="how" id="how">
+  <div><b>1 · Frase</b><span>Escríbela tú o pide una a la IA.</span></div>
+  <div><b>2 · Pizarra</b><span>Selecciona palabras y escribe qué son debajo de la línea.</span></div>
+  <div><b>3 · Comprobar</b><span>Verde si está bien, rojo si no. Con pistas si las necesitas.</span></div>
+</section>
 <div class="work" id="work" hidden>
   <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
     <button class="tb" id="chg2">← Nueva frase</button>
