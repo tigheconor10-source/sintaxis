@@ -161,6 +161,11 @@ body.fs .board-scroll{height:calc(100vh - 150px)}
 .lt{cursor:text}
 .drawer{position:fixed;left:max(8px,env(safe-area-inset-left,0px));top:56px;bottom:8px;width:min(330px,calc(100vw - 16px));z-index:45;max-height:none;box-shadow:0 12px 40px rgba(0,0,0,.28)}
 .drawer .plist{flex:1;max-height:none}
+.work{display:block!important;grid-template-columns:none!important}
+.work>*{max-width:100%}
+.toolbar{display:flex;flex-wrap:wrap}
+.acts{margin-top:12px}
+@media(max-width:700px){.board-scroll{height:calc(100vh - 300px)}.toolbar .tb{padding:6px 8px;font-size:.8rem}}
 </style>
 </head>
 <body>
