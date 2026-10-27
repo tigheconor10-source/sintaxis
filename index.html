@@ -336,7 +336,7 @@ cc('ccInst','CCInst','instrumento',['complemento circunstancial de instrumento',
 ['subadj','Subordinada adjetiva','Sub. adj.','apo','Oración subordinada de relativo que complementa a un nombre (suele ser CN).',['subordinada adjetiva','subordinada de relativo','oracion subordinada adjetiva']]
 ];
 const FN={};FDEF.forEach(d=>{FN[d[0]]={id:d[0],label:d[1],short:d[2],fam:d[3],def:d[4],al:d[5],apo:d[3]==='apo'}});
-const BL={suj:'S',ter:'T',gprep:'G.Prep',gadj:'G.Adj',gadv:'G.Adv',pv:'PV',pn:'PN',gv:'GV',creg:'CReg',atr:'ATRIB',ssub:'S.sub.',subadj:'Sub. adj.',cn:'CN',ccNeg:'CCneg',ady:'Ady',ap:'Ap',cadv:'CAdv',nuc:'N',verbo:'NV',enl:'E',mod:'Mod',nx:'NX',gn:'GN',det:'Det',cd:'CD',ci:'CI',cla:'CLA',ag:'C.Ag.'};
+const BL={suj:'Suj',ter:'T',gprep:'G.Prep',gadj:'G.Adj',gadv:'G.Adv',pv:'PV',pn:'PN',gv:'GV',creg:'CReg',atr:'ATRIB',ssub:'S.sub.',subadj:'Sub. adj.',cn:'CN',ccNeg:'CCneg',ady:'Ady',ap:'Ap',cadv:'CAdv',nuc:'N',verbo:'NV',enl:'E',mod:'Mod',nx:'NX',gn:'GN',det:'Det',cd:'CD',ci:'CI',cla:'CLA',ag:'C.Ag.'};
 const BTYPE=['gn','gprep','gadj','gadv','gv','ssub','subadj'];
 function combLabel(fs){const a=fs.slice().sort((x,y)=>(BTYPE.includes(x)?0:1)-(BTYPE.includes(y)?0:1));return a.map(f=>BL[f]||FN[f].short).join('/')}
 const key=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
