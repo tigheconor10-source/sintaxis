@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>App Sintaxis</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..600&display=swap">
+<style>
+/* Concepto: cuaderno de análisis. Frase en serif sobre pizarra clara, corchetes de color bajo cada segmento, paleta por familia de función. */
+:root{
+  --bg:#f2f4f9; --surface:#ffffff; --surface2:#e8ecf4; --fg:#16202f; --muted:#586479; --line:#d3dae7;
+  --primary:#16202f; --primary-fg:#ffffff; --board:#fcfdff; --dot:#d9e0ec; --ink:#2347c9;
+  --ok:#17803f; --bad:#c42f3a; --focus:#2347c9;
+  --f-verbo:#1f5fd6; --f-suj:#9a6400; --f-arg:#7a35e0; --f-adj:#0b6f8a; --f-nom:#b3195a; --f-se:#c2410c; --f-dis:#475569; --f-apo:#6b7686;
+  --serif:'Literata',Georgia,'Times New Roman',serif; --sans:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1420; --surface:#171f2f; --surface2:#212b40; --fg:#e8edf6; --muted:#9aa7bd; --line:#2d394f;
+  --primary:#e8edf6; --primary-fg:#0e1420; --board:#121a2a; --dot:#222e45; --ink:#8fb0ff;
+  --ok:#52d08a; --bad:#ff7b84; --focus:#8fb0ff;
+  --f-verbo:#7fa8ff; --f-suj:#f0b94a; --f-arg:#b99aff; --f-adj:#5cd0e8; --f-nom:#ff8fc0; --f-se:#ff9f6e; --f-dis:#a9b7cf; --f-apo:#98a5ba; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1420; --surface:#171f2f; --surface2:#212b40; --fg:#e8edf6; --muted:#9aa7bd; --line:#2d394f;
+  --primary:#e8edf6; --primary-fg:#0e1420; --board:#121a2a; --dot:#222e45; --ink:#8fb0ff;
+  --ok:#52d08a; --bad:#ff7b84; --focus:#8fb0ff;
+  --f-verbo:#7fa8ff; --f-suj:#f0b94a; --f-arg:#b99aff; --f-adj:#5cd0e8; --f-nom:#ff8fc0; --f-se:#ff9f6e; --f-dis:#a9b7cf; --f-apo:#98a5ba; color-scheme:dark}
+*{box-sizing:border-box}
+html{color-scheme:light dark}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--sans);padding-block:0 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding-top:16px}
+.brand{font:italic 600 1.7rem/1 var(--serif);letter-spacing:-.01em;position:relative;padding-bottom:9px}
+.brand small{font:600 .72rem var(--sans);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:8px}
+.brand::after{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;border:2px solid var(--f-verbo);border-top:0;border-radius:0 0 4px 4px}
+.stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-weight:600;font-size:.85rem}
+.xpbar{width:70px;height:6px;border-radius:9px;background:var(--surface2);overflow:hidden}
+.xpbar i{display:block;height:100%;background:var(--f-verbo);width:0}
+.steps{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;list-style:none;margin:0}
+.steps li{flex:1 0 auto}
+.steps button{width:100%;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-weight:600;font-size:.85rem;white-space:nowrap}
+.steps b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--surface2);font-size:.75rem}
+.steps .on{border-color:var(--fg)}.steps .on b{background:var(--primary);color:var(--primary-fg)}
+.steps .done b{background:var(--ok);color:#fff}
+.steps .tool{border-style:dashed}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+h2{font:600 1.15rem/1.3 var(--serif);margin:0 0 10px;text-wrap:balance}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:600;display:inline-flex;gap:8px;align-items:center}
+.btn:hover{background:var(--surface2)}
+.btn.pri{background:var(--primary);color:var(--primary-fg);border-color:var(--primary)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg,.tb svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+textarea,select,input[type=search],input[type=text]{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:100%}
+textarea{font:1.1rem/1.5 var(--serif);resize:vertical;min-height:72px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:600;color:var(--muted);flex:1 1 160px}
+.cur{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.cur q{font:1.05rem var(--serif);quotes:"«" "»"}
+.work{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+@media(max-width:980px){.work{grid-template-columns:minmax(0,1fr)}}
+.toolbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+.tb{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 10px;font-weight:600;font-size:.85rem}
+.tb[aria-pressed=true]{background:var(--primary);color:var(--primary-fg);border-color:var(--primary)}
+.sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+.board-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--board)}
+.board{position:relative;min-width:100%;width:max-content;min-height:300px;background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px}
+.stage{padding:26px 28px 40px;position:relative}
+.words{display:flex;gap:.55em;white-space:nowrap;font:1.35rem/1.4 var(--serif);position:relative}
+.w{padding:2px 5px;border-radius:6px;cursor:pointer;user-select:none;-webkit-user-select:none;border:1px solid transparent}
+.w:hover{background:var(--surface2)}
+.w.sel{background:color-mix(in srgb,var(--f-verbo) 20%,var(--board));border-color:var(--f-verbo)}
+.w.drop{outline:2px dashed var(--f-verbo)}
+.w.bad{text-decoration:underline wavy var(--bad) 2px;text-underline-offset:5px}
+.marks{position:relative;margin-top:10px}
+.br{position:absolute;height:9px;border:2px solid var(--c);border-top:0;border-radius:0 0 4px 4px}
+.br.ghost{border-style:dashed}
+.br.ok{border-color:var(--ok)}.br.bad{border-color:var(--bad)}
+.lb{position:absolute;display:inline-flex;gap:4px;align-items:center;white-space:nowrap;font:600 .74rem var(--sans);color:var(--c);background:color-mix(in srgb,var(--c) 13%,var(--board));border:1px solid color-mix(in srgb,var(--c) 45%,transparent);border-radius:7px;padding:2px 4px 2px 8px;height:24px}
+.lb.ghost{border-style:dashed;background:transparent}
+.lb.ok{color:var(--ok);border-color:var(--ok)}.lb.bad{color:var(--bad);border-color:var(--bad)}
+.lb button{border:0;background:transparent;color:inherit;width:18px;height:18px;border-radius:5px;line-height:1;padding:0;font-size:.95rem}
+.lb button:hover{background:color-mix(in srgb,currentColor 18%,transparent)}
+#ink{position:absolute;inset:0;touch-action:none}
+#ink.off{pointer-events:none}
+.selbar{margin-top:10px;min-height:38px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.9rem;color:var(--muted)}
+.selbar strong{color:var(--fg);font-family:var(--serif)}
+.acts{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;position:relative}
+.menu{position:absolute;top:100%;margin-top:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px;z-index:5;min-width:230px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:8px 10px;border-radius:7px;font-weight:600}
+.menu button:hover{background:var(--surface2)}.menu small{display:block;font-weight:400;color:var(--muted)}
+.fb{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.fb .sum{display:flex;gap:10px;flex-wrap:wrap;font-weight:600}
+.tag{border-radius:999px;padding:2px 10px;font-size:.8rem;border:1px solid var(--line);background:var(--surface2)}
+.tag.ok{color:var(--ok);border-color:var(--ok)}.tag.bad{color:var(--bad);border-color:var(--bad)}
+.fb ul{margin:0;padding-left:18px}
+.note{font-size:.9rem;color:var(--muted)}
+.pal{position:sticky;top:env(safe-area-inset-top,0px);max-height:calc(100vh - 20px);display:flex;flex-direction:column;gap:8px}
+@media(max-width:980px){.pal{position:static;max-height:none}}
+.plist{overflow-y:auto;display:flex;flex-direction:column;gap:10px;max-height:56vh;padding-right:4px}
+.plist h3{margin:0 0 4px;font:700 .7rem var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid color-mix(in srgb,var(--c) 50%,transparent);background:color-mix(in srgb,var(--c) 12%,var(--surface));color:var(--c);border-radius:8px;padding:5px 10px;font-weight:600;font-size:.82rem;touch-action:pan-y}
+.chip.apo{border-style:dashed}
+.chip:hover{background:color-mix(in srgb,var(--c) 22%,var(--surface))}
+.ghostchip{position:fixed;z-index:50;pointer-events:none;opacity:.9}
+.ficha{font-size:.85rem;border-top:1px solid var(--line);padding-top:8px;color:var(--muted);min-height:64px}
+.ficha b{color:var(--fg)}
+.refs ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.refs li{display:flex;gap:8px;justify-content:space-between;align-items:center;background:var(--bg);border-radius:8px;padding:6px 10px;font-size:.85rem}
+.drop-z{border:2px dashed var(--line);border-radius:12px;padding:14px;text-align:center;color:var(--muted)}
+.drop-z.over{border-color:var(--fg)}
+.toast{font-size:.9rem;font-weight:600}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><small>App</small>Sintaxis</div>
+  <div class="stats"><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
+</header>
+<ol class="steps" id="steps">
+  <li><button data-go="p-frase"><b>1</b>Frase</button></li>
+  <li><button data-go="p-board"><b>2</b>Pizarra</button></li>
+  <li><button data-go="p-pal"><b>3</b>Resolver</button></li>
+  <li><button data-go="p-fb"><b>4</b>Comprobar</button></li>
+  <li><button class="tool" data-go="p-ref"><b>5</b>Solucionario</button></li>
+  <li><button class="tool" data-go="p-acts"><b>6</b>Ayuda</button></li>
+</ol>
+
+<section class="card" id="p-frase">
+  <div id="inp">
+    <h2>¿Qué frase vas a analizar?</h2>
+    <textarea id="txt" maxlength="240" placeholder="Escribe una oración, por ejemplo: Se habló de los problemas en la reunión."></textarea>
+    <div class="row" style="margin-top:10px">
+      <label class="f" for="lvlsel">Nivel<select id="lvlsel"><option>ESO</option><option selected>Bachillerato</option></select></label>
+      <label class="f" for="tema">Tema<select id="tema"><option value="">Cualquiera</option><option value="se">Valores del «se»</option><option value="regimen">Complemento de régimen</option><option value="predicativo">Predicativo</option><option value="locativo">Locativo argumental</option><option value="agente">Pasiva y agente</option><option value="disjunto">Disjuntos y conectores</option></select></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn pri" id="use">Usar esta frase</button>
+      <button class="btn" id="gen">Generar con IA</button>
+      <button class="btn" id="bank">Frase del banco</button>
+      <span class="note" id="gmsg"></span>
+    </div>
+  </div>
+  <div class="cur" id="curbar" hidden><q id="curq"></q><button class="btn" id="chg">Cambiar frase</button></div>
+</section>
+
+<div class="work" id="work" hidden>
+  <div>
+    <section class="card" id="p-board">
+      <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
+        <button class="tb" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Asignar</button>
+        <button class="tb" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
+        <button class="tb" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button>
+        <span class="sep"></span>
+        <button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button>
+        <button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button>
+        <button class="tb" id="t-str" aria-pressed="true">Enderezar líneas</button>
+      </div>
+      <div class="board-scroll"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div>
+      <div class="selbar" id="selbar"></div>
+      <div class="acts" id="p-acts">
+        <button class="btn pri" id="chk"><svg viewBox="0 0 24 24"><path d="M2 13l4 4 8-9"/><path d="M12 15l2 2 8-10"/></svg>Comprobar</button>
+        <button class="btn" id="helpb" aria-haspopup="true" aria-expanded="false">Ayuda ▾</button>
+        <button class="btn" id="show">Mostrar respuesta</button>
+        <button class="btn" id="aichk" hidden>Comprobar con IA</button>
+        <div class="menu" id="hmenu" hidden>
+          <button id="h1">Una pista<small>Revela un paso, con su color</small></button>
+          <button id="h2">Solución completa<small>Todos los pasos, codificados por color</small></button>
+        </div>
+      </div>
+      <div class="fb" id="p-fb" aria-live="polite"></div>
+    </section>
+    <section class="card refs" id="p-ref" style="margin-top:16px">
+      <h2>Solucionarios oficiales</h2>
+      <p class="note" style="margin:0 0 8px">Sube un PDF, DOCX o TXT con las soluciones. Se consulta primero y no gasta IA. Todo se procesa en tu navegador.</p>
+      <div class="drop-z" id="dz"><button class="btn" id="up">Subir archivo</button> <span>o suéltalo aquí</span><input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden multiple></div>
+      <label class="f" for="paste" style="margin-top:10px">O pega el texto del solucionario<textarea id="paste" style="min-height:56px;font:.9rem var(--sans)"></textarea></label>
+      <div class="row" style="margin-top:8px"><button class="btn" id="addp">Añadir texto</button><span class="note" id="rmsg"></span></div>
+      <ul id="rlist"></ul>
+    </section>
+  </div>
+  <aside class="card pal" id="p-pal">
+    <input type="search" id="q" placeholder="Buscar función (CCT, régimen, se…)" aria-label="Buscar función">
+    <div class="plist" id="plist"></div>
+    <div class="ficha" id="ficha">Toca una función para asignarla a la selección, o arrástrala hasta una palabra (ratón o lápiz).</div>
+  </aside>
+</div>
+</div>
+<script>
+// <pure>
+const FAM={verbo:'--f-verbo',suj:'--f-suj',arg:'--f-arg',adj:'--f-adj',nom:'--f-nom',se:'--f-se',dis:'--f-dis',apo:'--f-apo'};
+const GROUPS=[['Núcleo y sujeto',['verbo','suj','sujPac']],['Argumentos y predicativos',['cd','ci','creg','atr','predSuj','predCD','cla']],['Adjuntos',['cct','ccl','ccm','ccc','ccf','ccCant','ccComp','ccInst','ag']],['Dentro del grupo',['cn','cadj']],['El «se»',['sePR','seImp','seVM','sePron','seRef']],['Disjuntos',['modOrac','conn']],['Apoyo (no puntúa)',['gn','gprep','gadj','gadv','mod']]];
+const cc=(id,short,what,al)=>[id,'CC de '+what,short,'adj','Adjunto opcional de '+what+'. Se puede omitir y se sustituye por un adverbio (allí, ayer, así).',al];
+const FDEF=[
+['verbo','Núcleo del predicado (verbo)','Verbo','verbo','Palabra o perífrasis que expresa la acción, estado o proceso y concuerda con el sujeto.',['verbo','nucleo del predicado verbal','nucleo del predicado','predicado verbal','np']],
+['suj','Sujeto','Suj.','suj','Elemento con el que concuerda el verbo en número y persona. Prueba: cambia el número del verbo y mira qué palabra cambia con él.',['sujeto','suj']],
+['sujPac','Sujeto paciente','Suj. pac.','suj','Sujeto de una pasiva (con «ser» o refleja): recibe la acción y el verbo concuerda con él.',['sujeto paciente']],
+['cd','Complemento directo','CD','arg','Argumento del verbo transitivo. Se sustituye por lo/la/los/las; si es de persona lleva «a».',['complemento directo','c directo','cd']],
+['ci','Complemento indirecto','CI','arg','Destinatario o beneficiario de la acción. Se sustituye por le/les (se).',['complemento indirecto','c indirecto','ci']],
+['creg','Complemento de régimen','C. Rég.','arg','Grupo preposicional exigido por el verbo con preposición fija (confiar en). Se sustituye por preposición + pronombre tónico («en ello»), no por un adverbio.',['complemento de regimen','c regimen','suplemento','creg','c reg']],
+['atr','Atributo','Atr.','arg','Complemento de un verbo copulativo (ser, estar, parecer) que atribuye una cualidad al sujeto.',['atributo','atr']],
+['predSuj','C. predicativo del sujeto','C. Pred. Suj.','arg','Dice cómo es o cómo está el sujeto mientras ocurre la acción y concuerda con él en género y número («llegaron agotados»).',['complemento predicativo del sujeto paciente','complemento predicativo del sujeto','predicativo del sujeto','c pred suj','pred suj']],
+['predCD','C. predicativo del CD','C. Pred. CD','arg','Dice cómo es o cómo está el complemento directo y concuerda con él («Considero a María inteligente»).',['complemento predicativo del cd','complemento predicativo del complemento directo','predicativo del cd','c pred cd','pred cd']],
+['cla','Locativo argumental','CLA','arg','Complemento de lugar exigido por el verbo (poner, dirigirse, residir). Sin él la oración queda incompleta.',['complemento locativo argumental','locativo argumental','cla']],
+cc('cct','CCT','tiempo',['complemento circunstancial de tiempo','cc de tiempo','cct']),
+cc('ccl','CCL','lugar',['complemento circunstancial de lugar','cc de lugar','ccl']),
+cc('ccm','CCM','modo',['complemento circunstancial de modo','cc de modo','ccm']),
+cc('ccc','CCC','causa',['complemento circunstancial de causa','cc de causa','ccc']),
+cc('ccf','CCF','finalidad',['complemento circunstancial de finalidad','cc de finalidad','ccf']),
+cc('ccCant','CCCant','cantidad',['complemento circunstancial de cantidad','cc de cantidad']),
+cc('ccComp','CCComp','compañía',['complemento circunstancial de compania','cc de compania']),
+cc('ccInst','CCInst','instrumento',['complemento circunstancial de instrumento','cc de instrumento']),
+['ag','Complemento agente','C. Ag.','adj','En una pasiva indica quién realiza la acción: «fue aprobado por el comité».',['complemento agente','c agente','c ag']],
+['cn','Complemento del nombre','CN','nom','Modifica a un sustantivo: adjetivo, grupo preposicional («de la norma») u oración de relativo.',['complemento del nombre','complemento nominal','cn']],
+['cadj','Complemento del adjetivo','C. Adj.','nom','Complementa a un adjetivo («lleno de agua»).',['complemento del adjetivo','c adj']],
+['sePR','«se» de pasiva refleja','Se pas. refl.','se','El verbo concuerda con el sujeto paciente: «Se consideran fundamentales el cumplimiento y la aplicación».',['marca de pasiva refleja','pasiva refleja','se pasiva refleja']],
+['seImp','«se» impersonal','Se impers.','se','La oración no tiene sujeto y el verbo va en 3.ª singular: «Se habló de los problemas»; «Se atiende a los pacientes» (CD de persona con «a»).',['marca de impersonalidad','se impersonal','impersonal','impersonalidad']],
+['seVM','«se» de voz media','Se voz media','se','El sujeto experimenta un cambio de estado: «El atleta se quedó exhausto».',['voz media','se de voz media']],
+['sePron','«se» pronominal','Se pron.','se','El pronombre forma parte del verbo (arrepentirse, dirigirse) y no expresa acción reflexiva.',['se pronominal','verbo pronominal','pronominal']],
+['seRef','«se» reflexivo / recíproco','Se refl.','se','«se» es CD o CI y coincide con el sujeto («Juan se peina») o se reparte entre varios («se saludaron»).',['reflexivo','reciproco']],
+['modOrac','Modificador oracional','Mod. orac.','dis','Disjunto: actitud del hablante ante lo que dice («Afortunadamente», «Sinceramente»). Suele ir entre comas.',['modificador oracional','disjunto']],
+['conn','Conector discursivo','Conector','dis','Marcador que organiza el discurso («Por consiguiente», «además»).',['conector discursivo','conector','marcador discursivo']],
+['gn','Grupo nominal','GN','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo nominal','gn']],
+['gprep','Grupo preposicional','GPrep','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo preposicional','gprep']],
+['gadj','Grupo adjetival','GAdj','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo adjetival','gadj']],
+['gadv','Grupo adverbial','GAdv','apo','Categoría del grupo (apoyo visual, no puntúa).',['grupo adverbial','gadv']],
+['mod','Modificador','Mod.','apo','Palabra que modifica a un núcleo (adjetivo, adverbio). Apoyo visual, no puntúa.',['modificador']]
+];
+const FN={};FDEF.forEach(d=>{FN[d[0]]={id:d[0],label:d[1],short:d[2],fam:d[3],def:d[4],al:d[5],apo:d[3]==='apo'}});
+const key=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const nzr=s=>key(s).replace(/[^a-z0-9|\n ]+/g,' ').replace(/[ \t]+/g,' ');
+function tokenize(str){return str.trim().split(/\s+/).filter(Boolean).map(t=>({t,k:key(t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,''))}))}
+function locate(words,seg,nth){const sw=tokenize(seg).map(x=>x.k);if(!sw.length)return null;let c=0;for(let i=0;i+sw.length<=words.length;i++){if(sw.every((k,j)=>words[i+j].k===k)){if(c++===(nth||0))return[i,i+sw.length-1]}}return null}
+function buildSol(words,items){const out=[];(items||[]).forEach(it=>{const seg=it.seg||it[0],f=it.f||it[1];if(!FN[f])return;const r=locate(words,seg,it.n||it[3]||0);if(r)out.push({s:r[0],e:r[1],f,opt:!!(it.opt||it[2])})});return out}
+function matchFunc(txt){const n=' '+nzr(txt).replace(/\n/g,' ')+' ';let best=null,bl=0;for(const id in FN)for(const a of FN[id].al){const m=n.indexOf(' '+a+' ');if(m>=0&&a.length>bl){best=id;bl=a.length}}return best}
+const BANK=[
+['Se considera fundamental el cumplimiento de la norma por parte de todos los empleados.','se','Bach',[['Se','sePR'],['considera','verbo'],['fundamental','predSuj'],['el cumplimiento de la norma por parte de todos los empleados','sujPac'],['de la norma','cn',1],['por parte de todos los empleados','cn']],'El verbo concuerda con el sujeto paciente («Se consideran fundamentales el cumplimiento y la aplicación»). «Por parte de todos los empleados» complementa al nombre «cumplimiento» con valor de agente.'],
+['Durante la reunión se habló largamente de los problemas financieros de la empresa.','se','Bach',[['Durante la reunión','cct'],['se','seImp'],['habló','verbo'],['largamente','ccm'],['de los problemas financieros de la empresa','creg'],['de la empresa','cn',1]],'Impersonal: no hay sujeto; «de los problemas…» lo exige el verbo hablar (régimen) y el verbo queda en singular.'],
+['El atleta se quedó exhausto tras la carrera.','se','Bach',[['El atleta','suj'],['se','seVM'],['quedó','verbo'],['exhausto','predSuj'],['tras la carrera','cct']],'Voz media: el sujeto experimenta un cambio de estado. «Exhausto» es predicativo del sujeto.'],
+['En esta clínica se atiende diariamente a pacientes con dolencias crónicas.','se','Bach',[['En esta clínica','ccl'],['se','seImp'],['atiende','verbo'],['diariamente','cct'],['a pacientes con dolencias crónicas','cd'],['con dolencias crónicas','cn',1]],'Impersonal: el CD de persona lleva «a» y no puede ser sujeto paciente; el verbo queda en singular.'],
+['Los manifestantes se dirigieron rápidamente hacia la sede del parlamento.','se','Bach',[['Los manifestantes','suj'],['se','sePron'],['dirigieron','verbo'],['rápidamente','ccm'],['hacia la sede del parlamento','cla'],['del parlamento','cn',1]],'«Dirigirse» es pronominal y exige un locativo argumental (la meta).'],
+['Los alumnos confían en sus posibilidades.','regimen','ESO',[['Los alumnos','suj'],['confían','verbo'],['en sus posibilidades','creg']],'Confiar exige la preposición «en»: complemento de régimen.'],
+['El proyecto carece de presupuesto.','regimen','ESO',[['El proyecto','suj'],['carece','verbo'],['de presupuesto','creg']],'Carecer rige la preposición «de».'],
+['Se arrepintió de sus palabras.','regimen','ESO',[['Se','sePron'],['arrepintió','verbo'],['de sus palabras','creg']],'Verbo pronominal con complemento de régimen; sujeto omitido.'],
+['Trataron el asunto de trivial.','regimen','Bach',[['Trataron','verbo'],['el asunto','cd'],['de trivial','creg']],'Estructura doble: CD + complemento de régimen.'],
+['El profesor comparó el español con el latín.','regimen','Bach',[['El profesor','suj'],['comparó','verbo'],['el español','cd'],['con el latín','creg']],'Estructura doble: CD + complemento de régimen.'],
+['La actriz recogió el premio emocionada.','predicativo','ESO',[['La actriz','suj'],['recogió','verbo'],['el premio','cd'],['emocionada','predSuj']],'«Emocionada» concuerda con el sujeto: predicativo del sujeto.'],
+['Considero a María inteligente.','predicativo','Bach',[['Considero','verbo'],['a María','cd'],['inteligente','predCD']],'Predicativo obligatorio del CD: si se omite, el verbo cambia de sentido.'],
+['Designaron a Pedro director.','predicativo','Bach',[['Designaron','verbo'],['a Pedro','cd'],['director','predCD']],'Predicativo obligatorio del CD.'],
+['María puso los libros en la estantería.','locativo','Bach',[['María','suj'],['puso','verbo'],['los libros','cd'],['en la estantería','cla']],'Poner exige dónde: locativo argumental.'],
+['El proyecto fue aprobado por el comité.','agente','Bach',[['El proyecto','sujPac'],['fue aprobado','verbo'],['por el comité','ag']],'Pasiva con «ser»: el complemento agente indica quién realiza la acción.'],
+['Por consiguiente, modificaremos la fecha.','disjunto','Bach',[['Por consiguiente','conn'],['modificaremos','verbo'],['la fecha','cd']],'Los conectores son disjuntos: organizan el discurso.'],
+['Afortunadamente, llegaron los bomberos.','disjunto','ESO',[['Afortunadamente','modOrac'],['llegaron','verbo'],['los bomberos','suj']],'Disjunto: actitud del hablante ante lo que dice.']
+].map(b=>({text:b[0],tema:b[1],nivel:b[2],items:b[3],note:b[4]}));
+const sKey=s=>nzr(s).replace(/[ \n]+/g,' ').trim();
+function findBank(sentence){const k=sKey(sentence);return BANK.find(b=>sKey(b.text)===k)||null}
+function refRegion(sentence,text){const ws=sKey(sentence).split(' ');const re=new RegExp(ws.map(esc).join('[ \\n|]+'));const n=nzr(text);const m=re.exec(n);if(!m)return null;return n.slice(m.index+m[0].length,m.index+m[0].length+3000)}
+function parseRows(words,sentence,text){const reg=refRegion(sentence,text);if(reg==null)return{found:false};const pre=s=>s.replace(/→|=>|->| – | — /g,'|');const lines=reg.split('\n');const items=[];for(const ln of lines){if(ln.indexOf('|')<0)continue;const c=ln.split('|').map(x=>x.trim()).filter(Boolean);if(c.length<2)continue;const f=matchFunc(c.slice(1).join(' '));const r=locate(words,c[0]);if(f&&r)items.push({s:r[0],e:r[1],f,opt:false});else if(items.length&&!f&&!r)break;else if(items.length&&!r)break}return{found:true,items}}
+function weakCheck(words,sentence,text,ann){const reg=refRegion(sentence,text);if(reg==null)return 'unk';const seg=sKey(words.slice(ann.s,ann.e+1).map(w=>w.t).join(' '));const re=new RegExp('(^| )'+esc(seg)+'(?= |$)','g');let m,claims=[];while((m=re.exec(reg))){const win=reg.slice(m.index+m[0].length,m.index+m[0].length+140).replace(/\n/g,' ');let best=null,bp=1e9;for(const id in FN)for(const a of FN[id].al){const p=(' '+win+' ').indexOf(' '+a+' ');if(p>=0&&p<bp){bp=p;best=id}}if(best)claims.push(best)}if(!claims.length)return 'unk';return claims.includes(ann.f)?'ok':'bad'}
+function grade(anns,sol){const st={};let ok=0,bad=0;const used=new Set();anns.forEach(a=>{const i=sol.findIndex((x,j)=>!used.has(j)&&x.s===a.s&&x.e===a.e&&x.f===a.f);if(i>=0){used.add(i);st[a.id]='ok';if(!sol[i].opt)ok++}else if(FN[a.f].apo)st[a.id]='neutral';else{st[a.id]='bad';bad++}});const miss=sol.filter((x,j)=>!used.has(j)&&!x.opt);return{st,ok,bad,miss,total:sol.filter(x=>!x.opt).length}}
+// </pure>
+const $=id=>document.getElementById(id);
+const S={sentence:'',words:[],anns:[],nid:1,sel:null,tool:'assign',str:true,strokes:[],hist:[],checked:false,st:{},ghosts:[],sol:null,hints:0,gave:false,awarded:0,refs:[],xp:0,streak:0,ai:null,aic:{},bankIdx:-1,busy:false};
+const store={get(k,d){try{const v=localStorage.getItem('asx:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('asx:'+k,JSON.stringify(v))}catch(e){}}};
+const NAMES=['Aprendiz','Analista','Sintáctico','Gramático','Maestro del predicado'];
+function say(msg,el){(el||$('gmsg')).textContent=msg}
+function fcol(id){return 'var('+FAM[FN[id].fam]+')'}
+function refreshStats(){const l=Math.min(NAMES.length,Math.floor(S.xp/100)+1);$('lvl').textContent='Nivel '+l+' · '+NAMES[l-1];$('xp').textContent=S.xp+' XP';$('xpb').style.width=(S.xp%100)+'%';$('streak').textContent='Racha '+S.streak;store.set('xp',S.xp);store.set('streak',S.streak)}
+function snap(){S.hist.push(JSON.stringify({a:S.anns,s:S.strokes,n:S.nid}));if(S.hist.length>60)S.hist.shift()}
+function undo(){const h=S.hist.pop();if(!h)return;const o=JSON.parse(h);S.anns=o.a;S.strokes=o.s;S.nid=o.n;changed();drawAll()}
+function changed(){S.checked=false;S.st={};S.ghosts=S.ghosts.filter(g=>!S.anns.some(a=>a.s===g.s&&a.e===g.e&&a.f===g.f));renderAll()}
+function stepState(){const n=S.sentence?(S.checked?4:(S.anns.length?3:2)):1;document.querySelectorAll('#steps li').forEach((li,i)=>{const b=li.firstElementChild;b.classList.toggle('on',i+1===n);b.classList.toggle('done',i+1<n&&i<4)})}
+/* palette */
+function buildPalette(filter){const f=key(filter||'');const box=$('plist');box.innerHTML='';let any=false;GROUPS.forEach(([name,ids])=>{const ok=ids.filter(id=>{const x=FN[id];return !f||key(x.label+' '+x.short+' '+x.al.join(' ')).includes(f)});if(!ok.length)return;any=true;const h=document.createElement('div');h.innerHTML='<h3></h3><div class="chips"></div>';h.firstChild.textContent=name;const c=h.lastChild;ok.forEach(id=>{const b=document.createElement('button');b.className='chip'+(FN[id].apo?' apo':'');b.style.setProperty('--c',fcol(id));b.textContent=FN[id].label;b.dataset.f=id;c.appendChild(b)});box.appendChild(h)});if(!any)box.textContent='Sin resultados.'}
+function ficha(id){const x=FN[id];$('ficha').innerHTML='<b></b><br><span></span>';$('ficha').firstChild.textContent=x.label+' ('+x.short+')';$('ficha').lastChild.textContent=x.def}
+/* words */
+function setSentence(text,sol,note){S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
+  $('inp').hidden=true;$('curbar').hidden=false;$('curq').textContent=S.sentence;$('work').hidden=false;$('p-fb').innerHTML='';buildWords();renderAll();drawAll();$('work').scrollIntoView({behavior:'smooth',block:'nearest'})}
+function buildWords(){const w=$('words');w.innerHTML='';S.words.forEach((x,i)=>{const b=document.createElement('span');b.className='w';b.textContent=x.t;b.dataset.i=i;b.tabIndex=0;b.setAttribute('role','button');w.appendChild(b)})}
+function selRange(){return S.sel?[Math.min(S.sel.a,S.sel.b),Math.max(S.sel.a,S.sel.b)]:null}
+function tap(i){const r=selRange();if(!r)S.sel={a:i,b:i};else if(i>=r[0]&&i<=r[1]){S.sel=(r[0]===r[1])?null:{a:i,b:i}}else S.sel={a:Math.min(r[0],i),b:Math.max(r[1],i)};renderSel()}
+let dr=null;
+$('words').addEventListener('pointerdown',e=>{const w=e.target.closest('.w');if(!w)return;const i=+w.dataset.i;dr={a:i,moved:false,touch:e.pointerType==='touch'}});
+$('words').addEventListener('pointermove',e=>{if(!dr||dr.touch||!(e.buttons&1))return;const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(!w)return;const i=+w.dataset.i;if(i!==dr.a||dr.moved){dr.moved=true;S.sel={a:dr.a,b:i};renderSel()}});
+window.addEventListener('pointerup',()=>{if(dr&&!dr.moved)tap(dr.a);dr=null});
+$('words').addEventListener('keydown',e=>{const w=e.target.closest('.w');if(!w)return;const i=+w.dataset.i;if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(i)}else if(e.key==='ArrowRight'&&w.nextSibling)w.nextSibling.focus();else if(e.key==='ArrowLeft'&&w.previousSibling)w.previousSibling.focus()});
+function renderSel(){const r=selRange();const bar=$('selbar');document.querySelectorAll('.w').forEach((el,i)=>el.classList.toggle('sel',!!r&&i>=r[0]&&i<=r[1]));bar.innerHTML='';if(!r){bar.textContent='Toca una palabra o arrastra sobre varias y elige su función a la derecha.';return}const t=S.words.slice(r[0],r[1]+1).map(x=>x.t).join(' ');const s=document.createElement('strong');s.textContent='«'+t+'»';const b=document.createElement('button');b.className='btn';b.textContent='Deseleccionar';b.onclick=()=>{S.sel=null;renderSel()};bar.append('Selección: ',s,b)}
+function assign(f,range){const r=range||selRange();if(!r){say('Primero selecciona una palabra o un grupo de palabras en la frase.',$('selbar'));return}if(S.anns.some(a=>a.s===r[0]&&a.e===r[1]&&a.f===f)){S.sel=null;renderSel();return}snap();S.anns.push({id:S.nid++,s:r[0],e:r[1],f});S.sel=null;changed()}
+function removeAnn(id){snap();S.anns=S.anns.filter(a=>a.id!==id);changed()}
+/* palette interactions + drag */
+let pd=null;
+$('plist').addEventListener('pointerdown',e=>{const c=e.target.closest('.chip');if(!c)return;pd={f:c.dataset.f,x:e.clientX,y:e.clientY,drag:false,mouse:e.pointerType!=='touch',g:null,c}});
+window.addEventListener('pointermove',e=>{if(!pd||!pd.mouse)return;if(!pd.drag&&Math.hypot(e.clientX-pd.x,e.clientY-pd.y)>7){pd.drag=true;const g=pd.c.cloneNode(true);g.className+=' ghostchip';document.body.appendChild(g);pd.g=g}if(pd.drag){pd.g.style.left=e.clientX+8+'px';pd.g.style.top=e.clientY+8+'px';document.querySelectorAll('.w.drop').forEach(x=>x.classList.remove('drop'));const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(w)w.classList.add('drop')}});
+window.addEventListener('pointerup',e=>{if(!pd)return;const p=pd;pd=null;if(p.g)p.g.remove();document.querySelectorAll('.w.drop').forEach(x=>x.classList.remove('drop'));if(p.drag){const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(w){const i=+w.dataset.i,r=selRange();assign(p.f,r&&i>=r[0]&&i<=r[1]?r:[i,i])}}else{ficha(p.f);assign(p.f)}});
+$('plist').addEventListener('mouseover',e=>{const c=e.target.closest('.chip');if(c)ficha(c.dataset.f)});
+$('plist').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const c=e.target.closest('.chip');if(c){e.preventDefault();ficha(c.dataset.f);assign(c.dataset.f)}}});
+$('q').addEventListener('input',e=>buildPalette(e.target.value));
+/* marks */
+function renderAll(){renderMarks();renderSel();stepState()}
+function renderMarks(){const ws=[...$('words').children];const box=$('marks');box.innerHTML='';if(!ws.length)return;ws.forEach(w=>w.classList.remove('bad'));
+  const items=S.anns.map(a=>({...a,g:false})).concat(S.ghosts.map((g,i)=>({id:'g'+i,s:g.s,e:g.e,f:g.f,g:true})));
+  items.forEach(it=>{const a=ws[it.s],b=ws[it.e];it.x1=a.offsetLeft;it.x2=b.offsetLeft+b.offsetWidth;const lw=FN[it.f].short.length*7.4+(it.g?26:44);it.lw=lw;const cx=(it.x1+it.x2)/2;it.l=Math.min(it.x1,cx-lw/2);it.r=Math.max(it.x2,cx+lw/2)});
+  items.sort((p,q)=>(p.e-p.s)-(q.e-q.s)||p.s-q.s);const rows=[];items.forEach(it=>{for(let L=0;;L++){const r=rows[L]||(rows[L]=[]);if(!r.some(o=>it.l<o.r+6&&o.l<it.r+6)){r.push(it);it.lv=L;break}}});
+  box.style.height=(rows.length*46+8)+'px';
+  items.forEach(it=>{const st=it.g?'ghost':S.st[it.id]||'';const c=fcol(it.f);const top=it.lv*46;const br=document.createElement('div');br.className='br '+(it.g?'ghost ':'')+(st==='ok'||st==='bad'?st:'');br.style.cssText='--c:'+c+';left:'+it.x1+'px;width:'+(it.x2-it.x1)+'px;top:'+top+'px';box.appendChild(br);
+    const lb=document.createElement('div');lb.className='lb '+(it.g?'ghost ':'')+(st==='ok'||st==='bad'?st:'');const cx=(it.x1+it.x2)/2;lb.style.cssText='--c:'+c+';left:'+(cx-it.lw/2)+'px;top:'+(top+13)+'px';
+    const mark=st==='ok'?'✓ ':st==='bad'?'✗ ':'';lb.append(mark+FN[it.f].short);
+    if(!it.g){const x=document.createElement('button');x.textContent='×';x.title='Quitar';x.setAttribute('aria-label','Quitar '+FN[it.f].label);x.onclick=()=>removeAnn(it.id);lb.appendChild(x)}
+    lb.title=FN[it.f].label;box.appendChild(lb);
+    if(st==='bad')for(let i=it.s;i<=it.e;i++)ws[i].classList.add('bad')});
+  sizeInk()}
+window.addEventListener('resize',()=>{renderMarks()});
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>renderMarks());
+/* canvas */
+const cv=$('ink'),cx2=cv.getContext('2d');let cur=null,erasing=false,erased=false;
+function sizeInk(){const b=$('board');const w=b.offsetWidth,h=b.offsetHeight,d=window.devicePixelRatio||1;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.width=w+'px';cv.style.height=h+'px'}cx2.setTransform(d,0,0,d,0,0);drawAll()}
+function drawAll(){cx2.clearRect(0,0,cv.width,cv.height);cx2.lineCap='round';cx2.lineJoin='round';cx2.lineWidth=3;cx2.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#2347c9';S.strokes.forEach(s=>{cx2.beginPath();if(s.k==='line'){cx2.moveTo(s.x1,s.y1);cx2.lineTo(s.x2,s.y2)}else{s.pts.forEach((p,i)=>i?cx2.lineTo(p.x,p.y):cx2.moveTo(p.x,p.y));if(s.pts.length===1)cx2.lineTo(s.pts[0].x+.1,s.pts[0].y)}cx2.stroke()});if(cur){cx2.beginPath();cur.forEach((p,i)=>i?cx2.lineTo(p.x,p.y):cx2.moveTo(p.x,p.y));cx2.stroke()}}
+const cpos=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+function finishStroke(pts){if(pts.length<2)return;const a=pts[0],b=pts[pts.length-1],ch=Math.hypot(b.x-a.x,b.y-a.y);let len=0;for(let i=1;i<pts.length;i++)len+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);if(len<6)return;snap();
+  if(S.str&&ch>=14&&len/ch<=1.6){let{x:x1,y:y1}=a,{x:x2,y:y2}=b;const ang=Math.abs(Math.atan2(y2-y1,x2-x1)*180/Math.PI);if(ang<10||ang>170){y1=y2=(y1+y2)/2}else if(Math.abs(ang-90)<10){x1=x2=(x1+x2)/2}S.strokes.push({k:'line',x1,y1,x2,y2})}else S.strokes.push({k:'free',pts:pts.filter((p,i)=>i%2===0||i===pts.length-1)})}
+function dseg(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;let t=l?((p.x-a.x)*dx+(p.y-a.y)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)}
+function hit(s,p){if(s.k==='line')return dseg(p,{x:s.x1,y:s.y1},{x:s.x2,y:s.y2})<=12;return s.pts.some((q,i)=>i?dseg(p,s.pts[i-1],q)<=12:Math.hypot(p.x-q.x,p.y-q.y)<=12)}
+function eraseAt(p){const n=S.strokes.filter(s=>!hit(s,p));if(n.length!==S.strokes.length){if(!erased){const keep=S.strokes;S.strokes=n;snapWith(keep);erased=true}else S.strokes=n;drawAll()}}
+function snapWith(old){S.hist.push(JSON.stringify({a:S.anns,s:old,n:S.nid}))}
+cv.addEventListener('pointerdown',e=>{if(S.tool==='assign')return;cv.setPointerCapture(e.pointerId);const p=cpos(e);if(S.tool==='pen'){cur=[p]}else{erasing=true;erased=false;eraseAt(p)}});
+cv.addEventListener('pointermove',e=>{const p=cpos(e);if(cur){cur.push(p);drawAll()}else if(erasing)eraseAt(p)});
+const endInk=()=>{if(cur){const c=cur;cur=null;finishStroke(c)}erasing=false;drawAll()};
+cv.addEventListener('pointerup',endInk);cv.addEventListener('pointercancel',endInk);
+function setTool(t){S.tool=t;[['assign','t-assign'],['pen','t-pen'],['era','t-era']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',String(k===t)));cv.classList.toggle('off',t==='assign');cv.style.cursor=t==='era'?'cell':t==='pen'?'crosshair':''}
+$('t-assign').onclick=()=>setTool('assign');$('t-pen').onclick=()=>setTool('pen');$('t-era').onclick=()=>setTool('era');
+$('t-und').onclick=undo;$('t-clr').onclick=()=>{if(S.strokes.length){snap();S.strokes=[];drawAll()}};
+$('t-str').onclick=e=>{S.str=!S.str;e.currentTarget.setAttribute('aria-pressed',String(S.str))};
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>setTimeout(drawAll,50));
+new MutationObserver(drawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!/TEXTAREA|INPUT/.test(e.target.tagName)){e.preventDefault();undo()}if(e.key==='Escape'){$('hmenu').hidden=true;$('helpb').setAttribute('aria-expanded','false')}});
+/* AI (Claude vía capability sample; punto de enganche para un proxy de Gemini) */
+let sampleFn=null;
+(async()=>{try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){sampleFn=null}})();
+async function askJSON(prompt,opts){if(sampleFn)return sampleFn.json(prompt,opts);let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})})}catch(e){throw{code:'upstream_error'}}if(!r.ok)throw{code:r.status===429?'rate_limited':'upstream_error'};return r.json()}
+const FLIST=()=>Object.values(FN).filter(f=>!f.apo).map(f=>f.id+': '+f.label).join('; ');
+const aiErr=e=>({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
+async function aiGenerate(){const tema=$('tema').selectedOptions[0].textContent,nivel=$('lvlsel').value;$('gen').disabled=true;say('Generando…');
+  try{const r=await askJSON('Eres profesor de Lengua Castellana (España). Crea UNA oración simple en español para practicar análisis sintáctico. Nivel: '+nivel+'. Tema: '+tema+'. Responde solo con JSON: {"frase":"...","solucion":[{"seg":"palabras consecutivas copiadas literalmente de la frase, sin puntuación","f":"id","opt":false}],"nota":"explicación breve, máximo 250 caracteres"}. Incluye verbo, sujeto si lo hay y todos los complementos; marca opt:true en los análisis internos (CN, C. Adj.). Funciones válidas (id: nombre): '+FLIST(),{modelTier:'default',cache:false});
+    if(!r||typeof r.frase!=='string'||!Array.isArray(r.solucion))throw{code:'invalid_json'};const w=tokenize(r.frase);const items=buildSol(w,r.solucion);if(items.length<2)throw{code:'invalid_json'};S.aic[sKey(r.frase)]={items,note:String(r.nota||'')};say('');$('txt').value=r.frase;setSentence(r.frase,{items,source:'ai'},String(r.nota||''))}catch(e){say(aiErr(e))}finally{$('gen').disabled=false}}
+async function aiSolve(){const k=sKey(S.sentence);if(S.aic[k])return S.aic[k];const r=await askJSON('Analiza sintácticamente esta oración en español (Bachillerato, España): «'+S.sentence+'». Responde solo con JSON: {"solucion":[{"seg":"palabras consecutivas copiadas literalmente de la oración, sin puntuación","f":"id","opt":false}],"nota":"explicación breve, máximo 250 caracteres"}. Incluye verbo, sujeto (si lo hay), valores del «se» y todos los complementos; opt:true para análisis internos (CN, C. Adj.). Funciones válidas (id: nombre): '+FLIST(),{modelTier:'default'});if(!r||!Array.isArray(r.solucion))throw{code:'invalid_json'};const items=buildSol(S.words,r.solucion);if(!items.length)throw{code:'invalid_json'};return S.aic[k]={items,note:String(r.nota||'')}}
+/* resolver solución: PDF filas > banco > PDF aproximado > IA */
+async function resolveSol(allowAI){const refs=S.refs;for(const r of refs){const p=parseRows(S.words,S.sentence,r.text);if(p.found&&p.items.length>=2)return{items:p.items,source:'pdf',name:r.name}}
+  const b=findBank(S.sentence);if(b)return{items:buildSol(S.words,b.items),source:'bank',note:b.note};
+  if(S.sol&&S.sol.source==='ai')return S.sol;
+  for(const r of refs)if(refRegion(S.sentence,r.text)!=null)return{weak:r.text,source:'pdfweak',name:r.name};
+  if(!allowAI)return null;const a=await aiSolve();return a?{items:a.items,source:'ai',note:a.note}:null}
+const SRC={pdf:'tu solucionario',bank:'el banco de la app',pdfweak:'tu solucionario (coincidencia aproximada)',ai:'IA'};
+async function getSol(allowAI){if(S.busy)return null;S.busy=true;try{const s=await resolveSol(allowAI);if(s)S.sol=s;return s}catch(e){say(aiErr(e),$('p-fb'));return null}finally{S.busy=false}}
+/* comprobar */
+function fbMsg(html){const f=$('p-fb');f.innerHTML='';f.append(html)}
+function mk(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+async function check(allowAI){if(!S.anns.length){fbMsg(mk('div','note','Marca al menos un elemento en la frase antes de comprobar.'));return}
+  fbMsg(mk('div','note','Comprobando…'));const sol=await getSol(allowAI);
+  if(!sol){const d=mk('div','note','Esta frase no está en el banco ni en tus solucionarios.'+(true?' Pulsa «Comprobar con IA» para validarla.':' Sube un solucionario donde aparezca.'));$('aichk').hidden=false;fbMsg(d);return}
+  $('aichk').hidden=true;const out=mk('div');
+  if(sol.source==='pdfweak'){const st={};let ok=0,bad=0,unk=0;S.anns.forEach(a=>{if(FN[a.f].apo){st[a.id]='neutral';return}const r=weakCheck(S.words,S.sentence,sol.weak,a);st[a.id]=r;if(r==='ok')ok++;else if(r==='bad')bad++;else unk++});S.st=st;S.checked=true;renderAll();
+    out.append(sum(ok,bad,'Sin verificar: '+unk));out.append(mk('div','note','Validado con '+SRC.pdfweak+'. No se puede saber si te falta algún elemento.'));$('aichk').hidden=falsefbMsg(out);return}
+  const g=grade(S.anns,sol.items);S.st=g.st;S.checked=true;S.lastGrade=g;renderAll();
+  const perfect=!g.bad&&!g.miss.length;out.append(sum(g.ok,g.bad,'Por completar: '+g.miss.length));
+  if(perfect)out.append(mk('div','toast','¡Análisis completo y correcto!'));else if(g.bad)out.append(mk('div','note','Los errores están subrayados en rojo. Revisa la función o el segmento.'));else out.append(mk('div','note','Lo marcado es correcto, pero aún te faltan elementos.'));
+  out.append(mk('div','note','Validado con '+SRC[sol.source]+(sol.name?' («'+sol.name+'»)':'')+'.'));
+  const note=sol.note||S.note;if((perfect||S.gave)&&note)out.append(mk('div','note','Por qué: '+note));
+  award(g,perfect);fbMsg(out)}
+function sum(ok,bad,extra){const d=mk('div','sum');d.append(mk('span','tag ok','✓ '+ok+' aciertos'),mk('span','tag'+(bad?' bad':''),'✗ '+bad+' errores'),mk('span','tag',extra));return d}
+function award(g,perfect){let sc=g.ok*10+(perfect?30:0)-5*S.hints;if(S.gave)sc=0;sc=Math.max(0,sc);const d=sc-S.awarded;if(d>0){S.xp+=d;S.awarded=sc}if(perfect&&!S.gave&&!S.streaked){S.streak++;S.streaked=true}refreshStats()}
+/* ayudas */
+function ghostOf(it){return{s:it.s,e:it.e,f:it.f}}
+async function help(mode){$('hmenu').hidden=true;$('helpb').setAttribute('aria-expanded','false');const sol=await getSol(true);if(!sol||!sol.items){fbMsg(mk('div','note','No hay solución disponible para esta frase con los solucionarios cargados.'));return}
+  const g=grade(S.anns,sol.items);let list=g.miss.filter(m=>!S.ghosts.some(x=>x.s===m.s&&x.e===m.e&&x.f===m.f));
+  if(mode==='one'){if(!list.length){const b=S.anns.find(a=>g.st[a.id]==='bad');if(b){const hint=sol.items.find(x=>x.s<=b.e&&x.e>=b.s&&!x.opt);if(hint){S.hints++;S.ghosts.push(ghostOf(hint));S.st=g.st;S.checked=true;renderAll();fbMsg(mk('div','note','Pista: mira este tramo, su función aparece punteada.'));return}}fbMsg(mk('div','note','No te queda nada por descubrir.'));return}
+    list.sort((a,b)=>a.s-b.s||b.e-a.e);S.hints++;S.ghosts.push(ghostOf(list[0]));renderAll();fbMsg(mk('div','note','Pista: el elemento punteado (con su color) es el siguiente paso.'))}
+  else{S.hints+=2;list.forEach(m=>S.ghosts.push(ghostOf(m)));renderAll();fbMsg(mk('div','note','Solución completa en punteado. Cada color es una familia de funciones.'))}}
+async function showAnswer(){const r=selRange();const sol=await getSol(true);if(!sol||!sol.items){fbMsg(mk('div','note','No hay respuesta disponible para esta frase.'));return}
+  if(r){const it=sol.items.filter(x=>x.s<=r[1]&&x.e>=r[0]).sort((a,b)=>(a.e-a.s)-(b.e-b.s))[0];if(!it){fbMsg(mk('div','note','Esa parte no forma un elemento propio del análisis.'));return}S.hints++;if(!S.ghosts.some(x=>x.s===it.s&&x.e===it.e&&x.f===it.f))S.ghosts.push(ghostOf(it));renderAll();const d=mk('div');d.append(mk('div','toast','«'+S.words.slice(it.s,it.e+1).map(w=>w.t).join(' ')+'» → '+FN[it.f].label),mk('div','note',FN[it.f].def));fbMsg(d);return}
+  const d=mk('div');d.append(mk('div','note','¿Rendirte y ver todo el análisis? No sumarás XP en esta frase y se reinicia la racha.'));const row=mk('div','row');const y=mk('button','btn pri','Sí, mostrar todo'),n=mk('button','btn','Cancelar');y.onclick=()=>{S.gave=true;S.streak=0;S.ghosts=[];sol.items.filter(x=>!x.opt).forEach(m=>{if(!S.anns.some(a=>a.s===m.s&&a.e===m.e&&a.f===m.f))S.ghosts.push(ghostOf(m))});renderAll();refreshStats();const o=mk('div');o.append(mk('div','toast','Respuesta completa en punteado.'));if(sol.note||S.note)o.append(mk('div','note','Por qué: '+(sol.note||S.note)));fbMsg(o)};n.onclick=()=>fbMsg(mk('div'));row.append(y,n);d.append(row);fbMsg(d)}
+$('chk').onclick=()=>check(false);$('aichk').onclick=()=>check(true);$('show').onclick=showAnswer;
+$('helpb').onclick=e=>{const m=$('hmenu');m.hidden=!m.hidden;e.currentTarget.setAttribute('aria-expanded',String(!m.hidden))};$('h1').onclick=()=>help('one');$('h2').onclick=()=>help('all');
+document.addEventListener('click',e=>{if(!e.target.closest('#hmenu,#helpb')){$('hmenu').hidden=true}});
+/* solucionarios */
+const loadScript=u=>new Promise((ok,ko)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=()=>ko(new Error('script'));document.head.appendChild(s)});
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+async function readPdf(buf){if(!window.pdfjsLib){await loadScript(PDFJS+'pdf.min.js');pdfjsLib.GlobalWorkerOptions.workerSrc=PDFJS+'pdf.worker.min.js'}
+  const doc=await pdfjsLib.getDocument({data:buf,isEvalSupported:false}).promise;let out='';for(let p=1;p<=doc.numPages;p++){const c=await(await doc.getPage(p)).getTextContent();const lines=[];c.items.forEach(it=>{if(!it.str.trim()&&!it.hasEOL)return;const y=Math.round(it.transform[5]),x=it.transform[4];let L=lines.find(l=>Math.abs(l.y-y)<3);if(!L){L={y,parts:[]};lines.push(L)}L.parts.push({x,w:it.width,s:it.str})});lines.sort((a,b)=>b.y-a.y).forEach(L=>{L.parts.sort((a,b)=>a.x-b.x);let t='',end=null;L.parts.forEach(p2=>{if(end!=null&&p2.x-end>12)t+=' | ';else if(end!=null&&!/\s$/.test(t))t+=' ';t+=p2.s.trim();end=p2.x+p2.w});out+=t+'\n'})}
+  return{text:out,pages:doc.numPages}}
+async function readDocx(buf){if(!window.JSZip)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');const z=await JSZip.loadAsync(buf);const xml=await z.file('word/document.xml').async('string');const d=new DOMParser().parseFromString(xml,'application/xml');const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';const ptxt=p=>[...p.getElementsByTagNameNS(W,'t')].map(t=>t.textContent).join('');let out='';const body=d.getElementsByTagNameNS(W,'body')[0];[...body.children].forEach(n=>{if(n.localName==='p')out+=ptxt(n)+'\n';else if(n.localName==='tbl')[...n.getElementsByTagNameNS(W,'tr')].forEach(tr=>{out+=[...tr.getElementsByTagNameNS(W,'tc')].map(tc=>[...tc.getElementsByTagNameNS(W,'p')].map(ptxt).join(' ')).join(' | ')+'\n'})});return{text:out}}
+async function addFile(f){const m=$('rmsg');m.textContent='Leyendo «'+f.name+'»…';try{const n=f.name.toLowerCase();let r;if(n.endsWith('.pdf'))r=await readPdf(await f.arrayBuffer());else if(n.endsWith('.docx'))r=await readDocx(await f.arrayBuffer());else r={text:await f.text()};if(!r.text.trim())throw new Error('vacío');addRef(f.name,r.text,r.pages);m.textContent=''}catch(e){m.textContent='No se pudo leer «'+f.name+'». Si es un PDF escaneado, pega su texto abajo.'}}
+function addRef(name,text,pages){S.refs=S.refs.filter(r=>r.name!==name);S.refs.push({name,text:text.slice(0,300000),pages});store.set('refs',S.refs.map(r=>({name:r.name,text:r.text.slice(0,120000),pages:r.pages})));renderRefs();S.sol=S.sol&&S.sol.source==='ai'?S.sol:null}
+function renderRefs(){const u=$('rlist');u.innerHTML='';S.refs.forEach(r=>{const li=document.createElement('li');const s=document.createElement('span');const found=S.sentence&&refRegion(S.sentence,r.text)!=null;s.textContent=r.name+' · '+Math.round(r.text.length/1000)+' k caracteres'+(S.sentence?(found?' · frase localizada ✓':' · frase no localizada'):'');const b=document.createElement('button');b.className='btn';b.textContent='Quitar';b.onclick=()=>{S.refs=S.refs.filter(x=>x!==r);store.set('refs',S.refs);renderRefs()};li.append(s,b);u.appendChild(li)})}
+$('up').onclick=()=>$('file').click();$('file').onchange=e=>{[...e.target.files].forEach(addFile);e.target.value=''};
+const dz=$('dz');['dragover','dragenter'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.add('over')}));['dragleave','drop'].forEach(t=>dz.addEventListener(t,e=>{e.preventDefault();dz.classList.remove('over')}));dz.addEventListener('drop',e=>[...e.dataTransfer.files].forEach(addFile));
+$('addp').onclick=()=>{const t=$('paste').value.trim();if(!t)return;addRef('Texto pegado '+(S.refs.length+1),t);$('paste').value=''};
+/* frase */
+$('use').onclick=()=>{const t=$('txt').value.trim();if(t.split(/\s+/).length<2){say('Escribe una oración de al menos dos palabras.');return}say('');const b=findBank(t);setSentence(t,null,b?b.note:'')};
+$('txt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('use').click()}});
+$('bank').onclick=()=>{const tema=$('tema').value,niv=$('lvlsel').value;let pool=BANK.filter(b=>(!tema||b.tema===tema));if(!pool.length)pool=BANK;const pref=pool.filter(b=>niv==='ESO'?b.nivel==='ESO':true);if(pref.length)pool=pref;S.bankIdx=(S.bankIdx+1)%pool.length;const b=pool[S.bankIdx];$('txt').value=b.text;setSentence(b.text,null,b.note)};
+$('gen').onclick=aiGenerate;
+$('chg').onclick=()=>{$('inp').hidden=false;$('curbar').hidden=true;$('txt').focus()};
+document.querySelectorAll('#steps button').forEach(b=>b.onclick=()=>{const t=$(b.dataset.go);if(!t)return;if(b.dataset.go!=='p-frase'&&$('work').hidden){$('p-frase').scrollIntoView({behavior:'smooth'});return}t.scrollIntoView({behavior:'smooth',block:'start'})});
+/* init */
+S.xp=store.get('xp',0);S.streak=store.get('streak',0);S.refs=store.get('refs',[]);
+buildPalette('');refreshStats();renderRefs();renderSel();stepState();
+
+</script>
+</body></html>
