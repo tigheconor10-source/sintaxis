@@ -184,6 +184,9 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
 .bx{display:grid;column-gap:6px;row-gap:7px;width:max-content;min-width:100%;padding:8px 4px}
 .bx .w{font-family:var(--serif);font-size:clamp(1.05rem,2.4vw,1.55rem);text-align:center;padding:0 2px;color:var(--fg)}
 .bx .bb{font-size:.76rem;font-weight:700;text-align:center;padding:4px 8px;border-top:3px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 9%,transparent);border-radius:0 0 8px 8px;white-space:nowrap;align-self:start}
+.srcb{margin-top:10px;font-size:.88rem;font-weight:600;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.srcb.ai{border-color:#d9a21b;background:color-mix(in srgb,#f0b94a 16%,transparent);color:var(--fg)}
+.srcb.ai::before{content:'IA · ';font-weight:800}
 </style>
 </head>
 <body>
@@ -239,6 +242,7 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
     <button class="tb" id="fnbtn" aria-pressed="false">Funciones (ayuda)</button>
   </div>
   <div class="board-scroll" id="bsc"><div class="zbox" id="zbox"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div></div>
+  <div class="srcb" id="srcb" hidden></div>
   <div class="selbar" id="selbar"></div>
   <div class="acts" id="p-acts">
     <button class="btn pri" id="chk"><svg viewBox="0 0 24 24"><path d="M2 13l4 4 8-9"/><path d="M12 15l2 2 8-10"/></svg>Comprobar</button>
@@ -326,6 +330,9 @@ cc('ccInst','CCInst','instrumento',['complemento circunstancial de instrumento',
 ['subadj','Subordinada adjetiva','Sub. adj.','apo','Oración subordinada de relativo que complementa a un nombre (suele ser CN).',['subordinada adjetiva','subordinada de relativo','oracion subordinada adjetiva']]
 ];
 const FN={};FDEF.forEach(d=>{FN[d[0]]={id:d[0],label:d[1],short:d[2],fam:d[3],def:d[4],al:d[5],apo:d[3]==='apo'}});
+const BL={suj:'S',ter:'T',gprep:'G.Prep',gadj:'G.Adj',gadv:'G.Adv',pv:'PV',pn:'PN',gv:'GV',creg:'CReg',atr:'ATRIB',ssub:'S.sub.',subadj:'Sub. adj.',cn:'CN',nuc:'N',verbo:'NV',enl:'E',mod:'Mod',nx:'NX',gn:'GN',det:'Det',cd:'CD',ci:'CI',cla:'CLA',ag:'C.Ag.'};
+const BTYPE=['gn','gprep','gadj','gadv','gv','ssub','subadj'];
+function combLabel(fs){const a=fs.slice().sort((x,y)=>(BTYPE.includes(x)?0:1)-(BTYPE.includes(y)?0:1));return a.map(f=>BL[f]||FN[f].short).join('/')}
 const key=s=>String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
 const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const nzr=s=>key(s).replace(/[^a-z0-9|\n ]+/g,' ').replace(/[ \t]+/g,' ');
@@ -383,7 +390,7 @@ function buildPalette(filter){const f=key(filter||'');const box=$('plist');box.i
   const dl=$('fnlist');if(dl&&!dl.children.length)Object.values(FN).forEach(x=>{const o=document.createElement('option');o.value=x.short;dl.appendChild(o)})}
 function ficha(id){const x=FN[id];$('ficha').innerHTML='<b></b><br><span></span>';$('ficha').firstChild.textContent=x.label+' ('+x.short+')';$('ficha').lastChild.textContent=x.def}
 /* frase */
-function setSentence(text,sol,note){if($('p-boxes'))$('p-boxes').hidden=true;S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.draftTxt='';S.editId=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
+function setSentence(text,sol,note){if($('srcb'))$('srcb').hidden=true;if($('p-boxes'))$('p-boxes').hidden=true;S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.draftTxt='';S.editId=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
   $('p-frase').hidden=true;document.body.classList.remove('s1');document.body.classList.add('s2');$('work').hidden=false;$('p-fb').innerHTML='';buildWords();fitWords();renderAll();drawAll();renderRefs()}
 function buildWords(){const w=$('words');w.innerHTML='';S.words.forEach((x,i)=>{const b=document.createElement('span');b.className='w';b.textContent=x.t;b.dataset.i=i;b.tabIndex=0;b.setAttribute('role','button');w.appendChild(b)})}
 function selRange(){return S.sel?[Math.min(S.sel.a,S.sel.b),Math.max(S.sel.a,S.sel.b)]:null}
@@ -414,7 +421,8 @@ $('q').addEventListener('input',e=>buildPalette(e.target.value));
 function renderAll(){renderSel(false)}
 function renderMarks(){const ws=[...$('words').children];const box=$('marks');box.innerHTML='';ws.forEach(w=>w.classList.remove('bad'));if(!ws.length)return;
   const items=[];S.anns.forEach(a=>{if(a.id===S.editId)return;items.push({id:a.id,s:a.s,e:a.e,txt:a.txt,col:annCol(a),k:'ann'})});
-  S.ghosts.forEach((g,i)=>items.push({id:'g'+i,s:g.s,e:g.e,txt:FN[g.f].short,col:fcol(g.f),k:'ghost'}));
+  const gm=new Map();S.ghosts.forEach((g,i)=>{const k=g.s+'-'+g.e;if(!gm.has(k))gm.set(k,{i,s:g.s,e:g.e,fs:[]});if(!gm.get(k).fs.includes(g.f))gm.get(k).fs.push(g.f)});
+  gm.forEach(g=>{const main=g.fs.find(f=>!BTYPE.includes(f))||g.fs[0];items.push({id:'g'+g.i,s:g.s,e:g.e,txt:combLabel(g.fs),col:fcol(main),k:'ghost'})});
   const r=selRange();if(r)items.push({id:'draft',s:r[0],e:r[1],txt:S.draftTxt||'',col:'var(--ink)',k:'draft'});
   items.forEach(it=>{const a=ws[it.s],b=ws[it.e];it.x1=a.offsetLeft;it.x2=b.offsetLeft+b.offsetWidth;const lw=it.k==='draft'?Math.max(170,it.txt.length*8+50):it.txt.length*7.6+(it.k==='ghost'?24:46);it.lw=lw;const c=(it.x1+it.x2)/2;it.lx=Math.max(0,c-lw/2);it.l=Math.min(it.x1,it.lx);it.r=Math.max(it.x2,it.lx+lw)});
   items.sort((p,q)=>(p.e-p.s)-(q.e-q.s)||p.s-q.s);const rows=[];items.forEach(it=>{for(let L=0;;L++){const row=rows[L]||(rows[L]=[]);if(!row.some(o=>it.l<o.r+6&&o.l<it.r+6)){row.push(it);it.lv=L;break}}});
@@ -469,7 +477,8 @@ async function resolveSol(allowAI){const refs=S.refs;for(const r of refs){const 
   for(const r of refs)if(refRegion(S.sentence,r.text)!=null)return{weak:r.text,source:'pdfweak',name:r.name};
   if(!allowAI)return null;const a=await aiSolve();return a?{items:a.items,source:'ai',note:a.note}:null}
 const SRC={pdf:'tu solucionario',bank:'el banco de la app',pdfweak:'tu solucionario (coincidencia aproximada)',ai:'IA'};
-async function getSol(allowAI){if(S.busy)return null;S.busy=true;try{const s=await resolveSol(allowAI);if(s)S.sol=s;return s}catch(e){say(aiErr(e),$('p-fb'));return null}finally{S.busy=false}}
+function updateSrc(){const b=$('srcb');if(!b)return;const s=S.sol;if(!s||!S.sentence){b.hidden=true;return}b.className='srcb '+s.source;b.textContent=s.source==='ai'?'Solución generada por IA: puede tener fallos. Si dudas, contrástala con tus apuntes.':s.source==='bank'?'Solución del banco de la app (revisada).':'Solución sacada de '+(s.name?'«'+s.name+'»':'tu solucionario')+'.';b.hidden=false}
+async function getSol(allowAI){if(S.busy)return null;S.busy=true;try{const s=await resolveSol(allowAI);if(s){S.sol=s;updateSrc()}return s}catch(e){say(aiErr(e),$('p-fb'));return null}finally{S.busy=false}}
 function evalAnns(items){const exp=[];S.anns.forEach(a=>(a.fs||[]).forEach(f=>exp.push({id:a.id+':'+f,s:a.s,e:a.e,f})));const g=grade(exp,items);const st={};S.anns.forEach(a=>{if(!(a.fs||[]).length){st[a.id]='unk';return}const ss=a.fs.map(f=>g.st[a.id+':'+f]);st[a.id]=ss.includes('bad')?'bad':ss.includes('ok')?'ok':'neutral'});g.st=st;g.unk=S.anns.filter(a=>!(a.fs||[]).length).length;return g}
 /* comprobar */
 function fbMsg(html){const f=$('p-fb');f.innerHTML='';f.append(html)}
@@ -556,13 +565,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')$('gmodal').hidden=t
 
 $('fnbtn').onclick=()=>{const p=$('p-pal');p.hidden=!p.hidden;$('fnbtn').setAttribute('aria-pressed',String(!p.hidden))};$('pclose').onclick=()=>{$('p-pal').hidden=true;$('fnbtn').setAttribute('aria-pressed','false')};
 // ---- Análisis completo en cajas (estilo sintaxio, con tu notación)
-const BL={suj:'S',ter:'T',gprep:'GP',pv:'PV',pn:'PN',gv:'GV',creg:'CReg',atr:'ATRIB',ssub:'S.sub.',subadj:'Sub. adj.',cn:'CN',nuc:'N',verbo:'NV',enl:'E',mod:'Mod',nx:'NX',gn:'GN',gadj:'Gadj',gadv:'Gadv',det:'Det',cd:'CD',ci:'CI',cla:'CLA',ag:'C.Ag.'};
-const BTYPE=['gn','gprep','gadj','gadv','gv','ssub','subadj'];
 function buildBoxes(items){
   const box=mk('div','bx');const n=S.words.length;box.style.gridTemplateColumns='repeat('+n+',auto)';
   const map=new Map();items.forEach(it=>{const k=it.s+'-'+it.e;if(!map.has(k))map.set(k,{s:it.s,e:it.e,fs:[]});if(!map.get(k).fs.includes(it.f))map.get(k).fs.push(it.f)});
   const list=[...map.values()];
-  list.forEach(x=>{x.fs.sort((a,b)=>(BTYPE.includes(a)?0:1)-(BTYPE.includes(b)?0:1));x.lab=x.fs.map(f=>BL[f]||FN[f].short).join('/');const main=x.fs.find(f=>!BTYPE.includes(f))||x.fs[0];x.fam=FN[main].fam});
+  list.forEach(x=>{x.fs.sort((a,b)=>(BTYPE.includes(a)?0:1)-(BTYPE.includes(b)?0:1));x.lab=combLabel(x.fs);const main=x.fs.find(f=>!BTYPE.includes(f))||x.fs[0];x.fam=FN[main].fam});
   const multi=list.filter(x=>x.s!==x.e).sort((a,b)=>(a.e-a.s)-(b.e-b.s));
   multi.forEach(x=>{x.lv=1+Math.max(0,...multi.filter(y=>y!==x&&y.s>=x.s&&y.e<=x.e&&(y.e-y.s)<(x.e-x.s)).map(y=>y.lv||0))});
   S.words.forEach((w,i)=>{const d=mk('div','w',w.t);d.style.gridColumn=(i+1)+'';d.style.gridRow='1';box.append(d)});
