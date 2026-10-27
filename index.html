@@ -180,6 +180,10 @@ body.s1 #p-frase{margin-top:22px}
 body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:760px;margin:6px auto 0;width:100%}
 .how div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
 .how b{font-family:var(--serif)}.how span{color:var(--muted);font-size:.9rem}
+.bxs{overflow-x:auto;padding:6px 0 2px}
+.bx{display:grid;column-gap:6px;row-gap:7px;width:max-content;min-width:100%;padding:8px 4px}
+.bx .w{font-family:var(--serif);font-size:clamp(1.05rem,2.4vw,1.55rem);text-align:center;padding:0 2px;color:var(--fg)}
+.bx .bb{font-size:.76rem;font-weight:700;text-align:center;padding:4px 8px;border-top:3px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 9%,transparent);border-radius:0 0 8px 8px;white-space:nowrap;align-self:start}
 </style>
 </head>
 <body>
@@ -240,6 +244,7 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
     <button class="btn pri" id="chk"><svg viewBox="0 0 24 24"><path d="M2 13l4 4 8-9"/><path d="M12 15l2 2 8-10"/></svg>Comprobar</button>
     <button class="btn" id="helpb" aria-haspopup="true" aria-expanded="false">Ayuda ▾</button>
     <button class="btn" id="show">Mostrar respuesta</button>
+    <button class="btn" id="boxbtn">Ver análisis completo</button>
     <button class="btn" id="aichk" hidden>Comprobar con IA</button>
     <div class="menu" id="hmenu" hidden>
       <button id="h1">Una pista<small>Revela un paso, con su color</small></button>
@@ -247,6 +252,7 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
     </div>
   </div>
   <div class="fb" id="p-fb" aria-live="polite"></div>
+  <section class="card" id="p-boxes" hidden style="margin-top:12px"><div class="row" style="justify-content:space-between"><b>Análisis completo</b><button class="btn" id="bxclose">Cerrar</button></div><p class="note" id="bxnote" style="margin:6px 0 0"></p><div class="bxs" id="bx"></div></section>
   <details class="card refs" id="p-ref" style="margin-top:16px">
     <summary style="cursor:pointer;font-weight:700">Solucionarios oficiales (opcional)</summary>
     <p class="note" style="margin:8px 0">Sube un PDF, DOCX, TXT o una foto de la solución manuscrita (la IA la pasa a texto y tú la revisas). Se consulta primero y no gasta IA. Todo se procesa en tu navegador.</p>
@@ -377,7 +383,7 @@ function buildPalette(filter){const f=key(filter||'');const box=$('plist');box.i
   const dl=$('fnlist');if(dl&&!dl.children.length)Object.values(FN).forEach(x=>{const o=document.createElement('option');o.value=x.short;dl.appendChild(o)})}
 function ficha(id){const x=FN[id];$('ficha').innerHTML='<b></b><br><span></span>';$('ficha').firstChild.textContent=x.label+' ('+x.short+')';$('ficha').lastChild.textContent=x.def}
 /* frase */
-function setSentence(text,sol,note){S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.draftTxt='';S.editId=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
+function setSentence(text,sol,note){if($('p-boxes'))$('p-boxes').hidden=true;S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.draftTxt='';S.editId=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
   $('p-frase').hidden=true;document.body.classList.remove('s1');document.body.classList.add('s2');$('work').hidden=false;$('p-fb').innerHTML='';buildWords();fitWords();renderAll();drawAll();renderRefs()}
 function buildWords(){const w=$('words');w.innerHTML='';S.words.forEach((x,i)=>{const b=document.createElement('span');b.className='w';b.textContent=x.t;b.dataset.i=i;b.tabIndex=0;b.setAttribute('role','button');w.appendChild(b)})}
 function selRange(){return S.sel?[Math.min(S.sel.a,S.sel.b),Math.max(S.sel.a,S.sel.b)]:null}
@@ -549,5 +555,31 @@ $('guidebtn').onclick=openGuide;$('gclose').onclick=()=>{$('gmodal').hidden=true
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('gmodal').hidden=true});
 
 $('fnbtn').onclick=()=>{const p=$('p-pal');p.hidden=!p.hidden;$('fnbtn').setAttribute('aria-pressed',String(!p.hidden))};$('pclose').onclick=()=>{$('p-pal').hidden=true;$('fnbtn').setAttribute('aria-pressed','false')};
+// ---- Análisis completo en cajas (estilo sintaxio, con tu notación)
+const BL={suj:'S',ter:'T',gprep:'GP',pv:'PV',pn:'PN',gv:'GV',creg:'CReg',atr:'ATRIB',ssub:'S.sub.',subadj:'Sub. adj.',cn:'CN',nuc:'N',verbo:'NV',enl:'E',mod:'Mod',nx:'NX',gn:'GN',gadj:'Gadj',gadv:'Gadv',det:'Det',cd:'CD',ci:'CI',cla:'CLA',ag:'C.Ag.'};
+const BTYPE=['gn','gprep','gadj','gadv','gv','ssub','subadj'];
+function buildBoxes(items){
+  const box=mk('div','bx');const n=S.words.length;box.style.gridTemplateColumns='repeat('+n+',auto)';
+  const map=new Map();items.forEach(it=>{const k=it.s+'-'+it.e;if(!map.has(k))map.set(k,{s:it.s,e:it.e,fs:[]});if(!map.get(k).fs.includes(it.f))map.get(k).fs.push(it.f)});
+  const list=[...map.values()];
+  list.forEach(x=>{x.fs.sort((a,b)=>(BTYPE.includes(a)?0:1)-(BTYPE.includes(b)?0:1));x.lab=x.fs.map(f=>BL[f]||FN[f].short).join('/');const main=x.fs.find(f=>!BTYPE.includes(f))||x.fs[0];x.fam=FN[main].fam});
+  const multi=list.filter(x=>x.s!==x.e).sort((a,b)=>(a.e-a.s)-(b.e-b.s));
+  multi.forEach(x=>{x.lv=1+Math.max(0,...multi.filter(y=>y!==x&&y.s>=x.s&&y.e<=x.e&&(y.e-y.s)<(x.e-x.s)).map(y=>y.lv||0))});
+  S.words.forEach((w,i)=>{const d=mk('div','w',w.t);d.style.gridColumn=(i+1)+'';d.style.gridRow='1';box.append(d)});
+  const put=(x,row)=>{const d=mk('div','bb',x.lab);d.style.gridColumn=(x.s+1)+' / '+(x.e+2);d.style.gridRow=String(row);d.style.setProperty('--c','var('+FAM[x.fam]+')');box.append(d)};
+  list.filter(x=>x.s===x.e).forEach(x=>put(x,2));
+  const top=multi.filter(x=>!multi.some(y=>y!==x&&y.s<=x.s&&y.e>=x.e&&(y.e-y.s)>(x.e-x.s)));const maxLv=Math.max(0,...multi.map(x=>x.lv));
+  multi.forEach(x=>put(x,2+(top.includes(x)?maxLv:x.lv)));
+  return box}
+function closeBoxes(){$('p-boxes').hidden=true}
+$('bxclose').onclick=closeBoxes;
+$('boxbtn').onclick=async()=>{
+  if(!S.sentence)return;
+  const sol=await getSol(true);if(!sol)return;
+  if(!sol.items){fbMsg(mk('div','note','Tu solucionario tiene esta frase, pero no he podido leer el análisis completo de él. Prueba con una frase del banco o con «Mostrar respuesta».'));return}
+  if(!S.gave){S.gave=true;S.streak=0;refreshStats()}
+  const nt=$('bxnote');nt.textContent='Fuente: '+SRC[sol.source]+(sol.name?' ('+sol.name+')':'')+(sol.source==='ai'?'. Análisis hecho por la IA: puede tener fallos.':'.')+' En esta frase no sumas XP.'+(sol.note?' '+sol.note:'');
+  const h=$('bx');h.innerHTML='';h.append(buildBoxes(sol.items));
+  $('p-boxes').hidden=false;$('p-boxes').scrollIntoView({behavior:'smooth',block:'nearest'})};
 </script>
 </body></html>
