@@ -122,6 +122,10 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:6
 .guide{background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.95rem;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .guide .btn{margin-left:auto}
 .stats .pill:not(#lvl){display:none}
+body.fs .top,body.fs #p-frase,body.fs #guide,body.fs #p-ref{display:none}
+body.fs .work{position:fixed;inset:0;z-index:40;background:var(--bg);padding:12px max(12px,env(safe-area-inset-left,0px));overflow:auto;margin:0;max-width:none}
+body.fs .board{min-height:calc(100vh - 230px)}
+body.fs .pal{max-height:none}
 </style>
 </head>
 <body>
@@ -160,6 +164,7 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:6
         <span class="sep"></span>
         <button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button>
         <button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button>
+        <button class="tb big" id="t-fs"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fslab">Pantalla completa</span></button>
         <button class="tb" id="t-str" aria-pressed="true">Enderezar líneas</button>
       </div>
       <div class="board-scroll"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div>
@@ -282,7 +287,7 @@ function buildPalette(filter){const f=key(filter||'');const box=$('plist');box.i
 function ficha(id){const x=FN[id];$('ficha').innerHTML='<b></b><br><span></span>';$('ficha').firstChild.textContent=x.label+' ('+x.short+')';$('ficha').lastChild.textContent=x.def}
 /* words */
 function setSentence(text,sol,note){S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
-  $('inp').hidden=true;$('curbar').hidden=false;$('curq').textContent=S.sentence;$('work').hidden=false;$('p-fb').innerHTML='';buildWords();renderAll();drawAll();$('work').scrollIntoView({behavior:'smooth',block:'nearest'})}
+  $('inp').hidden=true;$('curbar').hidden=false;$('curq').textContent=S.sentence;$('work').hidden=false;$('p-fb').innerHTML='';buildWords();fitWords();renderAll();drawAll();$('work').scrollIntoView({behavior:'smooth',block:'nearest'})}
 function buildWords(){const w=$('words');w.innerHTML='';S.words.forEach((x,i)=>{const b=document.createElement('span');b.className='w';b.textContent=x.t;b.dataset.i=i;b.tabIndex=0;b.setAttribute('role','button');w.appendChild(b)})}
 function selRange(){return S.sel?[Math.min(S.sel.a,S.sel.b),Math.max(S.sel.a,S.sel.b)]:null}
 function tap(i){const r=selRange();if(!r)S.sel={a:i,b:i};else if(i>=r[0]&&i<=r[1]){S.sel=(r[0]===r[1])?null:{a:i,b:i}}else S.sel={a:Math.min(r[0],i),b:Math.max(r[1],i)};renderSel()}
@@ -413,6 +418,13 @@ S.xp=store.get('xp',0);S.streak=store.get('streak',0);S.refs=store.get('refs',[]
 buildPalette('');refreshStats();renderRefs();renderSel();stepState();
 
 $('gx').onclick=()=>{$('guide').hidden=true;try{localStorage.setItem('asx:guide','1')}catch(e){}};try{if(localStorage.getItem('asx:guide'))$('guide').hidden=true}catch(e){}
+
+function fitWords(){const w=$('words');if(!w.children.length)return;w.style.fontSize='40px';const avail=$('board').parentElement.clientWidth-70;const need=w.scrollWidth;let px=40*Math.min(1,avail/need);px=Math.max(16,Math.min(px,46));w.style.fontSize=px.toFixed(1)+'px';renderMarks()}
+window.addEventListener('resize',fitWords);
+function setFS(on){document.body.classList.toggle('fs',on);$('fslab').textContent=on?'Salir de pantalla completa':'Pantalla completa';try{if(on&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});else if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}setTimeout(fitWords,60);setTimeout(fitWords,300)}
+$('t-fs').onclick=()=>setFS(!document.body.classList.contains('fs'));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('fs'))setFS(false)});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&document.body.classList.contains('fs'))setFS(false)});
 
 </script>
 </body></html>
