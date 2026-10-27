@@ -126,6 +126,13 @@ body.fs .top,body.fs #p-frase,body.fs #guide,body.fs #p-ref{display:none}
 body.fs .work{position:fixed;inset:0;z-index:40;background:var(--bg);padding:12px max(12px,env(safe-area-inset-left,0px));overflow:auto;margin:0;max-width:none}
 body.fs .board{min-height:calc(100vh - 230px)}
 body.fs .pal{max-height:none}
+.words{width:max-content;gap:.28em}
+.w{padding:2px 4px}
+.stage{padding:30px 22px 50px}
+.zbox{position:relative}
+.board{position:absolute;top:0;left:0;min-width:0;transform-origin:0 0}
+.board-scroll{max-height:calc(100vh - 210px);overflow:auto}
+body.fs .board-scroll{max-height:calc(100vh - 190px)}
 </style>
 </head>
 <body>
@@ -161,13 +168,15 @@ body.fs .pal{max-height:none}
         <button class="tb big" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
         <button class="tb big" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Asignar</button>
         <button class="tb big" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button>
+        <button class="tb big" id="t-hand" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>Mover</button>
+        <button class="tb big" id="z-out" aria-label="Alejar">−</button><button class="tb big" id="z-fit" aria-label="Ajustar a la pantalla">Ajustar</button><button class="tb big" id="z-in" aria-label="Acercar">+</button>
         <span class="sep"></span>
         <button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button>
         <button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button>
         <button class="tb big" id="t-fs"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fslab">Pantalla completa</span></button>
         <button class="tb" id="t-str" aria-pressed="true">Enderezar líneas</button>
       </div>
-      <div class="board-scroll"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div>
+      <div class="board-scroll" id="bsc"><div class="zbox" id="zbox"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div></div>
       <div class="selbar" id="selbar"></div>
       <div class="acts" id="p-acts">
         <button class="btn pri" id="chk"><svg viewBox="0 0 24 24"><path d="M2 13l4 4 8-9"/><path d="M12 15l2 2 8-10"/></svg>Comprobar</button>
@@ -325,21 +334,21 @@ window.addEventListener('resize',()=>{renderMarks()});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>renderMarks());
 /* canvas */
 const cv=$('ink'),cx2=cv.getContext('2d');let cur=null,erasing=false,erased=false;
-function sizeInk(){const b=$('board');const w=b.offsetWidth,h=b.offsetHeight,d=window.devicePixelRatio||1;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.width=w+'px';cv.style.height=h+'px'}cx2.setTransform(d,0,0,d,0,0);drawAll()}
+function sizeInk(){applyZoom();const b=$('board');const w=b.offsetWidth,h=b.offsetHeight,d=window.devicePixelRatio||1;if(cv.width!==Math.round(w*d)||cv.height!==Math.round(h*d)){cv.width=Math.round(w*d);cv.height=Math.round(h*d);cv.style.width=w+'px';cv.style.height=h+'px'}cx2.setTransform(d,0,0,d,0,0);drawAll()}
 function drawAll(){cx2.clearRect(0,0,cv.width,cv.height);cx2.lineCap='round';cx2.lineJoin='round';cx2.lineWidth=3;cx2.strokeStyle=getComputedStyle(document.documentElement).getPropertyValue('--ink').trim()||'#2347c9';S.strokes.forEach(s=>{cx2.beginPath();if(s.k==='line'){cx2.moveTo(s.x1,s.y1);cx2.lineTo(s.x2,s.y2)}else{s.pts.forEach((p,i)=>i?cx2.lineTo(p.x,p.y):cx2.moveTo(p.x,p.y));if(s.pts.length===1)cx2.lineTo(s.pts[0].x+.1,s.pts[0].y)}cx2.stroke()});if(cur){cx2.beginPath();cur.forEach((p,i)=>i?cx2.lineTo(p.x,p.y):cx2.moveTo(p.x,p.y));cx2.stroke()}}
-const cpos=e=>{const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+const cpos=e=>{const r=cv.getBoundingClientRect(),k=cv.offsetWidth/(r.width||1);return{x:(e.clientX-r.left)*k,y:(e.clientY-r.top)*k}};let pan=null;
 function finishStroke(pts){if(pts.length<2)return;const a=pts[0],b=pts[pts.length-1],ch=Math.hypot(b.x-a.x,b.y-a.y);let len=0;for(let i=1;i<pts.length;i++)len+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].y-pts[i-1].y);if(len<6)return;snap();
   if(S.str&&ch>=14&&len/ch<=1.6){let{x:x1,y:y1}=a,{x:x2,y:y2}=b;const ang=Math.abs(Math.atan2(y2-y1,x2-x1)*180/Math.PI);if(ang<10||ang>170){y1=y2=(y1+y2)/2}else if(Math.abs(ang-90)<10){x1=x2=(x1+x2)/2}S.strokes.push({k:'line',x1,y1,x2,y2})}else S.strokes.push({k:'free',pts:pts.filter((p,i)=>i%2===0||i===pts.length-1)})}
 function dseg(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;let t=l?((p.x-a.x)*dx+(p.y-a.y)*dy)/l:0;t=Math.max(0,Math.min(1,t));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)}
 function hit(s,p){if(s.k==='line')return dseg(p,{x:s.x1,y:s.y1},{x:s.x2,y:s.y2})<=12;return s.pts.some((q,i)=>i?dseg(p,s.pts[i-1],q)<=12:Math.hypot(p.x-q.x,p.y-q.y)<=12)}
 function eraseAt(p){const n=S.strokes.filter(s=>!hit(s,p));if(n.length!==S.strokes.length){if(!erased){const keep=S.strokes;S.strokes=n;snapWith(keep);erased=true}else S.strokes=n;drawAll()}}
 function snapWith(old){S.hist.push(JSON.stringify({a:S.anns,s:old,n:S.nid}))}
-cv.addEventListener('pointerdown',e=>{if(S.tool==='assign')return;cv.setPointerCapture(e.pointerId);const p=cpos(e);if(S.tool==='pen'){cur=[p]}else{erasing=true;erased=false;eraseAt(p)}});
-cv.addEventListener('pointermove',e=>{const p=cpos(e);if(cur){cur.push(p);drawAll()}else if(erasing)eraseAt(p)});
-const endInk=()=>{if(cur){const c=cur;cur=null;finishStroke(c)}erasing=false;drawAll()};
+cv.addEventListener('pointerdown',e=>{if(S.tool==='assign')return;if(S.tool==='hand'){const b=$('bsc');pan={x:e.clientX,y:e.clientY,l:b.scrollLeft,t:b.scrollTop};cv.setPointerCapture(e.pointerId);return}cv.setPointerCapture(e.pointerId);const p=cpos(e);if(S.tool==='pen'){cur=[p]}else{erasing=true;erased=false;eraseAt(p)}});
+cv.addEventListener('pointermove',e=>{if(pan){const b=$('bsc');b.scrollLeft=pan.l-(e.clientX-pan.x);b.scrollTop=pan.t-(e.clientY-pan.y);return}const p=cpos(e);if(cur){cur.push(p);drawAll()}else if(erasing)eraseAt(p)});
+const endInk=()=>{pan=null;if(cur){const c=cur;cur=null;finishStroke(c)}erasing=false;drawAll()};
 cv.addEventListener('pointerup',endInk);cv.addEventListener('pointercancel',endInk);
-function setTool(t){S.tool=t;[['assign','t-assign'],['pen','t-pen'],['era','t-era']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',String(k===t)));cv.classList.toggle('off',t==='assign');cv.style.cursor=t==='era'?'cell':t==='pen'?'crosshair':''}
-$('t-assign').onclick=()=>setTool('assign');$('t-pen').onclick=()=>setTool('pen');$('t-era').onclick=()=>setTool('era');
+function setTool(t){S.tool=t;[['assign','t-assign'],['pen','t-pen'],['era','t-era'],['hand','t-hand']].forEach(([k,id])=>$(id).setAttribute('aria-pressed',String(k===t)));cv.classList.toggle('off',t==='assign');cv.style.cursor=t==='era'?'cell':t==='pen'?'crosshair':t==='hand'?'grab':''}
+$('t-assign').onclick=()=>setTool('assign');$('t-pen').onclick=()=>setTool('pen');$('t-era').onclick=()=>setTool('era');$('t-hand').onclick=()=>setTool('hand');
 $('t-und').onclick=undo;$('t-clr').onclick=()=>{if(S.strokes.length){snap();S.strokes=[];drawAll()}};
 $('t-str').onclick=e=>{S.str=!S.str;e.currentTarget.setAttribute('aria-pressed',String(S.str))};
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>setTimeout(drawAll,50));
@@ -419,7 +428,12 @@ buildPalette('');refreshStats();renderRefs();renderSel();stepState();
 
 $('gx').onclick=()=>{$('guide').hidden=true;try{localStorage.setItem('asx:guide','1')}catch(e){}};try{if(localStorage.getItem('asx:guide'))$('guide').hidden=true}catch(e){}
 
-function fitWords(){const w=$('words');if(!w.children.length)return;w.style.fontSize='40px';const avail=$('board').parentElement.clientWidth-70;const need=w.scrollWidth;let px=40*Math.min(1,avail/need);px=Math.max(16,Math.min(px,46));w.style.fontSize=px.toFixed(1)+'px';renderMarks()}
+S.zoom=1;
+function applyZoom(){const b=$('board'),z=$('zbox'),sc=$('bsc');if(!b||!z||!sc)return;b.style.transform='scale('+S.zoom+')';b.style.minWidth=(sc.clientWidth/S.zoom)+'px';z.style.width=Math.max(sc.clientWidth,b.offsetWidth*S.zoom)+'px';z.style.height=(b.offsetHeight*S.zoom)+'px'}
+function zoomBy(f){S.zoom=Math.max(.5,Math.min(3,S.zoom*f));applyZoom()}
+function fitWords(){const w=$('words');if(!w.children.length)return;S.zoom=1;w.style.fontSize='40px';const avail=$('bsc').clientWidth-48;const need=w.offsetWidth;let px=40*Math.min(1,avail/need);px=Math.max(14,Math.min(px,46));w.style.fontSize=px.toFixed(1)+'px';renderMarks()}
+$('z-in').onclick=()=>zoomBy(1.25);$('z-out').onclick=()=>zoomBy(.8);$('z-fit').onclick=()=>{fitWords();$('bsc').scrollTo(0,0)};
+$('bsc').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoomBy(e.deltaY<0?1.1:1/1.1)}},{passive:false});
 window.addEventListener('resize',fitWords);
 function setFS(on){document.body.classList.toggle('fs',on);$('fslab').textContent=on?'Salir de pantalla completa':'Pantalla completa';try{if(on&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{});else if(!on&&document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}setTimeout(fitWords,60);setTimeout(fitWords,300)}
 $('t-fs').onclick=()=>setFS(!document.body.classList.contains('fs'));
