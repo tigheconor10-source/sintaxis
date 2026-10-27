@@ -10,6 +10,9 @@ export default async function handler(req, res) {
   if (!key) return res.status(500).json({ error: 'Falta la variable GEMINI_API_KEY en Vercel (y hay que redesplegar tras añadirla).' });
   const prompt = String((req.body && req.body.prompt) || '').slice(0, 6000);
   if (!prompt) return res.status(400).json({ error: 'prompt vacío' });
+  const img = req.body && req.body.image;
+  const parts = [{ text: prompt }];
+  if (img && img.data) parts.push({ inlineData: { mimeType: String(img.mime || 'image/jpeg'), data: String(img.data) } });
   const models = [process.env.GEMINI_MODEL, 'gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-2.0-flash'].filter(Boolean);
   const t0 = Date.now();
   let last = 'sin respuesta';
@@ -21,8 +24,8 @@ export default async function handler(req, res) {
           method: 'POST',
           headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
           body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { responseMimeType: 'application/json', temperature: 0.7 }
+            contents: [{ role: 'user', parts }],
+            generationConfig: { responseMimeType: 'application/json', temperature: img ? 0.1 : 0.7 }
           })
         });
         const data = await r.json().catch(() => ({}));
