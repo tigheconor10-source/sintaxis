@@ -142,6 +142,25 @@ body.fs .board-scroll{max-height:calc(100vh - 190px)}
 .gbody table{border-collapse:collapse;width:100%;margin:8px 0;display:block;overflow-x:auto}
 .gbody th,.gbody td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
 .gbody th{background:var(--surface2)}
+.wrap{max-width:none}
+.top{padding-top:10px}
+.toolbar{gap:6px;align-items:center;margin-bottom:8px}
+.tb{padding:7px 11px;font-size:.88rem}
+.board-scroll{height:calc(100vh - 215px);min-height:360px;max-height:none}
+body.fs .board-scroll{height:calc(100vh - 150px)}
+.board{min-height:100%}
+.stage{padding:44px 26px 60px}
+.words{font-size:clamp(1.8rem,4vw,3.2rem)}
+.br{height:0;border:0;border-bottom:3px solid var(--c);border-radius:3px}
+.br.draft{border-bottom-style:dashed}
+.br.ghost{border-bottom-style:dotted}
+.br.ok{border-bottom-color:var(--ok)}.br.bad{border-bottom-color:var(--bad)}
+.lb{padding:2px 4px 2px 9px;font-size:.88rem;height:28px;line-height:1}
+.lb.draft{background:var(--surface);border:2px solid var(--ink);padding:0 4px}
+.lb input{border:0;background:transparent;padding:4px 6px;font:600 .9rem var(--sans);color:var(--fg);outline:none;min-width:0}
+.lt{cursor:text}
+.drawer{position:fixed;left:max(8px,env(safe-area-inset-left,0px));top:56px;bottom:8px;width:min(330px,calc(100vw - 16px));z-index:45;max-height:none;box-shadow:0 12px 40px rgba(0,0,0,.28)}
+.drawer .plist{flex:1;max-height:none}
 </style>
 </head>
 <body>
@@ -170,44 +189,51 @@ body.fs .board-scroll{max-height:calc(100vh - 190px)}
 </section>
 
 <div class="work" id="work" hidden>
-  <div>
-    <div class="guide" id="guide"><b>Cómo funciona:</b> 1) Pulsa <b>Lápiz</b> y subraya o rodea lo que quieras: las líneas se enderezan solas. 2) Pulsa <b>Asignar</b>, toca una palabra (o varias) y elige su función a la derecha. 3) Pulsa <b>Comprobar</b>: verde es correcto, rojo es error. <button class="btn" id="gx">Entendido</button></div>
-    <section class="card" id="p-board">
-      <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
-        <div class="tg"><span class="tl">Analizar</span><button class="tb big" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Asignar</button></div>
-        <div class="tg"><span class="tl">Dibujar</span><div class="row" style="gap:6px"><button class="tb big" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button><button class="tb big" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button><button class="tb" id="t-str" aria-pressed="true">Enderezar</button></div></div>
-        <div class="tg"><span class="tl">Vista</span><div class="row" style="gap:6px"><button class="tb big" id="t-hand" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>Mover</button><button class="tb big" id="z-out" aria-label="Alejar">−</button><button class="tb big" id="z-fit" aria-label="Ajustar a la pantalla">Ajustar</button><button class="tb big" id="z-in" aria-label="Acercar">+</button><button class="tb big" id="t-fs"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fslab">Pantalla completa</span></button></div></div>
-        <div class="tg"><span class="tl">Editar</span><div class="row" style="gap:6px"><button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button><button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button></div></div>
-      </div>
-      <div class="board-scroll" id="bsc"><div class="zbox" id="zbox"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div></div>
-      <div class="selbar" id="selbar"></div>
-      <div class="acts" id="p-acts">
-        <button class="btn pri" id="chk"><svg viewBox="0 0 24 24"><path d="M2 13l4 4 8-9"/><path d="M12 15l2 2 8-10"/></svg>Comprobar</button>
-        <button class="btn" id="helpb" aria-haspopup="true" aria-expanded="false">Ayuda ▾</button>
-        <button class="btn" id="show">Mostrar respuesta</button>
-        <button class="btn" id="aichk" hidden>Comprobar con IA</button>
-        <div class="menu" id="hmenu" hidden>
-          <button id="h1">Una pista<small>Revela un paso, con su color</small></button>
-          <button id="h2">Solución completa<small>Todos los pasos, codificados por color</small></button>
-        </div>
-      </div>
-      <div class="fb" id="p-fb" aria-live="polite"></div>
-    </section>
-    <details class="card refs" id="p-ref" style="margin-top:16px">
-      <summary style="cursor:pointer;font-weight:700">Solucionarios oficiales (opcional)</summary>
-      <p class="note" style="margin:0 0 8px">Sube un PDF, DOCX o TXT con las soluciones. Se consulta primero y no gasta IA. Todo se procesa en tu navegador.</p>
-      <div class="drop-z" id="dz"><button class="btn" id="up">Subir archivo</button> <span>o suéltalo aquí</span><input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden multiple></div>
-      <label class="f" for="paste" style="margin-top:10px">O pega el texto del solucionario<textarea id="paste" style="min-height:56px;font:.9rem var(--sans)"></textarea></label>
-      <div class="row" style="margin-top:8px"><button class="btn" id="addp">Añadir texto</button><span class="note" id="rmsg"></span></div>
-      <ul id="rlist"></ul>
-    </details>
+  <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
+    <button class="tb" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Seleccionar</button>
+    <button class="tb" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
+    <button class="tb" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button>
+    <button class="tb" id="t-str" aria-pressed="true">Enderezar</button>
+    <span class="sep"></span>
+    <button class="tb" id="t-hand" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>Mover</button>
+    <button class="tb" id="z-out" aria-label="Alejar">−</button><button class="tb" id="z-fit" aria-label="Ajustar a la pantalla">Ajustar</button><button class="tb" id="z-in" aria-label="Acercar">+</button>
+    <button class="tb" id="t-fs"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg><span id="fslab">Pantalla completa</span></button>
+    <span class="sep"></span>
+    <button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button>
+    <button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button>
+    <span class="sep"></span>
+    <button class="tb" id="fnbtn" aria-pressed="false">Funciones (ayuda)</button>
   </div>
-  <aside class="card pal" id="p-pal">
-    <input type="search" id="q" placeholder="Buscar función (CCT, régimen, se…)" aria-label="Buscar función">
-    <div class="plist" id="plist"></div>
-    <div class="ficha" id="ficha">Toca una función para asignarla a la selección, o arrástrala hasta una palabra (ratón o lápiz).</div>
-  </aside>
+  <div class="board-scroll" id="bsc"><div class="zbox" id="zbox"><div class="board" id="board"><div class="stage"><div class="words" id="words"></div><div class="marks" id="marks"></div></div><canvas id="ink" class="off"></canvas></div></div></div>
+  <div class="selbar" id="selbar"></div>
+  <div class="acts" id="p-acts">
+    <button class="btn pri" id="chk"><svg viewBox="0 0 24 24"><path d="M2 13l4 4 8-9"/><path d="M12 15l2 2 8-10"/></svg>Comprobar</button>
+    <button class="btn" id="helpb" aria-haspopup="true" aria-expanded="false">Ayuda ▾</button>
+    <button class="btn" id="show">Mostrar respuesta</button>
+    <button class="btn" id="aichk" hidden>Comprobar con IA</button>
+    <div class="menu" id="hmenu" hidden>
+      <button id="h1">Una pista<small>Revela un paso, con su color</small></button>
+      <button id="h2">Solución completa<small>Todos los pasos, codificados por color</small></button>
+    </div>
+  </div>
+  <div class="fb" id="p-fb" aria-live="polite"></div>
+  <details class="card refs" id="p-ref" style="margin-top:16px">
+    <summary style="cursor:pointer;font-weight:700">Solucionarios oficiales (opcional)</summary>
+    <p class="note" style="margin:8px 0">Sube un PDF, DOCX o TXT con las soluciones. Se consulta primero y no gasta IA. Todo se procesa en tu navegador.</p>
+    <div class="drop-z" id="dz"><button class="btn" id="up">Subir archivo</button> <span>o suéltalo aquí</span><input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden multiple></div>
+    <label class="f" for="paste" style="margin-top:10px">O pega el texto del solucionario<textarea id="paste" style="min-height:56px;font:.9rem var(--sans)"></textarea></label>
+    <div class="row" style="margin-top:8px"><button class="btn" id="addp">Añadir texto</button><span class="note" id="rmsg"></span></div>
+    <ul id="rlist"></ul>
+  </details>
 </div>
+
+<aside class="card pal drawer" id="p-pal" hidden>
+  <div class="row" style="justify-content:space-between"><b>Funciones</b><button class="btn" id="pclose">Cerrar</button></div>
+  <input type="search" id="q" placeholder="Buscar función (CCT, régimen, se…)" aria-label="Buscar función">
+  <div class="plist" id="plist"></div>
+  <div class="ficha" id="ficha">Con una selección activa, toca una función para añadirla a lo que escribes. También puedes arrastrarla hasta una palabra (ratón o lápiz).</div>
+</aside>
+<datalist id="fnlist"></datalist>
 <div id="gmodal" class="gmodal" hidden><div class="gbox"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Guía de sintaxis</h2><button class="btn" id="gclose">Cerrar</button></div><div class="row" id="gtabs" style="margin:10px 0"></div><div id="gbody" class="gbody"></div></div></div>
 </div>
 <script>
@@ -289,57 +315,70 @@ function refRegion(sentence,text){const ws=sKey(sentence).split(' ');const re=ne
 function parseRows(words,sentence,text){const reg=refRegion(sentence,text);if(reg==null)return{found:false};const pre=s=>s.replace(/→|=>|->| – | — /g,'|');const lines=reg.split('\n');const items=[];for(const ln of lines){if(ln.indexOf('|')<0)continue;const c=ln.split('|').map(x=>x.trim()).filter(Boolean);if(c.length<2)continue;const f=matchFunc(c.slice(1).join(' '));const r=locate(words,c[0]);if(f&&r)items.push({s:r[0],e:r[1],f,opt:false});else if(items.length&&!f&&!r)break;else if(items.length&&!r)break}return{found:true,items}}
 function weakCheck(words,sentence,text,ann){const reg=refRegion(sentence,text);if(reg==null)return 'unk';const seg=sKey(words.slice(ann.s,ann.e+1).map(w=>w.t).join(' '));const re=new RegExp('(^| )'+esc(seg)+'(?= |$)','g');let m,claims=[];while((m=re.exec(reg))){const win=reg.slice(m.index+m[0].length,m.index+m[0].length+140).replace(/\n/g,' ');let best=null,bp=1e9;for(const id in FN)for(const a of FN[id].al){const p=(' '+win+' ').indexOf(' '+a+' ');if(p>=0&&p<bp){bp=p;best=id}}if(best)claims.push(best)}if(!claims.length)return 'unk';return claims.includes(ann.f)?'ok':'bad'}
 function grade(anns,sol){const st={};let ok=0,bad=0;const used=new Set();anns.forEach(a=>{const i=sol.findIndex((x,j)=>!used.has(j)&&x.s===a.s&&x.e===a.e&&x.f===a.f);if(i>=0){used.add(i);st[a.id]='ok';if(!sol[i].opt)ok++}else if(FN[a.f].apo)st[a.id]='neutral';else{st[a.id]='bad';bad++}});const miss=sol.filter((x,j)=>!used.has(j)&&!x.opt);return{st,ok,bad,miss,total:sol.filter(x=>!x.opt).length}}
+function lookupFn(p){const n=x=>key(x).replace(/[^a-z0-9]/g,'');const k=n(p);if(!k)return null;for(const id in FN){const x=FN[id];if(k===n(id)||k===n(x.short)||k===n(x.label)||x.al.some(a=>n(a)===k))return id}return matchFunc(p)}
+function parseLabel(txt){const ids=[];String(txt).split(/[\/,+·;]|\s+y\s+/).map(x=>x.trim()).filter(Boolean).forEach(p=>{const id=lookupFn(p);if(id&&!ids.includes(id))ids.push(id)});return ids}
 // </pure>
 const $=id=>document.getElementById(id);
-const S={sentence:'',words:[],anns:[],nid:1,sel:null,tool:'assign',str:true,strokes:[],hist:[],checked:false,st:{},ghosts:[],sol:null,hints:0,gave:false,awarded:0,refs:[],xp:0,streak:0,ai:null,aic:{},bankIdx:-1,busy:false};
+const S={sentence:'',words:[],anns:[],nid:1,sel:null,draftTxt:'',editId:null,tool:'assign',str:true,strokes:[],hist:[],checked:false,st:{},ghosts:[],sol:null,hints:0,gave:false,awarded:0,refs:[],xp:0,streak:0,aic:{},bankIdx:-1,busy:false,note:'',streaked:false,zoom:1};
 const store={get(k,d){try{const v=localStorage.getItem('asx:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('asx:'+k,JSON.stringify(v))}catch(e){}}};
 const NAMES=['Aprendiz','Analista','Sintáctico','Gramático','Maestro del predicado'];
 function say(msg,el){(el||$('gmsg')).textContent=msg}
 function fcol(id){return 'var('+FAM[FN[id].fam]+')'}
+function annMain(a){const fs=a.fs||[];return fs.find(f=>!FN[f].apo)||fs[0]||null}
+function annCol(a){const m=annMain(a);return m?fcol(m):'var(--f-apo)'}
 function refreshStats(){const l=Math.min(NAMES.length,Math.floor(S.xp/100)+1);$('lvl').textContent='Nivel '+l+' · '+NAMES[l-1];$('xp').textContent=S.xp+' XP';$('xpb').style.width=(S.xp%100)+'%';$('streak').textContent='Racha '+S.streak;store.set('xp',S.xp);store.set('streak',S.streak)}
 function snap(){S.hist.push(JSON.stringify({a:S.anns,s:S.strokes,n:S.nid}));if(S.hist.length>60)S.hist.shift()}
-function undo(){const h=S.hist.pop();if(!h)return;const o=JSON.parse(h);S.anns=o.a;S.strokes=o.s;S.nid=o.n;changed();drawAll()}
-function changed(){S.checked=false;S.st={};S.ghosts=S.ghosts.filter(g=>!S.anns.some(a=>a.s===g.s&&a.e===g.e&&a.f===g.f));renderAll()}
-function stepState(){const n=S.sentence?(S.checked?4:(S.anns.length?3:2)):1;document.querySelectorAll('#steps li').forEach((li,i)=>{const b=li.firstElementChild;b.classList.toggle('on',i+1===n);b.classList.toggle('done',i+1<n&&i<4)})}
-/* palette */
-function buildPalette(filter){const f=key(filter||'');const box=$('plist');box.innerHTML='';let any=false;GROUPS.forEach(([name,ids])=>{const ok=ids.filter(id=>{const x=FN[id];return !f||key(x.label+' '+x.short+' '+x.al.join(' ')).includes(f)});if(!ok.length)return;any=true;const h=document.createElement('div');h.innerHTML='<h3></h3><div class="chips"></div>';h.firstChild.textContent=name;const c=h.lastChild;ok.forEach(id=>{const b=document.createElement('button');b.className='chip'+(FN[id].apo?' apo':'');b.style.setProperty('--c',fcol(id));b.textContent=FN[id].label;b.dataset.f=id;c.appendChild(b)});box.appendChild(h)});if(!any)box.textContent='Sin resultados.'}
+function undo(){const h=S.hist.pop();if(!h)return;const o=JSON.parse(h);S.anns=o.a;S.strokes=o.s;S.nid=o.n;S.sel=null;S.editId=null;S.draftTxt='';changed();drawAll()}
+function changed(){S.checked=false;S.st={};S.ghosts=S.ghosts.filter(g=>!S.anns.some(a=>a.s===g.s&&a.e===g.e&&(a.fs||[]).includes(g.f)));renderAll()}
+function stepState(){}
+/* paleta de ayuda */
+function buildPalette(filter){const f=key(filter||'');const box=$('plist');box.innerHTML='';let any=false;GROUPS.forEach(([name,ids])=>{const ok=ids.filter(id=>{const x=FN[id];return !f||key(x.label+' '+x.short+' '+x.al.join(' ')).includes(f)});if(!ok.length)return;any=true;const h=document.createElement('div');h.innerHTML='<h3></h3><div class="chips"></div>';h.firstChild.textContent=name;const c=h.lastChild;ok.forEach(id=>{const b=document.createElement('button');b.className='chip'+(FN[id].apo?' apo':'');b.style.setProperty('--c',fcol(id));b.textContent=FN[id].label;b.dataset.f=id;c.appendChild(b)});box.appendChild(h)});if(!any)box.textContent='Sin resultados.';
+  const dl=$('fnlist');if(dl&&!dl.children.length)Object.values(FN).forEach(x=>{const o=document.createElement('option');o.value=x.short;dl.appendChild(o)})}
 function ficha(id){const x=FN[id];$('ficha').innerHTML='<b></b><br><span></span>';$('ficha').firstChild.textContent=x.label+' ('+x.short+')';$('ficha').lastChild.textContent=x.def}
-/* words */
-function setSentence(text,sol,note){S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
-  $('inp').hidden=true;$('curbar').hidden=false;$('curq').textContent=S.sentence;$('work').hidden=false;$('p-fb').innerHTML='';buildWords();fitWords();renderAll();drawAll();$('work').scrollIntoView({behavior:'smooth',block:'nearest'})}
+/* frase */
+function setSentence(text,sol,note){S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.draftTxt='';S.editId=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
+  $('inp').hidden=true;$('curbar').hidden=false;$('curq').textContent=S.sentence;$('work').hidden=false;$('p-fb').innerHTML='';buildWords();fitWords();renderAll();drawAll();renderRefs()}
 function buildWords(){const w=$('words');w.innerHTML='';S.words.forEach((x,i)=>{const b=document.createElement('span');b.className='w';b.textContent=x.t;b.dataset.i=i;b.tabIndex=0;b.setAttribute('role','button');w.appendChild(b)})}
 function selRange(){return S.sel?[Math.min(S.sel.a,S.sel.b),Math.max(S.sel.a,S.sel.b)]:null}
-function tap(i){const r=selRange();if(!r)S.sel={a:i,b:i};else if(i>=r[0]&&i<=r[1]){S.sel=(r[0]===r[1])?null:{a:i,b:i}}else S.sel={a:Math.min(r[0],i),b:Math.max(r[1],i)};renderSel()}
+function tap(i){const r=selRange();if(S.editId)S.editId=null;if(!r){S.sel={a:i,b:i}}else if(i>=r[0]&&i<=r[1]){if(r[0]===r[1]){S.sel=null;S.draftTxt=''}else S.sel={a:i,b:i}}else S.sel={a:Math.min(r[0],i),b:Math.max(r[1],i)};renderSel(true)}
 let dr=null;
-$('words').addEventListener('pointerdown',e=>{const w=e.target.closest('.w');if(!w)return;const i=+w.dataset.i;dr={a:i,moved:false,touch:e.pointerType==='touch'}});
-$('words').addEventListener('pointermove',e=>{if(!dr||dr.touch||!(e.buttons&1))return;const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(!w)return;const i=+w.dataset.i;if(i!==dr.a||dr.moved){dr.moved=true;S.sel={a:dr.a,b:i};renderSel()}});
-window.addEventListener('pointerup',()=>{if(dr&&!dr.moved)tap(dr.a);dr=null});
+$('words').addEventListener('pointerdown',e=>{const w=e.target.closest('.w');if(!w)return;dr={a:+w.dataset.i,moved:false,touch:e.pointerType==='touch'}});
+$('words').addEventListener('pointermove',e=>{if(!dr||dr.touch||!(e.buttons&1))return;const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(!w)return;const i=+w.dataset.i;if(i!==dr.a||dr.moved){dr.moved=true;S.editId=null;S.sel={a:dr.a,b:i};renderSel(false)}});
+window.addEventListener('pointerup',()=>{if(dr){if(!dr.moved)tap(dr.a);else renderSel(true)}dr=null});
 $('words').addEventListener('keydown',e=>{const w=e.target.closest('.w');if(!w)return;const i=+w.dataset.i;if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(i)}else if(e.key==='ArrowRight'&&w.nextSibling)w.nextSibling.focus();else if(e.key==='ArrowLeft'&&w.previousSibling)w.previousSibling.focus()});
-function renderSel(){const r=selRange();const bar=$('selbar');document.querySelectorAll('.w').forEach((el,i)=>el.classList.toggle('sel',!!r&&i>=r[0]&&i<=r[1]));bar.innerHTML='';if(!r){bar.textContent='1) Toca una palabra (o arrastra sobre varias).  2) Elige su función a la derecha.  3) Si quieres, añade también su grupo (GN, GPrep…).';return}const t=S.words.slice(r[0],r[1]+1).map(x=>x.t).join(' ');const s=document.createElement('strong');s.textContent='«'+t+'»';const b=document.createElement('button');b.className='btn';b.textContent='Deseleccionar';b.onclick=()=>{S.sel=null;renderSel()};bar.append('Selección: ',s,b)}
-function assign(f,range){const r=range||selRange();if(!r){say('Primero selecciona una palabra o un grupo de palabras en la frase.',$('selbar'));return}if(S.anns.some(a=>a.s===r[0]&&a.e===r[1]&&a.f===f))return;snap();S.anns.push({id:S.nid++,s:r[0],e:r[1],f});S.sel={a:r[0],b:r[1]};changed()}
-function removeAnn(ids){ids=[].concat(ids);snap();S.anns=S.anns.filter(a=>!ids.includes(a.id));changed()}
-/* palette interactions + drag */
+function renderSel(focus){const r=selRange();const bar=$('selbar');document.querySelectorAll('.w').forEach((el,i)=>el.classList.toggle('sel',!!r&&i>=r[0]&&i<=r[1]));bar.innerHTML='';
+  if(!r){bar.textContent='Selecciona palabras (toca o arrastra). Se traza la línea y escribes debajo qué son, por ejemplo GPrep/CCL.'}else{const t=S.words.slice(r[0],r[1]+1).map(x=>x.t).join(' ');const s=document.createElement('strong');s.textContent='«'+t+'»';const b=document.createElement('button');b.className='btn';b.textContent='Cancelar';b.onclick=cancelDraft;bar.append('Escribe qué es y pulsa Enter: ',s,b)}
+  renderMarks();if(focus&&r){const i=$('draftIn');if(i)setTimeout(()=>{i.focus();i.setSelectionRange(i.value.length,i.value.length)},0)}}
+function cancelDraft(){S.sel=null;S.editId=null;S.draftTxt='';renderSel(false)}
+function commitDraft(){const t=(S.draftTxt||'').trim();const r=selRange();if(!r||!t)return;snap();const fs=parseLabel(t);if(S.editId){const a=S.anns.find(x=>x.id===S.editId);if(a){a.txt=t;a.fs=fs}}else S.anns.push({id:S.nid++,s:r[0],e:r[1],txt:t,fs});S.sel=null;S.draftTxt='';S.editId=null;changed()}
+function startEdit(id){const a=S.anns.find(x=>x.id===id);if(!a)return;S.editId=id;S.sel={a:a.s,b:a.e};S.draftTxt=a.txt;renderSel(true)}
+function removeAnn(id){snap();S.anns=S.anns.filter(a=>a.id!==id);if(S.editId===id)cancelDraft();changed()}
+function assign(f,range){const r=range;if(!r)return;if(S.anns.some(a=>a.s===r[0]&&a.e===r[1]&&(a.fs||[]).includes(f)))return;snap();S.anns.push({id:S.nid++,s:r[0],e:r[1],txt:FN[f].short,fs:[f]});S.sel=null;S.draftTxt='';changed()}
+function chipUse(id){ficha(id);if(!S.sel)return;const cur=(S.draftTxt||'').trim();S.draftTxt=cur?cur+'/'+FN[id].short:FN[id].short;renderSel(true)}
+/* arrastrar desde la paleta */
 let pd=null;
 $('plist').addEventListener('pointerdown',e=>{const c=e.target.closest('.chip');if(!c)return;pd={f:c.dataset.f,x:e.clientX,y:e.clientY,drag:false,mouse:e.pointerType!=='touch',g:null,c}});
 window.addEventListener('pointermove',e=>{if(!pd||!pd.mouse)return;if(!pd.drag&&Math.hypot(e.clientX-pd.x,e.clientY-pd.y)>7){pd.drag=true;const g=pd.c.cloneNode(true);g.className+=' ghostchip';document.body.appendChild(g);pd.g=g}if(pd.drag){pd.g.style.left=e.clientX+8+'px';pd.g.style.top=e.clientY+8+'px';document.querySelectorAll('.w.drop').forEach(x=>x.classList.remove('drop'));const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(w)w.classList.add('drop')}});
-window.addEventListener('pointerup',e=>{if(!pd)return;const p=pd;pd=null;if(p.g)p.g.remove();document.querySelectorAll('.w.drop').forEach(x=>x.classList.remove('drop'));if(p.drag){const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(w){const i=+w.dataset.i,r=selRange();assign(p.f,r&&i>=r[0]&&i<=r[1]?r:[i,i])}}else{ficha(p.f);assign(p.f)}});
+window.addEventListener('pointerup',e=>{if(!pd)return;const p=pd;pd=null;if(p.g)p.g.remove();document.querySelectorAll('.w.drop').forEach(x=>x.classList.remove('drop'));if(p.drag){const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest&&el.closest('.w');if(w){const i=+w.dataset.i,r=selRange();assign(p.f,r&&i>=r[0]&&i<=r[1]?r:[i,i])}}else chipUse(p.f)});
 $('plist').addEventListener('mouseover',e=>{const c=e.target.closest('.chip');if(c)ficha(c.dataset.f)});
-$('plist').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const c=e.target.closest('.chip');if(c){e.preventDefault();ficha(c.dataset.f);assign(c.dataset.f)}}});
+$('plist').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const c=e.target.closest('.chip');if(c){e.preventDefault();chipUse(c.dataset.f)}}});
 $('q').addEventListener('input',e=>buildPalette(e.target.value));
-/* marks */
-function renderAll(){renderMarks();renderSel();stepState()}
-function renderMarks(){const ws=[...$('words').children];const box=$('marks');box.innerHTML='';if(!ws.length)return;ws.forEach(w=>w.classList.remove('bad'));
-  const items=[];S.anns.forEach(a=>{if(FN[a.f].apo&&S.anns.some(m=>m!==a&&m.s===a.s&&m.e===a.e&&!FN[m.f].apo))return;items.push({...a,g:false,ids:[a.id],extra:[]})});
-  S.anns.forEach(a=>{if(!FN[a.f].apo)return;const m=items.find(x=>x.s===a.s&&x.e===a.e&&!FN[x.f].apo);if(m){m.ids.push(a.id);m.extra.push(FN[a.f].short)}});
-  S.ghosts.forEach((g,i)=>items.push({id:'g'+i,s:g.s,e:g.e,f:g.f,g:true,ids:[],extra:[]}));
-  items.forEach(it=>{const a=ws[it.s],b=ws[it.e];it.x1=a.offsetLeft;it.x2=b.offsetLeft+b.offsetWidth;it.txt=FN[it.f].short+(it.extra.length?' · '+it.extra.join(' · '):'');const lw=it.txt.length*7.4+(it.g?26:44);it.lw=lw;const cx=(it.x1+it.x2)/2;it.l=Math.min(it.x1,cx-lw/2);it.r=Math.max(it.x2,cx+lw/2)});
-  items.sort((p,q)=>(p.e-p.s)-(q.e-q.s)||p.s-q.s);const rows=[];items.forEach(it=>{for(let L=0;;L++){const r=rows[L]||(rows[L]=[]);if(!r.some(o=>it.l<o.r+6&&o.l<it.r+6)){r.push(it);it.lv=L;break}}});
+/* líneas y etiquetas */
+function renderAll(){renderSel(false)}
+function renderMarks(){const ws=[...$('words').children];const box=$('marks');box.innerHTML='';ws.forEach(w=>w.classList.remove('bad'));if(!ws.length)return;
+  const items=[];S.anns.forEach(a=>{if(a.id===S.editId)return;items.push({id:a.id,s:a.s,e:a.e,txt:a.txt,col:annCol(a),k:'ann'})});
+  S.ghosts.forEach((g,i)=>items.push({id:'g'+i,s:g.s,e:g.e,txt:FN[g.f].short,col:fcol(g.f),k:'ghost'}));
+  const r=selRange();if(r)items.push({id:'draft',s:r[0],e:r[1],txt:S.draftTxt||'',col:'var(--ink)',k:'draft'});
+  items.forEach(it=>{const a=ws[it.s],b=ws[it.e];it.x1=a.offsetLeft;it.x2=b.offsetLeft+b.offsetWidth;const lw=it.k==='draft'?Math.max(170,it.txt.length*8+50):it.txt.length*7.6+(it.k==='ghost'?24:46);it.lw=lw;const c=(it.x1+it.x2)/2;it.lx=Math.max(0,c-lw/2);it.l=Math.min(it.x1,it.lx);it.r=Math.max(it.x2,it.lx+lw)});
+  items.sort((p,q)=>(p.e-p.s)-(q.e-q.s)||p.s-q.s);const rows=[];items.forEach(it=>{for(let L=0;;L++){const row=rows[L]||(rows[L]=[]);if(!row.some(o=>it.l<o.r+6&&o.l<it.r+6)){row.push(it);it.lv=L;break}}});
   box.style.height=(rows.length*46+8)+'px';
-  items.forEach(it=>{const st=it.g?'ghost':S.st[it.id]||'';const c=fcol(it.f);const top=it.lv*46;const br=document.createElement('div');br.className='br '+(it.g?'ghost ':'')+(st==='ok'||st==='bad'?st:'');br.style.cssText='--c:'+c+';left:'+it.x1+'px;width:'+(it.x2-it.x1)+'px;top:'+top+'px';box.appendChild(br);
-    const lb=document.createElement('div');lb.className='lb '+(it.g?'ghost ':'')+(st==='ok'||st==='bad'?st:'');const cx=(it.x1+it.x2)/2;lb.style.cssText='--c:'+c+';left:'+(cx-it.lw/2)+'px;top:'+(top+13)+'px';
-    const mark=st==='ok'?'✓ ':st==='bad'?'✗ ':'';lb.append(mark+it.txt);
-    if(!it.g){const x=document.createElement('button');x.textContent='×';x.title='Quitar';x.setAttribute('aria-label','Quitar '+FN[it.f].label);x.onclick=()=>removeAnn(it.ids);lb.appendChild(x)}
-    lb.title=FN[it.f].label;box.appendChild(lb);
+  items.forEach(it=>{const st=it.k==='ann'?(S.st[it.id]||''):'';const cls=it.k+' '+(st==='ok'||st==='bad'?st:'');const top=it.lv*46;
+    const br=document.createElement('div');br.className='br '+cls;br.style.cssText='--c:'+it.col+';left:'+it.x1+'px;width:'+(it.x2-it.x1)+'px;top:'+top+'px';box.appendChild(br);
+    const lb=document.createElement('div');lb.className='lb '+cls;lb.style.cssText='--c:'+it.col+';left:'+it.lx+'px;top:'+(top+10)+'px';
+    if(it.k==='draft'){const inp=document.createElement('input');inp.id='draftIn';inp.type='text';inp.setAttribute('list','fnlist');inp.autocomplete='off';inp.placeholder='¿Qué es? Ej.: GPrep/CCL';inp.value=S.draftTxt;inp.setAttribute('aria-label','Función de la selección');inp.style.width=(it.lw-8)+'px';inp.oninput=()=>{S.draftTxt=inp.value};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commitDraft()}else if(e.key==='Escape'){e.preventDefault();cancelDraft()}};lb.appendChild(inp)}
+    else{const mark=st==='ok'?'✓ ':st==='bad'?'✗ ':st==='unk'?'? ':'';const t=document.createElement('span');t.className='lt';t.textContent=mark+it.txt;if(it.k==='ann'){t.title=st==='unk'?'No reconozco esta etiqueta. Clic para editar.':'Clic para editar';t.onclick=()=>startEdit(it.id)}lb.appendChild(t);
+      if(it.k==='ann'){const x=document.createElement('button');x.textContent='×';x.title='Quitar';x.setAttribute('aria-label','Quitar '+it.txt);x.onclick=()=>removeAnn(it.id);lb.appendChild(x)}}
+    box.appendChild(lb);
     if(st==='bad')for(let i=it.s;i<=it.e;i++)ws[i].classList.add('bad')});
   sizeInk()}
 window.addEventListener('resize',()=>{renderMarks()});
@@ -371,10 +410,10 @@ let sampleFn=null;
 (async()=>{try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){sampleFn=null}})();
 async function askJSON(prompt,opts){if(sampleFn)return sampleFn.json(prompt,opts);let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})})}catch(e){throw{code:'upstream_error'}}let j=null;try{j=await r.json()}catch(e){}if(!r.ok)throw{code:r.status===429?'rate_limited':'upstream_error',detail:(r.status===404?'No se encuentra /api/ai: sube también la carpeta api. ':'')+((j&&j.error)||('Error '+r.status))};return j}
 const FLIST=()=>Object.values(FN).filter(f=>!f.apo).map(f=>f.id+': '+f.label).join('; ');
-const aiErr=e=>(e&&e.detail)?('IA: '+e.detail):({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
+const aiErr=e=>(e&&e.detail)?('IA no disponible ahora ('+String(e.detail).slice(0,140)+').'):({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
 async function aiGenerate(){const tema=$('tema').selectedOptions[0].textContent,nivel=$('lvlsel').value;$('gen').disabled=true;say('Generando…');
   try{const r=await askJSON('Eres profesor de Lengua Castellana (España). Crea UNA oración simple en español para practicar análisis sintáctico. Nivel: '+nivel+'. Tema: '+tema+'. Responde solo con JSON: {"frase":"...","solucion":[{"seg":"palabras consecutivas copiadas literalmente de la frase, sin puntuación","f":"id","opt":false}],"nota":"explicación breve, máximo 250 caracteres"}. Incluye verbo, sujeto si lo hay y todos los complementos; marca opt:true en los análisis internos (CN, C. Adj.). Funciones válidas (id: nombre): '+FLIST(),{modelTier:'default',cache:false});
-    if(!r||typeof r.frase!=='string'||!Array.isArray(r.solucion))throw{code:'invalid_json'};const w=tokenize(r.frase);const items=buildSol(w,r.solucion);if(items.length<2)throw{code:'invalid_json'};S.aic[sKey(r.frase)]={items,note:String(r.nota||'')};say('');$('txt').value=r.frase;setSentence(r.frase,{items,source:'ai'},String(r.nota||''))}catch(e){say(aiErr(e))}finally{$('gen').disabled=false}}
+    if(!r||typeof r.frase!=='string'||!Array.isArray(r.solucion))throw{code:'invalid_json'};const w=tokenize(r.frase);const items=buildSol(w,r.solucion);if(items.length<2)throw{code:'invalid_json'};S.aic[sKey(r.frase)]={items,note:String(r.nota||'')};say('');$('txt').value=r.frase;setSentence(r.frase,{items,source:'ai'},String(r.nota||''))}catch(e){say(aiErr(e)+' Te pongo una frase del banco mientras tanto.');setTimeout(()=>$('bank').click(),400)}finally{$('gen').disabled=false}}
 async function aiSolve(){const k=sKey(S.sentence);if(S.aic[k])return S.aic[k];const r=await askJSON('Analiza sintácticamente esta oración en español (Bachillerato, España): «'+S.sentence+'». Responde solo con JSON: {"solucion":[{"seg":"palabras consecutivas copiadas literalmente de la oración, sin puntuación","f":"id","opt":false}],"nota":"explicación breve, máximo 250 caracteres"}. Incluye verbo, sujeto (si lo hay), valores del «se» y todos los complementos; opt:true para análisis internos (CN, C. Adj.). Funciones válidas (id: nombre): '+FLIST(),{modelTier:'default'});if(!r||!Array.isArray(r.solucion))throw{code:'invalid_json'};const items=buildSol(S.words,r.solucion);if(!items.length)throw{code:'invalid_json'};return S.aic[k]={items,note:String(r.nota||'')}}
 /* resolver solución: PDF filas > banco > PDF aproximado > IA */
 async function resolveSol(allowAI){const refs=S.refs;for(const r of refs){const p=parseRows(S.words,S.sentence,r.text);if(p.found&&p.items.length>=2)return{items:p.items,source:'pdf',name:r.name}}
@@ -384,6 +423,7 @@ async function resolveSol(allowAI){const refs=S.refs;for(const r of refs){const 
   if(!allowAI)return null;const a=await aiSolve();return a?{items:a.items,source:'ai',note:a.note}:null}
 const SRC={pdf:'tu solucionario',bank:'el banco de la app',pdfweak:'tu solucionario (coincidencia aproximada)',ai:'IA'};
 async function getSol(allowAI){if(S.busy)return null;S.busy=true;try{const s=await resolveSol(allowAI);if(s)S.sol=s;return s}catch(e){say(aiErr(e),$('p-fb'));return null}finally{S.busy=false}}
+function evalAnns(items){const exp=[];S.anns.forEach(a=>(a.fs||[]).forEach(f=>exp.push({id:a.id+':'+f,s:a.s,e:a.e,f})));const g=grade(exp,items);const st={};S.anns.forEach(a=>{if(!(a.fs||[]).length){st[a.id]='unk';return}const ss=a.fs.map(f=>g.st[a.id+':'+f]);st[a.id]=ss.includes('bad')?'bad':ss.includes('ok')?'ok':'neutral'});g.st=st;g.unk=S.anns.filter(a=>!(a.fs||[]).length).length;return g}
 /* comprobar */
 function fbMsg(html){const f=$('p-fb');f.innerHTML='';f.append(html)}
 function mk(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
@@ -391,10 +431,10 @@ async function check(allowAI){if(!S.anns.length){fbMsg(mk('div','note','Marca al
   fbMsg(mk('div','note','Comprobando…'));const sol=await getSol(allowAI);
   if(!sol){const d=mk('div','note','Esta frase no está en el banco ni en tus solucionarios.'+(true?' Pulsa «Comprobar con IA» para validarla.':' Sube un solucionario donde aparezca.'));$('aichk').hidden=false;fbMsg(d);return}
   $('aichk').hidden=true;const out=mk('div');
-  if(sol.source==='pdfweak'){const st={};let ok=0,bad=0,unk=0;S.anns.forEach(a=>{if(FN[a.f].apo){st[a.id]='neutral';return}const r=weakCheck(S.words,S.sentence,sol.weak,a);st[a.id]=r;if(r==='ok')ok++;else if(r==='bad')bad++;else unk++});S.st=st;S.checked=true;renderAll();
+  if(sol.source==='pdfweak'){const st={};let ok=0,bad=0,unk=0;S.anns.forEach(a=>{const mf=annMain(a);if(!mf||FN[mf].apo){st[a.id]=mf?'neutral':'unk';return}const r=weakCheck(S.words,S.sentence,sol.weak,{s:a.s,e:a.e,f:mf});st[a.id]=r;if(r==='ok')ok++;else if(r==='bad')bad++;else unk++});S.st=st;S.checked=true;renderAll();
     out.append(sum(ok,bad,'Sin verificar: '+unk));out.append(mk('div','note','Validado con '+SRC.pdfweak+'. No se puede saber si te falta algún elemento.'));$('aichk').hidden=falsefbMsg(out);return}
-  const g=grade(S.anns,sol.items);S.st=g.st;S.checked=true;S.lastGrade=g;renderAll();
-  const perfect=!g.bad&&!g.miss.length;out.append(sum(g.ok,g.bad,'Por completar: '+g.miss.length));
+  const g=evalAnns(sol.items);S.st=g.st;S.checked=true;S.lastGrade=g;renderAll();
+  const perfect=!g.bad&&!g.miss.length;out.append(sum(g.ok,g.bad,'Por completar: '+g.miss.length));if(g.unk)out.append(mk('div','note','No reconozco '+g.unk+' etiqueta(s) marcadas con «?». Revisa cómo las escribiste o abre «Funciones».'));
   if(perfect)out.append(mk('div','toast','¡Análisis completo y correcto!'));else if(g.bad)out.append(mk('div','note','Los errores están subrayados en rojo. Revisa la función o el segmento.'));else out.append(mk('div','note','Lo marcado es correcto, pero aún te faltan elementos.'));
   out.append(mk('div','note','Validado con '+SRC[sol.source]+(sol.name?' («'+sol.name+'»)':'')+'.'));
   const note=sol.note||S.note;if((perfect||S.gave)&&note)out.append(mk('div','note','Por qué: '+note));
@@ -404,13 +444,13 @@ function award(g,perfect){let sc=g.ok*10+(perfect?30:0)-5*S.hints;if(S.gave)sc=0
 /* ayudas */
 function ghostOf(it){return{s:it.s,e:it.e,f:it.f}}
 async function help(mode){$('hmenu').hidden=true;$('helpb').setAttribute('aria-expanded','false');const sol=await getSol(true);if(!sol||!sol.items){fbMsg(mk('div','note','No hay solución disponible para esta frase con los solucionarios cargados.'));return}
-  const g=grade(S.anns,sol.items);let list=g.miss.filter(m=>!S.ghosts.some(x=>x.s===m.s&&x.e===m.e&&x.f===m.f));
+  const g=evalAnns(sol.items);let list=g.miss.filter(m=>!S.ghosts.some(x=>x.s===m.s&&x.e===m.e&&x.f===m.f));
   if(mode==='one'){if(!list.length){const b=S.anns.find(a=>g.st[a.id]==='bad');if(b){const hint=sol.items.find(x=>x.s<=b.e&&x.e>=b.s&&!x.opt);if(hint){S.hints++;S.ghosts.push(ghostOf(hint));S.st=g.st;S.checked=true;renderAll();fbMsg(mk('div','note','Pista: mira este tramo, su función aparece punteada.'));return}}fbMsg(mk('div','note','No te queda nada por descubrir.'));return}
     list.sort((a,b)=>a.s-b.s||b.e-a.e);S.hints++;S.ghosts.push(ghostOf(list[0]));renderAll();fbMsg(mk('div','note','Pista: el elemento punteado (con su color) es el siguiente paso.'))}
   else{S.hints+=2;list.forEach(m=>S.ghosts.push(ghostOf(m)));renderAll();fbMsg(mk('div','note','Solución completa en punteado. Cada color es una familia de funciones.'))}}
 async function showAnswer(){const r=selRange();const sol=await getSol(true);if(!sol||!sol.items){fbMsg(mk('div','note','No hay respuesta disponible para esta frase.'));return}
   if(r){const it=sol.items.filter(x=>x.s<=r[1]&&x.e>=r[0]).sort((a,b)=>(a.e-a.s)-(b.e-b.s))[0];if(!it){fbMsg(mk('div','note','Esa parte no forma un elemento propio del análisis.'));return}S.hints++;if(!S.ghosts.some(x=>x.s===it.s&&x.e===it.e&&x.f===it.f))S.ghosts.push(ghostOf(it));renderAll();const d=mk('div');d.append(mk('div','toast','«'+S.words.slice(it.s,it.e+1).map(w=>w.t).join(' ')+'» → '+FN[it.f].label),mk('div','note',FN[it.f].def));fbMsg(d);return}
-  const d=mk('div');d.append(mk('div','note','¿Rendirte y ver todo el análisis? No sumarás XP en esta frase y se reinicia la racha.'));const row=mk('div','row');const y=mk('button','btn pri','Sí, mostrar todo'),n=mk('button','btn','Cancelar');y.onclick=()=>{S.gave=true;S.streak=0;S.ghosts=[];sol.items.filter(x=>!x.opt).forEach(m=>{if(!S.anns.some(a=>a.s===m.s&&a.e===m.e&&a.f===m.f))S.ghosts.push(ghostOf(m))});renderAll();refreshStats();const o=mk('div');o.append(mk('div','toast','Respuesta completa en punteado.'));if(sol.note||S.note)o.append(mk('div','note','Por qué: '+(sol.note||S.note)));fbMsg(o)};n.onclick=()=>fbMsg(mk('div'));row.append(y,n);d.append(row);fbMsg(d)}
+  const d=mk('div');d.append(mk('div','note','¿Rendirte y ver todo el análisis? No sumarás XP en esta frase y se reinicia la racha.'));const row=mk('div','row');const y=mk('button','btn pri','Sí, mostrar todo'),n=mk('button','btn','Cancelar');y.onclick=()=>{S.gave=true;S.streak=0;S.ghosts=[];sol.items.filter(x=>!x.opt).forEach(m=>{if(!S.anns.some(a=>a.s===m.s&&a.e===m.e&&(a.fs||[]).includes(m.f)))S.ghosts.push(ghostOf(m))});renderAll();refreshStats();const o=mk('div');o.append(mk('div','toast','Respuesta completa en punteado.'));if(sol.note||S.note)o.append(mk('div','note','Por qué: '+(sol.note||S.note)));fbMsg(o)};n.onclick=()=>fbMsg(mk('div'));row.append(y,n);d.append(row);fbMsg(d)}
 $('chk').onclick=()=>check(false);$('aichk').onclick=()=>check(true);$('show').onclick=showAnswer;
 $('helpb').onclick=e=>{const m=$('hmenu');m.hidden=!m.hidden;e.currentTarget.setAttribute('aria-expanded',String(!m.hidden))};$('h1').onclick=()=>help('one');$('h2').onclick=()=>help('all');
 document.addEventListener('click',e=>{if(!e.target.closest('#hmenu,#helpb')){$('hmenu').hidden=true}});
@@ -438,12 +478,11 @@ document.querySelectorAll('#steps button').forEach(b=>b.onclick=()=>{const t=$(b
 S.xp=store.get('xp',0);S.streak=store.get('streak',0);S.refs=store.get('refs',[]);
 buildPalette('');refreshStats();renderRefs();renderSel();stepState();
 
-$('gx').onclick=()=>{$('guide').hidden=true;try{localStorage.setItem('asx:guide','1')}catch(e){}};try{if(localStorage.getItem('asx:guide'))$('guide').hidden=true}catch(e){}
 
 S.zoom=1;
 function applyZoom(){const b=$('board'),z=$('zbox'),sc=$('bsc');if(!b||!z||!sc)return;b.style.transform='scale('+S.zoom+')';b.style.minWidth=(sc.clientWidth/S.zoom)+'px';z.style.width=Math.max(sc.clientWidth,b.offsetWidth*S.zoom)+'px';z.style.height=(b.offsetHeight*S.zoom)+'px'}
 function zoomBy(f){S.zoom=Math.max(.5,Math.min(3,S.zoom*f));applyZoom()}
-function fitWords(){const w=$('words');if(!w.children.length)return;S.zoom=1;const avail=Math.max(200,$('bsc').clientWidth-52);let px=40;w.style.fontSize=px+'px';for(let k=0;k<3;k++){const need=w.offsetWidth;if(need<=avail&&k>0)break;px=Math.max(13,Math.min(46,px*avail/need*0.985));w.style.fontSize=px.toFixed(1)+'px'}renderMarks()}
+function fitWords(){const w=$('words');if(!w.children.length)return;S.zoom=1;const avail=Math.max(200,$('bsc').clientWidth-52);let px=40;w.style.fontSize=px+'px';for(let k=0;k<3;k++){const need=w.offsetWidth;if(need<=avail&&k>0)break;px=Math.max(13,Math.min(58,px*avail/need*0.985));w.style.fontSize=px.toFixed(1)+'px'}renderMarks()}
 $('z-in').onclick=()=>zoomBy(1.25);$('z-out').onclick=()=>zoomBy(.8);$('z-fit').onclick=()=>{fitWords();$('bsc').scrollTo(0,0)};
 $('bsc').addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();zoomBy(e.deltaY<0?1.1:1/1.1)}},{passive:false});
 window.addEventListener('resize',fitWords);
@@ -463,6 +502,8 @@ const GUIDE={
 function openGuide(){const g=$('gmodal');if(!g.dataset.b){g.dataset.b=1;const tabs=$('gtabs'),body=$('gbody');Object.keys(GUIDE).forEach((k,i)=>{const b=document.createElement('button');b.className='btn';b.textContent=k;b.onclick=()=>{[...tabs.children].forEach(x=>x.classList.remove('pri'));b.classList.add('pri');body.innerHTML=GUIDE[k];body.scrollTop=0};tabs.appendChild(b);if(!i)b.click()})}g.hidden=false}
 $('guidebtn').onclick=openGuide;$('gclose').onclick=()=>{$('gmodal').hidden=true};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('gmodal').hidden=true});
+
+$('fnbtn').onclick=()=>{const p=$('p-pal');p.hidden=!p.hidden;$('fnbtn').setAttribute('aria-pressed',String(!p.hidden))};$('pclose').onclick=()=>{$('p-pal').hidden=true;$('fnbtn').setAttribute('aria-pressed','false')};
 
 </script>
 </body></html>
