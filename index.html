@@ -166,6 +166,11 @@ body.fs .board-scroll{height:calc(100vh - 150px)}
 .toolbar{display:flex;flex-wrap:wrap}
 .acts{margin-top:12px}
 @media(max-width:700px){.board-scroll{height:calc(100vh - 300px)}.toolbar .tb{padding:6px 8px;font-size:.8rem}}
+body.s1 .stats{display:none}
+body.s1 #p-frase{max-width:760px;margin:8vh auto 0;width:100%;padding:24px}
+body.s1 #p-frase h2{font-size:1.6rem}
+body.s1 #txt{font-size:1.4rem;min-height:110px}
+body.s1 #p-frase .btn{padding:11px 18px;font-size:1rem}
 </style>
 </head>
 <body>
@@ -190,11 +195,13 @@ body.fs .board-scroll{height:calc(100vh - 150px)}
       <span class="note" id="gmsg"></span>
     </div>
   </div>
-  <div class="cur" id="curbar" hidden><q id="curq"></q><button class="btn" id="chg">Cambiar frase</button></div>
+  
 </section>
 
 <div class="work" id="work" hidden>
   <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
+    <button class="tb" id="chg2">← Nueva frase</button>
+    <span class="sep"></span>
     <button class="tb" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Seleccionar</button>
     <button class="tb" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
     <button class="tb" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button>
@@ -342,7 +349,7 @@ function buildPalette(filter){const f=key(filter||'');const box=$('plist');box.i
 function ficha(id){const x=FN[id];$('ficha').innerHTML='<b></b><br><span></span>';$('ficha').firstChild.textContent=x.label+' ('+x.short+')';$('ficha').lastChild.textContent=x.def}
 /* frase */
 function setSentence(text,sol,note){S.sentence=text.trim();S.words=tokenize(S.sentence);S.anns=[];S.nid=1;S.sel=null;S.draftTxt='';S.editId=null;S.strokes=[];S.hist=[];S.checked=false;S.st={};S.ghosts=[];S.sol=sol||null;S.note=note||'';S.hints=0;S.gave=false;S.awarded=0;S.streaked=false;
-  $('inp').hidden=true;$('curbar').hidden=false;$('curq').textContent=S.sentence;$('work').hidden=false;$('p-fb').innerHTML='';buildWords();fitWords();renderAll();drawAll();renderRefs()}
+  $('p-frase').hidden=true;document.body.classList.remove('s1');document.body.classList.add('s2');$('work').hidden=false;$('p-fb').innerHTML='';buildWords();fitWords();renderAll();drawAll();renderRefs()}
 function buildWords(){const w=$('words');w.innerHTML='';S.words.forEach((x,i)=>{const b=document.createElement('span');b.className='w';b.textContent=x.t;b.dataset.i=i;b.tabIndex=0;b.setAttribute('role','button');w.appendChild(b)})}
 function selRange(){return S.sel?[Math.min(S.sel.a,S.sel.b),Math.max(S.sel.a,S.sel.b)]:null}
 function tap(i){const r=selRange();if(S.editId)S.editId=null;if(!r){S.sel={a:i,b:i}}else if(i>=r[0]&&i<=r[1]){if(r[0]===r[1]){S.sel=null;S.draftTxt=''}else S.sel={a:i,b:i}}else S.sel={a:Math.min(r[0],i),b:Math.max(r[1],i)};renderSel(true)}
@@ -477,7 +484,8 @@ $('use').onclick=()=>{const t=$('txt').value.trim();if(t.split(/\s+/).length<2){
 $('txt').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('use').click()}});
 $('bank').onclick=()=>{const tema=$('tema').value,niv=$('lvlsel').value;let pool=BANK.filter(b=>(!tema||b.tema===tema));if(!pool.length)pool=BANK;const pref=pool.filter(b=>niv==='ESO'?b.nivel==='ESO':true);if(pref.length)pool=pref;S.bankIdx=(S.bankIdx+1)%pool.length;const b=pool[S.bankIdx];$('txt').value=b.text;setSentence(b.text,null,b.note)};
 $('gen').onclick=aiGenerate;
-$('chg').onclick=()=>{$('inp').hidden=false;$('curbar').hidden=true;$('txt').focus()};
+function showEntry(){if(document.body.classList.contains('fs'))setFS(false);$('work').hidden=true;$('p-frase').hidden=false;$('inp').hidden=false;document.body.classList.remove('s2');document.body.classList.add('s1');$('txt').focus()}
+$('chg2').onclick=showEntry;document.body.classList.add('s1');
 document.querySelectorAll('#steps button').forEach(b=>b.onclick=()=>{const t=$(b.dataset.go);if(!t)return;if(b.dataset.go!=='p-frase'&&$('work').hidden){$('p-frase').scrollIntoView({behavior:'smooth'});return}t.scrollIntoView({behavior:'smooth',block:'start'})});
 /* init */
 S.xp=store.get('xp',0);S.streak=store.get('streak',0);S.refs=store.get('refs',[]);
