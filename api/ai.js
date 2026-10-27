@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Usa POST' });
   const key = process.env.GEMINI_API_KEY;
   if (!key) return res.status(500).json({ error: 'Falta la variable GEMINI_API_KEY en Vercel (y hay que redesplegar tras añadirla).' });
-  const prompt = String((req.body && req.body.prompt) || '').slice(0, 6000);
+  const prompt = String((req.body && req.body.prompt) || '').slice(0, 24000);
   if (!prompt) return res.status(400).json({ error: 'prompt vacío' });
   const img = req.body && req.body.image;
   const parts = [{ text: prompt }];

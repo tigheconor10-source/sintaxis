@@ -181,12 +181,14 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
 .how div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
 .how b{font-family:var(--serif)}.how span{color:var(--muted);font-size:.9rem}
 .bxs{overflow-x:auto;padding:6px 0 2px}
-.bx{display:grid;column-gap:6px;row-gap:7px;width:max-content;min-width:100%;padding:8px 4px}
-.bx .w{font-family:var(--serif);font-size:clamp(1.05rem,2.4vw,1.55rem);text-align:center;padding:0 2px;color:var(--fg)}
-.bx .bb{font-size:.76rem;font-weight:700;text-align:center;padding:4px 8px;border-top:3px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 9%,transparent);border-radius:0 0 8px 8px;white-space:nowrap;align-self:start}
+.bx{font-size:17px;display:grid;column-gap:8px;row-gap:9px;width:max-content;min-width:100%;padding:8px 4px}
+.bx .w{font-family:var(--serif);font-size:1.75em;text-align:center;padding:0 2px;color:var(--fg)}
+.bx .bb{font-size:.8em;font-weight:700;text-align:center;padding:4px 8px;border-top:3px solid var(--c);color:var(--c);background:color-mix(in srgb,var(--c) 9%,transparent);border-radius:0 0 8px 8px;white-space:nowrap;align-self:start}
 .srcb{margin-top:10px;font-size:.88rem;font-weight:600;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
 .srcb.ai{border-color:#d9a21b;background:color-mix(in srgb,#f0b94a 16%,transparent);color:var(--fg)}
 .srcb.ai::before{content:'IA · ';font-weight:800}
+.bxs .srcb{margin:8px 0 6px}
+#p-boxes{scroll-margin-top:12px;border-width:2px}
 </style>
 </head>
 <body>
@@ -248,7 +250,6 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
     <button class="btn pri" id="chk"><svg viewBox="0 0 24 24"><path d="M2 13l4 4 8-9"/><path d="M12 15l2 2 8-10"/></svg>Comprobar</button>
     <button class="btn" id="helpb" aria-haspopup="true" aria-expanded="false">Ayuda ▾</button>
     <button class="btn" id="show">Mostrar respuesta</button>
-    <button class="btn" id="boxbtn">Ver análisis completo</button>
     <button class="btn" id="aichk" hidden>Comprobar con IA</button>
     <div class="menu" id="hmenu" hidden>
       <button id="h1">Una pista<small>Revela un paso, con su color</small></button>
@@ -256,7 +257,7 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
     </div>
   </div>
   <div class="fb" id="p-fb" aria-live="polite"></div>
-  <section class="card" id="p-boxes" hidden style="margin-top:12px"><div class="row" style="justify-content:space-between"><b>Análisis completo</b><button class="btn" id="bxclose">Cerrar</button></div><p class="note" id="bxnote" style="margin:6px 0 0"></p><div class="bxs" id="bx"></div></section>
+  <section class="card" id="p-boxes" hidden style="margin-top:12px"><div class="row" style="justify-content:space-between"><b style="font-size:1.05rem">Solución</b><button class="btn" id="bxclose">← Volver a mi respuesta</button></div><p class="note" id="bxnote" style="margin:6px 0 0"></p><div class="bxs" id="bx"></div></section>
   <details class="card refs" id="p-ref" style="margin-top:16px">
     <summary style="cursor:pointer;font-weight:700">Solucionarios oficiales (opcional)</summary>
     <p class="note" style="margin:8px 0">Sube un PDF, DOCX, TXT o una foto de la solución manuscrita (la IA la pasa a texto y tú la revisas). Se consulta primero y no gasta IA. Todo se procesa en tu navegador.</p>
@@ -371,6 +372,16 @@ const SCH={s:'suj',n:'nuc',nv:'verbo',e:'enl',t:'ter',mod:'mod',nx:'nx',gp:'gpre
 function exactFn(p){const n=x=>key(x).replace(/[^a-z0-9]/g,'');const k=n(p);if(!k)return null;if(SCH[k])return SCH[k];for(const id in FN){const x=FN[id];if(k===n(id)||k===n(x.short)||k===n(x.label)||x.al.some(a=>n(a)===k))return id}return null}
 function lookupFn(p){return exactFn(p)||matchFunc(p)}
 function parseLabel(txt){const ids=[];String(txt).split(/[\/,+·;]|\s+y\s+/).map(x=>x.trim()).filter(Boolean).forEach(p=>{const id=lookupFn(p);if(id&&!ids.includes(id))ids.push(id)});return ids}
+function checkTree(words,items){const p=[];const sg=x=>words.slice(x.s,x.e+1).map(w=>w.t).join(' ');const real=words.map((w,i)=>w.k?i:-1).filter(i=>i>=0);
+  const single=new Set(items.filter(x=>x.s===x.e).map(x=>x.s));const miss=real.filter(i=>!single.has(i));
+  if(miss.length>Math.max(1,Math.floor(real.length*.2)))p.push('faltan las categorías de palabra (nuc, mod, det, enl, nx, verbo…) de: '+miss.slice(0,8).map(i=>'«'+words[i].t+'»').join(', '));
+  const multi=items.filter(x=>x.s!==x.e);let cross=null;
+  for(let i=0;i<multi.length&&!cross;i++)for(let j=i+1;j<multi.length;j++){const a=multi[i],b=multi[j];const ov=a.s<=b.e&&b.s<=a.e;const nest=(a.s<=b.s&&a.e>=b.e)||(b.s<=a.s&&b.e>=a.e);if(ov&&!nest){cross=[a,b];break}}
+  if(cross)p.push('los tramos «'+sg(cross[0])+'» y «'+sg(cross[1])+'» se cruzan; deben anidarse sin cruzarse');
+  if(!items.some(x=>x.f==='verbo'))p.push('no hay ningún verbo (id verbo)');
+  if(!items.some(x=>x.f==='gv'))p.push('falta el grupo verbal completo (gv + pv, o gv + pn si el verbo es copulativo)');
+  return p}
+function schoolExamples(){return BANK.filter(b=>b.tema==='colegio').map(b=>'Oración: «'+b.text+'»\nJSON: '+JSON.stringify({solucion:b.items.map(it=>{const o={seg:it[0],f:it[1]};if(it[3])o.n=it[3];return o}),nota:b.note})).join('\n\n')}
 // </pure>
 const $=id=>document.getElementById(id);
 const S={sentence:'',words:[],anns:[],nid:1,sel:null,draftTxt:'',editId:null,tool:'assign',str:true,strokes:[],hist:[],checked:false,st:{},ghosts:[],sol:null,hints:0,gave:false,awarded:0,refs:[],xp:0,streak:0,aic:{},bankIdx:-1,busy:false,note:'',streaked:false,zoom:1};
@@ -466,18 +477,27 @@ let sampleFn=null;
 async function askJSON(prompt,opts){if(sampleFn)return sampleFn.json(prompt,opts);let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})})}catch(e){throw{code:'upstream_error'}}let j=null;try{j=await r.json()}catch(e){}if(!r.ok)throw{code:r.status===429?'rate_limited':'upstream_error',detail:(r.status===404?'No se encuentra /api/ai: sube también la carpeta api. ':'')+((j&&j.error)||('Error '+r.status))};return j}
 const FLIST=()=>Object.values(FN).filter(f=>!f.apo).map(f=>f.id+': '+f.label).join('; ');
 const aiErr=e=>(e&&e.detail)?('IA no disponible ahora ('+String(e.detail).slice(0,140)+').'):({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
+const FLISTALL=()=>Object.values(FN).map(f=>f.id+': '+f.label).join('; ');
+const AIGUIDE=()=>'Eres profesor de Lengua Castellana (4.º ESO y Bachillerato, España) y analizas EXACTAMENTE como en el colegio: análisis completo en árbol, con todos los niveles.\nReglas:\n1) Da la categoría de CADA palabra con un tramo de una sola palabra: nuc (núcleo/N), mod (modificador: artículos, posesivos, adjetivos dentro de un grupo nominal), enl (enlace/preposición), nx (nexo de subordinada), verbo (NV, núcleo verbal), det, cn si es un adjetivo que complementa al nombre (además de gadj).\n2) Cada grupo lleva DOS entradas con el mismo seg: su tipo (gn, gprep, gadj, gadv, gv, ssub, subadj) y su función (suj, sujPac, cd, ci, creg, atr, predSuj, predCD, cla, cct, ccl, ccm, ccc, ccf, ag, cn, cadj, ter…). Ejemplo: «los alumnos» = gn + suj.\n3) El predicado es gv + pv (verbo no copulativo) o gv + pn (verbo copulativo con atributo). Sujeto y predicado cubren la oración entera.\n4) Dentro de un gprep: enl + ter (el término es un gn o una subordinada sustantiva ssub).\n5) Subordinada sustantiva = ssub + su función (ter, suj, cd…). Subordinada de relativo = subadj + cn.\n6) Los tramos deben anidarse sin cruzarse. Copia seg literalmente de la oración, sin puntuación. Si una palabra o tramo se repite, añade "n" (0 = primera aparición, 1 = segunda…).\n7) No inventes: ante la duda elige lo más habitual en el colegio.\nIds válidos (id: nombre): '+FLISTALL()+'\n\nEjemplos resueltos tal como los hace el colegio:\n\n'+schoolExamples()+'\n\n';
+async function aiSolveTree(sentence,words){let best=null,problems=[];
+  for(let t=0;t<3;t++){const r=await askJSON(AIGUIDE()+'Ahora analiza esta oración: «'+sentence+'»\nResponde solo con JSON: {"solucion":[{"seg":"...","f":"id","n":0}],"nota":"explicación breve, máximo 250 caracteres"}'+(problems.length?'\nTu intento anterior tenía estos problemas, corrígelos: '+problems.join('; ')+'.':''),{modelTier:'default',cache:false});
+    if(!r||!Array.isArray(r.solucion)){problems=['el JSON no tenía la lista "solucion"'];continue}
+    const items=buildSol(words,r.solucion);items.forEach(it=>{if(FN[it.f].apo)it.opt=true});const pr=checkTree(words,items);
+    if(!best||pr.length<best.warn.length)best={items,warn:pr,note:String(r.nota||'')};
+    if(!pr.length)break;problems=pr}
+  if(!best||!best.items.length)throw{code:'invalid_json'};return best}
 async function aiGenerate(){const tema=$('tema').selectedOptions[0].textContent,nivel=$('lvlsel').value;$('gen').disabled=true;say('Generando…');
-  try{const r=await askJSON('Eres profesor de Lengua Castellana (España). Crea UNA oración simple en español para practicar análisis sintáctico. Nivel: '+nivel+'. Tema: '+tema+'. Responde solo con JSON: {"frase":"...","solucion":[{"seg":"palabras consecutivas copiadas literalmente de la frase, sin puntuación","f":"id","opt":false}],"nota":"explicación breve, máximo 250 caracteres"}. Incluye verbo, sujeto si lo hay y todos los complementos; marca opt:true en los análisis internos (CN, C. Adj.). Funciones válidas (id: nombre): '+FLIST(),{modelTier:'default',cache:false});
-    if(!r||typeof r.frase!=='string'||!Array.isArray(r.solucion))throw{code:'invalid_json'};const w=tokenize(r.frase);const items=buildSol(w,r.solucion);if(items.length<2)throw{code:'invalid_json'};S.aic[sKey(r.frase)]={items,note:String(r.nota||'')};say('');$('txt').value=r.frase;setSentence(r.frase,{items,source:'ai'},String(r.nota||''))}catch(e){say(aiErr(e)+' Te pongo una frase del banco mientras tanto.');setTimeout(()=>$('bank').click(),400)}finally{$('gen').disabled=false}}
-async function aiSolve(){const k=sKey(S.sentence);if(S.aic[k])return S.aic[k];const r=await askJSON('Analiza sintácticamente esta oración en español (Bachillerato, España): «'+S.sentence+'». Responde solo con JSON: {"solucion":[{"seg":"palabras consecutivas copiadas literalmente de la oración, sin puntuación","f":"id","opt":false}],"nota":"explicación breve, máximo 250 caracteres"}. Incluye verbo, sujeto (si lo hay), valores del «se» y todos los complementos; opt:true para análisis internos (CN, C. Adj.). Funciones válidas (id: nombre): '+FLIST(),{modelTier:'default'});if(!r||!Array.isArray(r.solucion))throw{code:'invalid_json'};const items=buildSol(S.words,r.solucion);if(!items.length)throw{code:'invalid_json'};return S.aic[k]={items,note:String(r.nota||'')}}
+  try{const r=await askJSON('Eres profesor de Lengua Castellana (España). Escribe UNA oración en español para practicar análisis sintáctico. Nivel: '+nivel+'. Tema: '+tema+'. Debe ser clara y con una única interpretación posible, de 8 a 16 palabras, sin ambigüedades ni recursos raros. Responde solo con JSON: {"frase":"..."}',{modelTier:'default',cache:false});
+    if(!r||typeof r.frase!=='string'||r.frase.trim().split(/\s+/).length<3)throw{code:'invalid_json'};say('');$('txt').value=r.frase.trim();setSentence(r.frase.trim())}catch(e){say(aiErr(e)+' Te pongo una frase del banco mientras tanto.');setTimeout(()=>$('bank').click(),400)}finally{$('gen').disabled=false}}
+async function aiSolve(){const k=sKey(S.sentence);if(S.aic[k])return S.aic[k];fbMsg(mk('div','note','Analizando con IA… puede tardar unos segundos.'));const r=await aiSolveTree(S.sentence,S.words);fbMsg(mk('div'));return S.aic[k]=r}
 /* resolver solución: PDF filas > banco > PDF aproximado > IA */
 async function resolveSol(allowAI){const refs=S.refs;for(const r of refs){const p=parseRows(S.words,S.sentence,r.text);if(p.found&&p.items.length>=2)return{items:p.items,source:'pdf',name:r.name}}
   const b=findBank(S.sentence);if(b)return{items:buildSol(S.words,b.items),source:'bank',note:b.note};
   if(S.sol&&S.sol.source==='ai')return S.sol;
   for(const r of refs)if(refRegion(S.sentence,r.text)!=null)return{weak:r.text,source:'pdfweak',name:r.name};
-  if(!allowAI)return null;const a=await aiSolve();return a?{items:a.items,source:'ai',note:a.note}:null}
+  if(!allowAI)return null;const a=await aiSolve();return a?{items:a.items,source:'ai',note:a.note,warn:a.warn}:null}
 const SRC={pdf:'tu solucionario',bank:'el banco de la app',pdfweak:'tu solucionario (coincidencia aproximada)',ai:'IA'};
-function updateSrc(){const b=$('srcb');if(!b)return;const s=S.sol;if(!s||!S.sentence){b.hidden=true;return}b.className='srcb '+s.source;b.textContent=s.source==='ai'?'Solución generada por IA: puede tener fallos. Si dudas, contrástala con tus apuntes.':s.source==='bank'?'Solución del banco de la app (revisada).':'Solución sacada de '+(s.name?'«'+s.name+'»':'tu solucionario')+'.';b.hidden=false}
+function updateSrc(){const b=$('srcb');if(!b)return;const s=S.sol;if(!s||!S.sentence){b.hidden=true;return}b.className='srcb '+s.source;b.textContent=s.source==='ai'?'Solución generada por IA: puede tener fallos.'+(s.warn&&s.warn.length?' Esta vez no ha salido del todo coherente ('+s.warn[0]+').':'')+' Si dudas, contrástala con tus apuntes.':s.source==='bank'?'Solución del banco de la app (revisada).':'Solución sacada de '+(s.name?'«'+s.name+'»':'tu solucionario')+'.';b.hidden=false}
 async function getSol(allowAI){if(S.busy)return null;S.busy=true;try{const s=await resolveSol(allowAI);if(s){S.sol=s;updateSrc()}return s}catch(e){say(aiErr(e),$('p-fb'));return null}finally{S.busy=false}}
 function evalAnns(items){const exp=[];S.anns.forEach(a=>(a.fs||[]).forEach(f=>exp.push({id:a.id+':'+f,s:a.s,e:a.e,f})));const g=grade(exp,items);const st={};S.anns.forEach(a=>{if(!(a.fs||[]).length){st[a.id]='unk';return}const ss=a.fs.map(f=>g.st[a.id+':'+f]);st[a.id]=ss.includes('bad')?'bad':ss.includes('ok')?'ok':'neutral'});g.st=st;g.unk=S.anns.filter(a=>!(a.fs||[]).length).length;return g}
 /* comprobar */
@@ -578,15 +598,22 @@ function buildBoxes(items){
   const top=multi.filter(x=>!multi.some(y=>y!==x&&y.s<=x.s&&y.e>=x.e&&(y.e-y.s)>(x.e-x.s)));const maxLv=Math.max(0,...multi.map(x=>x.lv));
   multi.forEach(x=>put(x,2+(top.includes(x)?maxLv:x.lv)));
   return box}
-function closeBoxes(){$('p-boxes').hidden=true}
+function fitBoxes(wrap,bx){let f=18;bx.style.fontSize=f+'px';while(wrap.scrollWidth>wrap.clientWidth+1&&f>8){f-=1;bx.style.fontSize=f+'px'}}
+window.addEventListener('resize',()=>{const w=document.querySelector('#bx .bxs'),b=document.querySelector('#bx .bx');if(w&&b)fitBoxes(w,b)});
+function closeBoxes(){$('p-boxes').hidden=true;const b=$('bsc');if(b)b.scrollIntoView({behavior:'smooth',block:'start'})}
 $('bxclose').onclick=closeBoxes;
-$('boxbtn').onclick=async()=>{
+async function openSolution(){
   if(!S.sentence)return;
-  const sol=await getSol(true);if(!sol)return;
-  if(!sol.items){fbMsg(mk('div','note','Tu solucionario tiene esta frase, pero no he podido leer el análisis completo de él. Prueba con una frase del banco o con «Mostrar respuesta».'));return}
+  const pan=$('p-boxes'),nt=$('bxnote'),h=$('bx');
+  pan.hidden=false;h.innerHTML='';nt.textContent='Buscando la solución…';pan.scrollIntoView({behavior:'smooth',block:'start'});
+  const sol=await getSol(true);
+  if(!sol){pan.hidden=true;return}
+  if(!sol.items){h.innerHTML='';nt.textContent='Tu solucionario tiene esta frase, pero no he podido leer el análisis completo de él. Prueba con una frase del banco o pide la solución con otra frase.';return}
   if(!S.gave){S.gave=true;S.streak=0;refreshStats()}
-  const nt=$('bxnote');nt.textContent='Fuente: '+SRC[sol.source]+(sol.name?' ('+sol.name+')':'')+(sol.source==='ai'?'. Análisis hecho por la IA: puede tener fallos.':'.')+' En esta frase no sumas XP.'+(sol.note?' '+sol.note:'');
-  const h=$('bx');h.innerHTML='';h.append(buildBoxes(sol.items));
-  $('p-boxes').hidden=false;$('p-boxes').scrollIntoView({behavior:'smooth',block:'nearest'})};
+  nt.textContent='';
+  const src=mk('div','srcb '+sol.source);src.textContent=sol.source==='ai'?'Solución generada por IA: puede tener fallos.'+(sol.warn&&sol.warn.length?' Esta vez no ha salido del todo coherente ('+sol.warn[0]+').':'')+' Si dudas, contrástala con tus apuntes.':sol.source==='bank'?'Solución del banco de la app (revisada).':'Solución sacada de '+(sol.name?'«'+sol.name+'»':'tu solucionario')+'.';
+  h.innerHTML='';const bxs=mk('div','bxs'),bxe=buildBoxes(sol.items);bxs.append(bxe);h.append(src,bxs);fitBoxes(bxs,bxe);
+  const ex=mk('div','note','En esta frase no sumas XP.'+(sol.note?' '+sol.note:''));ex.style.marginTop='8px';h.append(ex)}
+$('show').onclick=openSolution;$('h2').onclick=openSolution;
 </script>
 </body></html>
