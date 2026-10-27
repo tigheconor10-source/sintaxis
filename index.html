@@ -112,6 +112,16 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:6
 .toast{font-size:.9rem;font-weight:600}
 [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.work{grid-template-columns:minmax(0,1fr) 270px}
+.words{font-size:clamp(1.7rem,3.4vw,2.7rem);gap:.5em}
+.w{padding:4px 8px}
+.board{min-height:480px}
+.stage{padding:36px 32px 60px}
+.tb.big{font-size:1.05rem;padding:11px 18px}
+.tb.big svg{width:22px;height:22px}
+.guide{background:var(--surface2);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:.95rem;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.guide .btn{margin-left:auto}
+.stats .pill:not(#lvl){display:none}
 </style>
 </head>
 <body>
@@ -120,14 +130,6 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:6
   <div class="brand"><small>App</small>Sintaxis</div>
   <div class="stats"><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
 </header>
-<ol class="steps" id="steps">
-  <li><button data-go="p-frase"><b>1</b>Frase</button></li>
-  <li><button data-go="p-board"><b>2</b>Pizarra</button></li>
-  <li><button data-go="p-pal"><b>3</b>Resolver</button></li>
-  <li><button data-go="p-fb"><b>4</b>Comprobar</button></li>
-  <li><button class="tool" data-go="p-ref"><b>5</b>Solucionario</button></li>
-  <li><button class="tool" data-go="p-acts"><b>6</b>Ayuda</button></li>
-</ol>
 
 <section class="card" id="p-frase">
   <div id="inp">
@@ -149,11 +151,12 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:6
 
 <div class="work" id="work" hidden>
   <div>
+    <div class="guide" id="guide"><b>Cómo funciona:</b> 1) Pulsa <b>Lápiz</b> y subraya o rodea lo que quieras: las líneas se enderezan solas. 2) Pulsa <b>Asignar</b>, toca una palabra (o varias) y elige su función a la derecha. 3) Pulsa <b>Comprobar</b>: verde es correcto, rojo es error. <button class="btn" id="gx">Entendido</button></div>
     <section class="card" id="p-board">
       <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
-        <button class="tb" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Asignar</button>
-        <button class="tb" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
-        <button class="tb" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button>
+        <button class="tb big" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
+        <button class="tb big" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Asignar</button>
+        <button class="tb big" id="t-era" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M3 17l9-9 6 6-5 5H6z"/><path d="M14 20h7"/></svg>Borrador</button>
         <span class="sep"></span>
         <button class="tb" id="t-und"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>Deshacer</button>
         <button class="tb" id="t-clr"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>Limpiar trazos</button>
@@ -173,14 +176,14 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:.8rem;font-weight:6
       </div>
       <div class="fb" id="p-fb" aria-live="polite"></div>
     </section>
-    <section class="card refs" id="p-ref" style="margin-top:16px">
-      <h2>Solucionarios oficiales</h2>
+    <details class="card refs" id="p-ref" style="margin-top:16px">
+      <summary style="cursor:pointer;font-weight:700">Solucionarios oficiales (opcional)</summary>
       <p class="note" style="margin:0 0 8px">Sube un PDF, DOCX o TXT con las soluciones. Se consulta primero y no gasta IA. Todo se procesa en tu navegador.</p>
       <div class="drop-z" id="dz"><button class="btn" id="up">Subir archivo</button> <span>o suéltalo aquí</span><input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden multiple></div>
       <label class="f" for="paste" style="margin-top:10px">O pega el texto del solucionario<textarea id="paste" style="min-height:56px;font:.9rem var(--sans)"></textarea></label>
       <div class="row" style="margin-top:8px"><button class="btn" id="addp">Añadir texto</button><span class="note" id="rmsg"></span></div>
       <ul id="rlist"></ul>
-    </section>
+    </details>
   </div>
   <aside class="card pal" id="p-pal">
     <input type="search" id="q" placeholder="Buscar función (CCT, régimen, se…)" aria-label="Buscar función">
@@ -408,6 +411,8 @@ document.querySelectorAll('#steps button').forEach(b=>b.onclick=()=>{const t=$(b
 /* init */
 S.xp=store.get('xp',0);S.streak=store.get('streak',0);S.refs=store.get('refs',[]);
 buildPalette('');refreshStats();renderRefs();renderSel();stepState();
+
+$('gx').onclick=()=>{$('guide').hidden=true;try{localStorage.setItem('asx:guide','1')}catch(e){}};try{if(localStorage.getItem('asx:guide'))$('guide').hidden=true}catch(e){}
 
 </script>
 </body></html>
