@@ -61,7 +61,7 @@ async function callOpenAI({ key, prompt, img, search, deadline }) {
   const content = [{ type: 'text', text: prompt }];
   if (img && img.data) content.push({ type: 'image_url', image_url: { url: `data:${img.mime || 'image/jpeg'};base64,${img.data}` } });
   const models = search
-    ? ['gpt-4o-search-preview', process.env.OPENAI_MODEL, 'gpt-4.1-mini', 'gpt-4o-mini']
+    ? ['gpt-4o-search-preview', 'gpt-4o-mini-search-preview', process.env.OPENAI_MODEL, 'gpt-4.1-mini', 'gpt-4o-mini']
     : [process.env.OPENAI_MODEL, 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4.1'];
   for (const model of [...new Set(models.filter(Boolean))]) {
     if (Date.now() > deadline) break;
@@ -111,8 +111,8 @@ export default async function handler(req, res) {
 
   const gem = gKey && (() => callGemini({ key: gKey, prompt, img, search, deadline }));
   const gpt = oKey && (() => callOpenAI({ key: oKey, prompt, img, search, deadline }));
-  // Análisis: ChatGPT primero. Búsqueda en Google (chat): Gemini primero. Cambia con AI_PRIMARY=gemini|openai.
-  const pref = (process.env.AI_PRIMARY || (search ? 'gemini' : 'openai')).toLowerCase();
+  // ChatGPT primero y Gemini de respaldo. Cambia con AI_PRIMARY=gemini|openai.
+  const pref = (process.env.AI_PRIMARY || 'openai').toLowerCase();
   const order = (pref === 'gemini' ? [gem, gpt] : [gpt, gem]).filter(Boolean);
 
   const errors = [];

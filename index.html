@@ -159,6 +159,14 @@ body.fs .board-scroll{height:calc(100vh - 150px)}
 .lb.draft{background:var(--surface);border:2px solid var(--ink);padding:0 4px}
 .lb input{border:0;background:transparent;padding:4px 6px;font:600 .9rem var(--sans);color:var(--fg);outline:none;min-width:0}
 .lt{cursor:text}
+/* etiquetas de la pizarra en formato caja (como la solución) */
+.br{border-bottom-width:3px}
+.br.ok{border-bottom-color:var(--ok)}.br.bad{border-bottom-color:var(--bad)}
+.lb:not(.draft){border:0;border-radius:0 0 9px 9px;background:color-mix(in srgb,var(--c) 11%,var(--board));color:var(--c);font:700 .88rem var(--sans);padding:3px 4px 3px 11px;height:27px}
+.lb.ghost:not(.draft){background:color-mix(in srgb,var(--c) 6%,transparent);outline:1px dashed color-mix(in srgb,var(--c) 55%,transparent);outline-offset:-1px}
+.lb.ok:not(.draft){--c:var(--ok);background:color-mix(in srgb,var(--ok) 14%,var(--board));color:var(--ok)}
+.lb.bad:not(.draft){--c:var(--bad);background:color-mix(in srgb,var(--bad) 13%,var(--board));color:var(--bad)}
+
 .drawer{position:fixed;left:max(8px,env(safe-area-inset-left,0px));top:56px;bottom:8px;width:min(330px,calc(100vw - 16px));z-index:45;max-height:none;box-shadow:0 12px 40px rgba(0,0,0,.28)}
 .drawer .plist{flex:1;max-height:none}
 .work:not([hidden]){display:block;grid-template-columns:none}
@@ -211,13 +219,34 @@ body.s1 .how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px
 .am .pr{display:flex;gap:8px;align-items:center;margin:4px 0}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:.8rem;font-weight:600}
 .muted{color:var(--muted)}
+
+.tbox{width:min(640px,100%)}
+.tkind{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tk{text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;color:var(--fg)}
+.tk b{font:600 1.15rem var(--serif)}.tk span{font-size:.85rem;color:var(--muted)}
+.tk.on{border-color:var(--f-verbo);background:color-mix(in srgb,var(--f-verbo) 8%,var(--surface))}
+.crit summary{cursor:pointer;font-weight:700;font-size:.9rem}.crit p{font-size:.86rem;color:var(--muted);margin:8px 0 0}
+.qn{font-size:.85rem;color:var(--muted);font-weight:600}
+.qq{font:600 1.2rem/1.35 var(--serif);margin:6px 0 12px}
+.qo{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;margin:0 0 8px;font-weight:600;color:var(--fg)}
+.qo.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,var(--surface));color:var(--ok)}
+.qo.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface));color:var(--bad)}
+.qe{font-size:.9rem;color:var(--muted);margin:8px 0}
+.tbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}
+.tbar b{font:600 1.05rem var(--serif)}.tbar .muted{font-size:.85rem}
+.big{font:600 2.6rem/1 var(--serif)}
+.brk{display:grid;gap:8px;margin:10px 0}
+.brk .r{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:.88rem}
+.brk .bar{height:9px;border-radius:5px;background:var(--surface2);overflow:hidden}.brk .bar i{display:block;height:100%;background:var(--ok)}
+.brk .bar.p i{background:var(--bad)}
+body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testing #chk,body.testing #aichk,body.testing #chg2,body.testing #hmenu,body.testing #selbar .btn.pri{display:none!important}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <div class="brand"><small>App</small>Sintaxis</div>
-  <div class="stats"><button class="btn" id="askbtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>Pregunta a la IA</button><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
+  <div class="stats"><button class="btn" id="testbtn"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-5"/></svg>Test</button><button class="btn" id="askbtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>Pregunta a la IA</button><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
 </header>
 
 <section class="hero" id="hero">
@@ -260,6 +289,7 @@ body.s1 .how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px
   <div style="--c:var(--ok)"><b>3 · Comprobar</b><span>Verde si está bien, rojo si no. Con pistas si las necesitas.</span></div>
 </section>
 <div class="work" id="work" hidden>
+  <div class="tbar" id="tbar" hidden></div>
   <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
     <button class="tb" id="chg2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Nueva frase</button>
     <span class="sep"></span>
@@ -312,9 +342,29 @@ body.s1 .how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px
 <div id="gmodal" class="gmodal" hidden><div class="gbox"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Guía de sintaxis</h2><button class="btn" id="gclose">Cerrar</button></div><div class="row" id="gtabs" style="margin:10px 0"></div><div id="gbody" class="gbody"></div></div></div>
 </div>
 <div id="amodal" class="gmodal" hidden><div class="gbox abox"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Pregunta a la IA</h2><button class="btn" id="aclose">Cerrar</button></div>
-<p class="muted" style="margin:6px 0 0;font-size:.85rem">Responde con tus apuntes y contrasta en Google. Si difieren, manda el colegio.</p>
+<p class="muted" style="margin:6px 0 0;font-size:.85rem">Responde con tus apuntes y lo contrasta. Si difieren, manda el colegio.</p>
 <div id="alog" class="alog"></div><div class="row" id="achips" style="gap:6px;margin:8px 0"></div>
 <div class="row" style="gap:8px;align-items:flex-end"><textarea id="aq" rows="2" maxlength="400" placeholder="Escribe tu duda, p. ej. ¿Cómo distingo un CD de un atributo?" style="flex:1"></textarea><button class="btn pri" id="ago">Preguntar</button></div></div></div>
+<div id="tmodal" class="gmodal" hidden><div class="gbox abox tbox"><div class="row" style="justify-content:space-between"><h2 style="margin:0" id="t-h">Test</h2><button class="btn" id="tclose">Cerrar</button></div>
+<div id="t-setup">
+  <p class="muted" style="margin:6px 0 12px;font-size:.9rem">La IA genera el test. Elige cómo quieres practicar.</p>
+  <div class="tkind" role="radiogroup" aria-label="Tipo de test">
+    <button class="tk on" role="radio" aria-checked="true" data-k="practica"><b>Práctica</b><span>2 frases en la pizarra, sin ayudas. Vale 2 puntos.</span></button>
+    <button class="tk" role="radio" aria-checked="false" data-k="teoria"><b>Teoría</b><span>5 preguntas de test sobre sintaxis. Nota sobre 10.</span></button>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <label class="f" for="t-lvl">Nivel<select id="t-lvl"><option>ESO</option><option selected>Bachillerato</option></select></label>
+    <label class="f" for="t-tema">Tema<select id="t-tema"><option value="">Cualquiera</option><option>Sujeto y predicado</option><option>Complementos del verbo (CD, CI, régimen, atributo)</option><option>Predicativo y atributo</option><option>Pasiva y complemento agente</option><option>Valores del «se»</option><option>Oraciones subordinadas</option></select></label>
+  </div>
+  <details class="crit" id="t-crit" style="margin-top:12px"><summary>Cómo se califica la práctica</summary>
+    <p>Basado en los criterios de la PAU (por ejemplo, Castilla y León): el análisis sintáctico vale <b>2 puntos</b> y se valora la identificación de las oraciones y sus nexos, la clasificación y la estructura de los grupos (categoría, función y estructura interna). Vale cualquier modelo de análisis si es claro.</p>
+    <p>En la app, <b>1 punto por frase</b>: 0,25 sujeto y predicado · 0,40 funciones de los complementos · 0,35 estructura interna (grupos, términos, enlaces, nexos). Cada etiqueta incorrecta resta 0,03 (máximo 0,15). Sin pistas ni «Mostrar respuesta».</p>
+  </details>
+  <div class="row" style="margin-top:14px"><button class="btn pri" id="tgo">Empezar test</button><span class="note" id="tmsg"></span></div>
+</div>
+<div id="t-quiz" hidden></div>
+<div id="t-res" hidden></div>
+</div></div>
 <script>
 // <pure>
 const FAM={verbo:'--f-verbo',suj:'--f-suj',arg:'--f-arg',adj:'--f-adj',nom:'--f-nom',se:'--f-se',dis:'--f-dis',apo:'--f-apo'};
@@ -552,9 +602,9 @@ function renderMarks(){const ws=[...$('words').children];const box=$('marks');bo
   box.style.height=(rows.length*46+8)+'px';
   items.forEach(it=>{const st=it.k==='ann'?(S.st[it.id]||''):'';const cls=it.k+' '+(st==='ok'||st==='bad'?st:'');const top=it.lv*46;
     const br=document.createElement('div');br.className='br '+cls;br.style.cssText='--c:'+it.col+';left:'+it.x1+'px;width:'+(it.x2-it.x1)+'px;top:'+top+'px';box.appendChild(br);
-    const lb=document.createElement('div');lb.className='lb '+cls;lb.style.cssText='--c:'+it.col+';left:'+it.lx+'px;top:'+(top+10)+'px';
+    const lb=document.createElement('div');lb.className='lb '+cls;lb.style.cssText='--c:'+it.col+';left:'+it.lx+'px;top:'+(top+(it.k==='draft'?10:3))+'px';
     if(it.k==='draft'){const inp=document.createElement('input');inp.id='draftIn';inp.type='text';inp.setAttribute('list','fnlist');inp.autocomplete='off';inp.placeholder='¿Qué es? Ej.: GPrep/CCL';inp.value=S.draftTxt;inp.setAttribute('aria-label','Función de la selección');inp.style.width=(it.lw-8)+'px';inp.oninput=()=>{S.draftTxt=inp.value};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commitDraft()}else if(e.key==='Escape'){e.preventDefault();cancelDraft()}};lb.appendChild(inp);const hb=document.createElement('button');hb.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>';hb.title='Ver respuesta de esta selección';hb.setAttribute('aria-label','Ver respuesta de esta selección');hb.onclick=hintSel;lb.appendChild(hb)}
-    else{const mark=st==='ok'?'✓ ':st==='bad'?'✗ ':st==='unk'?'? ':'';const t=document.createElement('span');t.className='lt';t.textContent=mark+it.txt;if(it.k==='ann'){t.title=st==='unk'?'No reconozco esta etiqueta. Clic para editar.':'Clic para editar';t.onclick=()=>startEdit(it.id)}lb.appendChild(t);
+    else{const mark=st==='unk'?'? ':'';const t=document.createElement('span');t.className='lt';t.textContent=mark+it.txt;if(it.k==='ann'){t.title=st==='unk'?'No reconozco esta etiqueta. Clic para editar.':'Clic para editar';t.onclick=()=>startEdit(it.id)}lb.appendChild(t);
       if(it.k==='ann'){const x=document.createElement('button');x.textContent='×';x.title='Quitar';x.setAttribute('aria-label','Quitar '+it.txt);x.onclick=()=>removeAnn(it.id);lb.appendChild(x)}}
     box.appendChild(lb);
     if(st==='bad')for(let i=it.s;i<=it.e;i++)ws[i].classList.add('bad')});
@@ -588,7 +638,7 @@ let sampleFn=null;
 (async()=>{try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){sampleFn=null}})();
 async function askJSON(prompt,opts){if(sampleFn)return sampleFn.json(prompt,opts);let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})})}catch(e){throw{code:'upstream_error'}}let j=null;try{j=await r.json()}catch(e){}if(!r.ok)throw{code:r.status===429?'rate_limited':'upstream_error',detail:(r.status===404?'No se encuentra /api/ai: sube también la carpeta api. ':'')+((j&&j.error)||('Error '+r.status))};return j}
 const FLIST=()=>Object.values(FN).filter(f=>!f.apo).map(f=>f.id+': '+f.label).join('; ');
-const aiErr=e=>(e&&e.detail)?('IA no disponible ahora ('+String(e.detail).slice(0,140)+').'):({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
+const aiErr=e=>(e&&e.detail)?(console.warn('IA:',e.detail),'La IA no está disponible ahora mismo. Inténtalo de nuevo en un momento.'):({not_granted:'No has permitido el uso de la IA.',rate_limited:'Demasiadas peticiones. Espera un poco.',invalid_json:'La IA devolvió un formato no válido. Inténtalo de nuevo.',cancelled:'Cancelado.'}[e&&e.code]||'No se pudo contactar con la IA.');
 const FLISTALL=()=>Object.values(FN).map(f=>f.id+': '+f.label).join('; ');
 const AIRULES='CRITERIOS DEL COLEGIO (síguelos al pie de la letra; se dice «grupo», no «sintagma»):\n- N es el núcleo de CUALQUIER grupo (nombre, adjetivo, adverbio). NV (id verbo) es solo el núcleo del verbo. No los mezcles.\n- Argumento o adjunto: CD se sustituye por lo/la/los/las; CI por le/les; atributo va con ser/estar/parecer (o semicopulativos) y se sustituye por «lo» solo con copulativos; complemento de régimen (creg) = preposición exigida por el verbo y sustituible por preposición + pronombre («de eso»); locativo argumental (cla) = lugar que el verbo exige (poner, vivir, dirigirse); si la oración funciona sin el lugar, es un CCL adjunto.\n- Verbos semicopulativos (encontrarse, seguir, quedarse, volverse, acabar, terminar, ponerse, hallarse, permanecer, andar, mostrarse): pierden significado, se pueden sustituir por «estar», llevan atributo que NO admite «lo»; el predicado es pn.\n- Verbos con régimen frecuentes: acordarse de, hablar de/sobre, acostumbrarse a, acusar de, alegrarse de, asustarse de, avisar de, caracterizarse por, casarse con, comprometerse con, confiar en, contar con, convencer de, creer en, cuidar de, depender de, disponer de, enamorarse de, entrometerse en, fijarse en, influir en, informar de, insistir en, olvidarse de, pensar en, preferir a, preguntar por, preocuparse de/por, rebelarse contra, retractarse de, saber de, soñar con, tratar sobre.\n- Verbos pronominales (marcharse, arrepentirse, quejarse…): «se» = sePron, sin función. Otros «se»: seVM, seDat, sePR, seImp, seRefl, seRec, seSus.\n- «del» y «al» son contracciones (de+el, a+el): marca la palabra con enl y mod (no la omitas) y forma parte del gprep: «del aula» = gprep + su función, con aula como nuc.\n- Un adverbio con complemento forma un grupo adverbial: «antes de la prueba final» = gadv + cct (el adverbio «antes» es nuc; «de la prueba final» es gprep + cadv). Igual con «lejos de casa» (ccl).\n- Adjetivo que complementa a un nombre dentro de un GN: gadj + ady (o cn). Aposición: ap. El adverbio «no» = ccNeg.\n- Oración compuesta (más de un verbo): cada verbo es una proposición con su propio gv + pv/pn; el nexo (que, si, quien…) es nx.\n- Subordinada sustantiva (ssub): se sustituye por «eso»; funciones: suj, cd (se sustituye por lo/eso), atr (con copulativo), ter (dentro de un gprep: creg, cn, cadj, cadv). Con infinitivo no hay nexo. «que» y «si» solo son nexo sin función. Los interrogativos (qué, quién, cuál, cómo, cuándo, dónde, cuánto, por qué) son nexo Y tienen función dentro de la subordinada: qué/cuál = cd; quién = suj; cómo = ccm; cuándo = cct; dónde = ccl; por qué = ccc; cuánto = ccCant. La preposición que precede al nexo pertenece al gprep, no a la subordinada.\n- Subordinada adjetiva/de relativo (subadj): siempre cn; se sustituye por «el cual»; el nexo relativo (que, el cual, quien, cuanto = funciones de GN; cuyo = determinante; donde, como, cuando = CC) SIEMPRE tiene función: sustituye el relativo por su antecedente y analiza la subordinada como oración simple. Especificativa (sin comas) o explicativa (entre comas).\n- Coordinadas: la conjunción (y, e, ni, pero, mas, sino, o, u, es decir…) es nexo y no pertenece a ninguna oración; yuxtapuestas: sin conjunción.\n- SUJETO Y PREDICADO (lo que más se falla): 1) Busca primero el verbo conjugado y pregunta «¿quién/qué + verbo?»; el sujeto concuerda en número y persona con el verbo (no es siempre el primer grupo: «Me gustan los libros» → suj = «los libros»). 2) El gv/pv NUNCA cubre al sujeto: si hay sujeto expreso, el gv empieza después de él (sujeto y predicado son dos bloques). El sujeto es un grupo propio (gn + suj, aunque sea una sola palabra como «Conor» o un pronombre) y queda FUERA del gv; nunca es complemento. 3) Sujeto omitido: si no hay sujeto expreso, no inventes un gn: rellena «sujeto_omitido» (yo, tú, él, ella, nosotros, vosotros, ellos); si es impersonal (llueve, hay, se vive bien, hace frío) pon «impersonal». 4) Pasiva (ser + participio, o pasiva refleja con se): el sujeto es PACIENTE (sujPac), el verbo es pv y el complemento agente (ag, gprep con «por») es opcional; la activa equivalente tendría ese sujeto como cd. Nunca pongas cd en una pasiva. 5) Atributo (atr) solo con ser, estar, parecer y semicopulativos: el predicado es gv + pn; con verbos predicativos es pv y NO hay atributo. 6) Predicativo (predSuj, predCD) lo llevan los verbos predicativos y concuerda con el sujeto o el CD («Conor gestionó motivado»: motivado = predSuj, predicado pv). Si el adjetivo se podría quitar y concuerda, es predicativo; si el verbo lo exige para tener sentido y es ser/estar, es atributo. 7) Orden de comprobación: verbo → sujeto → ¿copulativo? → atributo/predicativo → CD/CI/creg → circunstanciales.\n- Todas las palabras deben quedar dentro de algún grupo. La oración se divide en sujeto (gn + suj) y predicado (gv + pv/pn), salvo sujeto omitido o impersonales. El gv incluye todos los complementos del verbo.\n- Un gprep siempre tiene enl en su primera palabra y ter (gn, ssub…) hasta el final.\n- Cada tramo lleva UN solo tipo de grupo (gn, gprep, gadj o gadv), nunca dos: «del barco hundido» es gprep (+ cn); su término «barco hundido» es otro tramo más corto: gn + ter, y «hundido» es gadj + cn.\n- Un adjetivo con complemento («fascinado con la tripulación») forma UN gadj con la función (predSuj); el adjetivo suelto solo lleva nuc y su complemento es gprep + cadj. No repitas la función en la palabra suelta.\n- Equivalencias con la notación del colegio de los ejemplos: SN-Suj = gn+suj; SP-CReg = gprep+creg; SAdv-CCT = gadv+cct; SAdj-Atrib = gadj+atr; SAdj-Ady = gadj+ady; SN-Ap = gn+ap; P.S.Sust-CD = ssub+cd; SV-PV = gv+pv; SV-PN = gv+pn; N(V) = verbo; E = enl; NXO = nx; CCneg = ccNeg.\n';
 const AIGUIDE=(sent)=>'Eres profesor de Lengua Castellana (4.º ESO y Bachillerato, España) y analizas EXACTAMENTE como en el colegio: análisis completo en árbol, con todos los niveles.\nFormato:\n1) Da la categoría de CADA palabra con un tramo de una sola palabra: nuc, mod (artículos, posesivos y adjetivos dentro de un grupo nominal), enl, nx, verbo, det.\n2) Cada grupo lleva DOS entradas con el mismo seg: su tipo (gn, gprep, gadj, gadv, gv, ssub, subadj) y su función (suj, sujPac, cd, ci, creg, atr, predSuj, predCD, cla, cct, ccl, ccm, ccc, ccf, ag, cn, cadj, cadv, ter…). Ejemplo: «los alumnos» = gn + suj.\n3) El predicado es gv + pv (verbo no copulativo) o gv + pn (copulativo con atributo).\n4) Subordinada sustantiva = ssub + su función (ter, suj, cd…). Subordinada de relativo = subadj + cn.\n5) Los tramos deben anidarse sin cruzarse. Copia seg literalmente de la oración, sin puntuación. Si un tramo se repite, añade "n" (0 = primera aparición, 1 = segunda…).\n\n'+AIRULES+'\nIds válidos (id: nombre): '+FLISTALL()+'\n\nEjemplos resueltos tal como los hace el colegio:\n\n'+schoolExamples()+'\n\nOtros análisis del colegio parecidos a tu oración (notación del colegio):\n\n'+similarEx(sent||'',4)+'\n\n';
@@ -639,7 +689,7 @@ function sum(ok,bad,extra){const d=mk('div','sum');d.append(mk('span','tag ok','
 function award(g,perfect){let sc=g.ok*10+(perfect?30:0)-5*S.hints;if(S.gave)sc=0;sc=Math.max(0,sc);const d=sc-S.awarded;if(d>0){S.xp+=d;S.awarded=sc}if(perfect&&!S.gave&&!S.streaked){S.streak++;S.streaked=true}refreshStats()}
 
 /* pista de la selección actual */
-async function hintSel(){const r=selRange();if(!r)return;const bar=$('selbar');const old=bar.innerHTML;
+async function hintSel(){if(window.TEST&&TEST.on)return;const r=selRange();if(!r)return;const bar=$('selbar');const old=bar.innerHTML;
   const sol=await getSol(true);if(!sol||!sol.items){bar.textContent='No hay solución disponible para esta frase.';return}
   const txt=S.words.slice(r[0],r[1]+1).map(w=>w.t).join(' ');
   const ex=sol.items.filter(x=>x.s===r[0]&&x.e===r[1]);
@@ -764,8 +814,8 @@ async function askGrounded(prompt){
 function askPrompt(q){
   const hist=ASKHIST.slice(-4).map(h=>(h.r==='u'?'Alumno: ':'Profesor: ')+h.t.slice(0,500)).join('\n');
   return 'Eres profesor de Lengua Castellana de 4.º ESO y Bachillerato (España, Colegio El Valle). Un alumno te hace una duda de sintaxis. Se dice «grupo», no «sintagma»; usa la notación del colegio (GN/Suj, G.Prep/CCL, G.Adj/Atrib, GV/PV, NV, E, Mod…).\n'+
-  'MÉTODO: 1) Lee los APUNTES DEL COLEGIO de abajo: son la autoridad. 2) Busca en Google (RAE, gramáticas) para contrastar y completar. 3) Si una fuente general discrepa de los apuntes, responde como en el colegio y avisa en una línea de que otras fuentes lo llaman distinto. 4) Si ni los apuntes ni la web lo aclaran, dilo; no inventes.\n'+
-  'FORMATO (texto plano, claro y breve, máximo 180 palabras, sin tablas): «**Respuesta:** …», «**Según tus apuntes:** … (o «los apuntes no lo tratan»)», «**Contrastado en la web:** …». Pon un ejemplo corto si ayuda. Si el alumno pide frases, escribe cada frase en su propia línea empezando por «▶ » (solo la frase), con 8 a 16 palabras y una única interpretación, y explica en una línea qué practican.\n\n'+
+  'MÉTODO: 1) Lee los APUNTES DEL COLEGIO de abajo: son la autoridad. 2) Busca en la web (RAE, gramáticas) para contrastar y completar. 3) Si una fuente general discrepa de los apuntes, responde como en el colegio y avisa en una línea de que otras fuentes lo llaman distinto. 4) Si ni los apuntes ni la web lo aclaran, dilo; no inventes.\n'+
+  'FORMATO (texto plano, claro y breve, máximo 180 palabras, sin tablas): «**Respuesta:** …», «**Según tus apuntes:** … (o «los apuntes no lo tratan»)», «**Contrastado:** …». Pon un ejemplo corto si ayuda. Si el alumno pide frases, escribe cada frase en su propia línea empezando por «▶ » (solo la frase), con 8 a 16 palabras y una única interpretación, y explica en una línea qué practican.\n\n'+
   'APUNTES DEL COLEGIO:\n'+AIRULES+'\nAnálisis del colegio parecidos a la duda:\n'+similarEx(q,5)+'\n\n'+(hist?'CONVERSACIÓN PREVIA:\n'+hist+'\n\n':'')+'DUDA DEL ALUMNO: '+q}
 function askRender(box,txt){
   box.innerHTML='';
@@ -773,15 +823,77 @@ function askRender(box,txt){
     if(l.startsWith('▶')){const sent=l.replace(/^▶\s*/,'').replace(/\*\*/g,'');const d=mk('div','pr');d.append(mk('span',null,sent));const b=mk('button','btn','Practicar');b.onclick=()=>{$('amodal').hidden=true;$('txt').value=sent;$('use').click();window.scrollTo({top:0,behavior:'smooth'})};d.append(b);box.append(d);return}
     const p=document.createElement('p');const parts=l.split(/\*\*/);parts.forEach((t,i)=>{if(!t)return;if(i%2){const s=document.createElement('strong');s.textContent=t;p.append(s)}else p.append(t)});box.append(p)})}
 async function askGo(q){q=(q||$('aq').value).trim();if(!q)return;$('aq').value='';
-  const log=$('alog');log.append(mk('div','am u',q));const bx=mk('div','am b');bx.textContent='Mirando tus apuntes y buscando en Google…';log.append(bx);log.scrollTop=log.scrollHeight;$('ago').disabled=true;
+  const log=$('alog');log.append(mk('div','am u',q));const bx=mk('div','am b');bx.textContent='Pensando con tus apuntes…';log.append(bx);log.scrollTop=log.scrollHeight;$('ago').disabled=true;
   try{const r=await askGrounded(askPrompt(q));ASKHIST.push({r:'u',t:q},{r:'b',t:r.texto});askRender(bx,r.texto);
-    const sr=mk('span','src');if(r.fuentes&&r.fuentes.length){sr.append('Fuentes web: ');r.fuentes.forEach((f,i)=>{const a=document.createElement('a');a.href=f.uri;a.target='_blank';a.rel='noopener';a.textContent=f.title;if(i)sr.append(' · ');sr.append(a)})}else sr.textContent=r.sinWeb?'Aquí no hay búsqueda web (vista previa); en tu app sí.':'Sin fuentes web esta vez: respuesta basada en los apuntes. Contrástala si dudas.';bx.append(sr);
+    const sr=mk('span','src');if(r.fuentes&&r.fuentes.length){sr.append('Fuentes: ');r.fuentes.forEach((f,i)=>{const a=document.createElement('a');a.href=f.uri;a.target='_blank';a.rel='noopener';a.textContent=f.title;if(i)sr.append(' · ');sr.append(a)})}else sr.textContent=r.sinWeb?'Vista previa sin fuentes externas.':'Sin fuentes web esta vez: respuesta basada en los apuntes. Contrástala si dudas.';bx.append(sr);
     bx.append(mk('span','src','Respuesta de IA: puede fallar. Contrástala con tus apuntes.'))}
   catch(e){bx.textContent=aiErr(e)}finally{$('ago').disabled=false;log.scrollTop=log.scrollHeight}}
-$('askbtn').onclick=()=>{$('amodal').hidden=false;if(!$('alog').children.length)$('alog').append((()=>{const d=mk('div','am b');d.textContent='Pregúntame cualquier duda de sintaxis. Te respondo con tus apuntes y lo contrasto en Google. También puedo inventarte frases para practicar.';return d})());$('aq').focus()};
+$('askbtn').onclick=()=>{$('amodal').hidden=false;if(!$('alog').children.length)$('alog').append((()=>{const d=mk('div','am b');d.textContent='Pregúntame cualquier duda de sintaxis. Te respondo con tus apuntes y lo contrasto con otras fuentes. También puedo inventarte frases para practicar.';return d})());$('aq').focus()};
 $('aclose').onclick=()=>{$('amodal').hidden=true};
 $('ago').onclick=()=>askGo();
 $('aq').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askGo()}});
 ASKCHIPS.forEach(c=>{const b=mk('button','chip',c);b.onclick=()=>askGo(c);$('achips').append(b)});
+
+/* ===== Test (práctica / teoría) ===== */
+const TEST={on:false,kind:'practica',sents:[],i:0,res:[],delivered:false};
+window.TEST=TEST;
+const TBLK=[
+  {k:'sp',n:'Sujeto y predicado',w:.25,f:['suj','sujPac','gv','pv','pn']},
+  {k:'fn',n:'Funciones de los complementos',w:.40,f:[...COMPL,'ccNeg']},
+  {k:'es',n:'Estructura interna',w:.35,f:['gn','gprep','gadj','gadv','ssub','subadj','ter','cn','cadj','cadv','ady','ap','nx','enl','verbo']}];
+function tScore(sol,g){
+  const req=sol.items.filter(x=>!x.opt&&!FN[x.f].apo);const have=new Set();S.anns.forEach(a=>(a.fs||[]).forEach(f=>have.add(a.s+'-'+a.e+'-'+f)));
+  const bl=TBLK.map(b=>{const r=req.filter(x=>b.f.includes(x.f));return{k:b.k,n:b.n,w:b.w,t:r.length,ok:r.filter(x=>have.has(x.s+'-'+x.e+'-'+x.f)).length}});
+  const act=bl.filter(b=>b.t);const ws=act.reduce((a,b)=>a+b.w,0)||1;let sc=act.reduce((a,b)=>a+b.w/ws*(b.ok/b.t),0);
+  const pen=Math.min(.15,.03*g.bad);sc=Math.max(0,sc-pen);sc=Math.round(sc*20)/20;return{sc,bl,pen,bad:g.bad}}
+const f2=n=>(Math.round(n*100)/100).toString().replace('.',',');
+function tSetView(v){$('t-setup').hidden=v!=='setup';$('t-quiz').hidden=v!=='quiz';$('t-res').hidden=v!=='res'}
+function tOpen(){tSetView('setup');$('t-h').textContent='Test';$('tmsg').textContent='';$('tmodal').hidden=false}
+function tTopic(){const t=$('t-tema').value;return t?' Tema: '+t+'.':''}
+async function tPracticeSents(){
+  try{const r=await askJSON('Eres profesor de Lengua Castellana ('+$('t-lvl').value+', España). Escribe 2 oraciones DISTINTAS para un ejercicio de análisis sintáctico de examen.'+tTopic()+' Cada una de 9 a 16 palabras, con una única interpretación posible, sin ambigüedades ni recursos raros. '+($('t-lvl').value==='ESO'?'Oraciones simples con complementos del verbo.':'La primera, una oración simple con varios complementos; la segunda, con una subordinada o más estructura.')+' Responde solo con JSON: {"frases":["...","..."]}',{modelTier:'default',cache:false});
+    const f=(r&&r.frases||[]).map(x=>String(x).trim()).filter(x=>x.split(/\s+/).length>=5);if(f.length>=2)return f.slice(0,2)}catch(e){}
+  const pool=PRACTICE.slice();const a=pool.splice(Math.floor(Math.random()*pool.length),1)[0],b=pool[Math.floor(Math.random()*pool.length)];return[a,b]}
+async function tGo(){$('tgo').disabled=true;$('tmsg').textContent='La IA está preparando el test…';
+  try{if(TEST.kind==='practica'){TEST.sents=await tPracticeSents();TEST.i=0;TEST.res=[];TEST.on=true;$('tmodal').hidden=true;document.body.classList.add('testing');tLoadSentence()}
+    else await tQuizStart()}
+  catch(e){$('tmsg').textContent=aiErr(e)}finally{$('tgo').disabled=false}}
+function tLoadSentence(){TEST.delivered=false;$('txt').value=TEST.sents[TEST.i];$('use').click();tBar();window.scrollTo({top:0,behavior:'smooth'})}
+function tBar(){const b=$('tbar');b.hidden=false;b.innerHTML='';const l=mk('div');l.append(mk('b',null,'Test de práctica · Frase '+(TEST.i+1)+' de '+TEST.sents.length),mk('div','muted','Sin ayudas. Cada frase vale 1 punto.'));
+  const r=mk('div','row');r.style.gap='8px';
+  if(!TEST.delivered){const e=mk('button','btn pri','Entregar frase');e.onclick=tDeliver;r.append(e)}
+  else{const n=mk('button','btn pri',TEST.i<TEST.sents.length-1?'Siguiente frase':'Ver resultado');n.onclick=tNext;r.append(n)}
+  const x=mk('button','btn','Salir del test');x.onclick=tExit;r.append(x);b.append(l,r)}
+function tExit(){TEST.on=false;document.body.classList.remove('testing');$('tbar').hidden=true;showEntry()}
+async function tDeliver(){if(!S.anns.length){fbMsg(mk('div','note','Marca algo en la frase antes de entregarla.'));return}
+  fbMsg(mk('div','note','Corrigiendo…'));const sol=await getSol(true);
+  if(!sol||!sol.items){fbMsg(mk('div','note','No he podido corregir esta frase ahora. Inténtalo de nuevo.'));return}
+  const g=evalAnns(sol.items);S.st=g.st;S.checked=true;S.lastGrade=g;renderAll();
+  const sc=tScore(sol,g);TEST.res[TEST.i]={sent:S.sentence,...sc};TEST.delivered=true;tBar();
+  const o=mk('div','sum');o.append(mk('span','tag '+(sc.sc>=.5?'ok':'bad'),'Frase '+(TEST.i+1)+': '+f2(sc.sc)+' / 1'));const out=mk('div');out.append(o);
+  const note=sol.note;if(note)out.append(mk('div','note','Por qué: '+note));
+  out.append(mk('div','note','Verde = bien, rojo = mal. Lo que no marcaste no aparece: te lo contamos en el resultado final.'));fbMsg(out)}
+function tNext(){if(TEST.i<TEST.sents.length-1){TEST.i++;tLoadSentence();$('p-fb').innerHTML=''}else tFinish()}
+function tFinish(){TEST.on=false;document.body.classList.remove('testing');$('tbar').hidden=true;showEntry();
+  const tot=TEST.res.reduce((a,r)=>a+(r?r.sc:0),0);const box=$('t-res');box.innerHTML='';$('t-h').textContent='Resultado del test';
+  box.append(mk('div','big',f2(tot)+' / 2'),mk('div','muted',tot>=1?'Aprobado en análisis sintáctico.':'Todavía por debajo de 1 punto: repasa lo marcado.'));
+  TEST.res.forEach((r,i)=>{if(!r)return;const h=mk('div');h.style.marginTop='14px';h.append(mk('b',null,'Frase '+(i+1)+': '+f2(r.sc)+' / 1'),mk('div','muted','«'+r.sent+'»'));const bk=mk('div','brk');
+    r.bl.forEach(b=>{if(!b.t)return;const row=mk('div','r');const bar=mk('div','bar'+(b.ok/b.t<.5?' p':''));const fill=document.createElement('i');fill.style.width=Math.round(100*b.ok/b.t)+'%';bar.append(fill);row.append(mk('span',null,b.n),bar,mk('span','muted',b.ok+'/'+b.t));bk.append(row)});
+    h.append(bk);if(r.bad)h.append(mk('div','muted','Etiquetas incorrectas: '+r.bad+' (restan '+f2(r.pen)+').'));box.append(h)});
+  const b=mk('div','row');b.style.marginTop='16px';const again=mk('button','btn pri','Otro test');again.onclick=tOpen;const c=mk('button','btn','Cerrar');c.onclick=()=>{$('tmodal').hidden=true};b.append(again,c);box.append(b);tSetView('res');$('tmodal').hidden=false}
+/* teoría */
+const QZ={qs:[],i:0,ok:0,fails:[]};
+async function tQuizStart(){const r=await askJSON('Eres profesor de Lengua Castellana ('+$('t-lvl').value+', España, Colegio El Valle). Crea 5 preguntas de test de TEORÍA de sintaxis (4 opciones, una sola correcta) basadas en estos apuntes. Se dice «grupo», no «sintagma».'+tTopic()+' Preguntas claras, con distractores plausibles y sin ambigüedad.\nAPUNTES:\n'+AIRULES+'\nResponde solo con JSON: {"preguntas":[{"q":"...","opciones":["a","b","c","d"],"correcta":0,"explicacion":"una frase"}]}',{modelTier:'default',cache:false});
+  const qs=(r&&r.preguntas||[]).filter(q=>q&&q.q&&Array.isArray(q.opciones)&&q.opciones.length>=3&&Number.isInteger(q.correcta)&&q.correcta>=0&&q.correcta<q.opciones.length).slice(0,5);
+  if(qs.length<3)throw{code:'invalid_json'};QZ.qs=qs;QZ.i=0;QZ.ok=0;QZ.fails=[];$('t-h').textContent='Test de teoría';tSetView('quiz');tQuestion()}
+function tQuestion(){const q=QZ.qs[QZ.i],box=$('t-quiz');box.innerHTML='';box.append(mk('div','qn','Pregunta '+(QZ.i+1)+' de '+QZ.qs.length),mk('div','qq',q.q));let done=false;
+  q.opciones.forEach((o,k)=>{const b=mk('button','qo',o);b.onclick=()=>{if(done)return;done=true;const right=k===q.correcta;b.classList.add(right?'ok':'bad');if(!right){box.querySelectorAll('.qo')[q.correcta].classList.add('ok');QZ.fails.push(q.q)}else QZ.ok++;
+    if(q.explicacion)box.append(mk('div','qe',q.explicacion));const n=mk('button','btn pri',QZ.i<QZ.qs.length-1?'Siguiente':'Ver nota');n.onclick=()=>{if(QZ.i<QZ.qs.length-1){QZ.i++;tQuestion()}else tQuizEnd()};box.append(n)};box.append(b)})}
+function tQuizEnd(){const nota=Math.round(QZ.ok/QZ.qs.length*100)/10;const box=$('t-res');box.innerHTML='';$('t-h').textContent='Resultado del test';
+  box.append(mk('div','big',f2(nota)+' / 10'),mk('div','muted',QZ.ok+' de '+QZ.qs.length+' correctas.'));
+  if(QZ.fails.length){const h=mk('div');h.style.marginTop='12px';h.append(mk('b',null,'Para repasar:'));QZ.fails.forEach(f=>h.append(mk('div','qe','· '+f)));box.append(h)}
+  const b=mk('div','row');b.style.marginTop='16px';const again=mk('button','btn pri','Otro test');again.onclick=tOpen;const c=mk('button','btn','Cerrar');c.onclick=()=>{$('tmodal').hidden=true};b.append(again,c);box.append(b);tSetView('res')}
+document.querySelectorAll('.tk').forEach(b=>b.onclick=()=>{TEST.kind=b.dataset.k;document.querySelectorAll('.tk').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-checked',on)});$('t-crit').hidden=TEST.kind!=='practica'});
+$('testbtn').onclick=tOpen;$('tclose').onclick=()=>{$('tmodal').hidden=true};$('tgo').onclick=tGo;
 </script>
 </body></html>
