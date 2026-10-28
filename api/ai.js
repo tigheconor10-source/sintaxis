@@ -6,7 +6,7 @@ const RETRY = [404, 408, 409, 429, 500, 502, 503, 504];
 const clean = (t) => String(t || '').replace(/^```(?:json)?\s*|\s*```$/g, '').trim();
 
 async function geminiModels(key) {
-  const fixed = [process.env.GEMINI_MODEL, 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'].filter(Boolean);
+  const fixed = [process.env.GEMINI_MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean);
   try {
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', { headers: { 'x-goog-api-key': key } });
     const d = await r.json();
@@ -15,7 +15,10 @@ async function geminiModels(key) {
       .map((m) => m.name.replace('models/', ''))
       .sort()
       .reverse();
-    return [...new Set([...fixed.slice(0, 1), ...live.slice(0, 4), ...fixed.slice(1)])];
+    // Los modelos «lite» primero: tienen mucho más cupo gratis al día (los flash normales solo ~20/día).
+    const lite = live.filter((m) => /lite/i.test(m));
+    const rest = live.filter((m) => !/lite/i.test(m));
+    return [...new Set([...fixed.slice(0, 1), ...lite.slice(0, 2), ...fixed.slice(1, 3), ...rest.slice(0, 2), ...fixed.slice(3)])];
   } catch (e) {
     return fixed;
   }
