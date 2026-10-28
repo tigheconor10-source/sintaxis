@@ -11,3 +11,8 @@ Práctica de análisis sintáctico: pizarra con trazos enderezados, funciones po
 ## Estructura
 - `index.html`: la app completa (HTML, CSS y JS).
 - `api/ai.js`: proxy a Gemini.
+
+## Claves de IA (Vercel > Settings > Environment Variables)
+- `OPENAI_API_KEY` (ChatGPT) y/o `GEMINI_API_KEY` (Gemini). Si una falla, se usa la otra.
+- Opcionales: `OPENAI_MODEL`, `GEMINI_MODEL`, `AI_PRIMARY` (`openai` o `gemini`).
+- Tras añadirlas: Redeploy.
