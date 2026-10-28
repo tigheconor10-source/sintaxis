@@ -166,7 +166,7 @@ body.fs .board-scroll{height:calc(100vh - 150px)}
 .toolbar{display:flex;flex-wrap:wrap}
 .acts{margin-top:12px}
 @media(max-width:700px){.board-scroll{height:calc(100vh - 300px)}.toolbar .tb{padding:6px 8px;font-size:.8rem}}
-body.s1 .stats{display:none}
+body.s1 .stats>.pill{display:none}
 body.s1 #p-frase{max-width:760px;margin:8vh auto 0;width:100%;padding:24px}
 body.s1 #p-frase h2{font-size:1.6rem}
 body.s1 #txt{font-size:1.4rem;min-height:110px}
@@ -190,13 +190,25 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
 .bxs .srcb{margin:8px 0 6px}
 #p-boxes{scroll-margin-top:12px;border-width:2px}
 .soline{font-size:.9rem;font-weight:700;color:var(--f-suj);margin:6px 2px 0}
+
+.abox{width:min(680px,100%);max-height:92vh;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.alog{flex:1;overflow:auto;min-height:160px;margin-top:10px;display:flex;flex-direction:column;gap:10px}
+.am{padding:10px 12px;border-radius:12px;max-width:94%;white-space:pre-wrap;line-height:1.5;font-size:.92rem}
+.am.u{align-self:flex-end;background:var(--primary);color:var(--primary-fg)}
+.am.b{align-self:flex-start;background:var(--surface2)}
+.am.b p{margin:0 0 8px}
+.am .src{display:block;font-size:.78rem;color:var(--muted);margin-top:6px}
+.am .src a{color:var(--ink)}
+.am .pr{display:flex;gap:8px;align-items:center;margin:4px 0}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;font-size:.8rem;font-weight:600}
+.muted{color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="top">
   <div class="brand"><small>App</small>Sintaxis</div>
-  <div class="stats"><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
+  <div class="stats"><button class="btn" id="askbtn">💬 Pregunta a la IA</button><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
 </header>
 
 <section class="hero" id="hero">
@@ -278,6 +290,10 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
 <datalist id="fnlist"></datalist>
 <div id="gmodal" class="gmodal" hidden><div class="gbox"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Guía de sintaxis</h2><button class="btn" id="gclose">Cerrar</button></div><div class="row" id="gtabs" style="margin:10px 0"></div><div id="gbody" class="gbody"></div></div></div>
 </div>
+<div id="amodal" class="gmodal" hidden><div class="gbox abox"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Pregunta a la IA</h2><button class="btn" id="aclose">Cerrar</button></div>
+<p class="muted" style="margin:6px 0 0;font-size:.85rem">Responde con tus apuntes y contrasta en Google. Si difieren, manda el colegio.</p>
+<div id="alog" class="alog"></div><div class="row" id="achips" style="gap:6px;margin:8px 0"></div>
+<div class="row" style="gap:8px;align-items:flex-end"><textarea id="aq" rows="2" maxlength="400" placeholder="Escribe tu duda, p. ej. ¿Cómo distingo un CD de un atributo?" style="flex:1"></textarea><button class="btn pri" id="ago">Preguntar</button></div></div></div>
 <script>
 // <pure>
 const FAM={verbo:'--f-verbo',suj:'--f-suj',arg:'--f-arg',adj:'--f-adj',nom:'--f-nom',se:'--f-se',dis:'--f-dis',apo:'--f-apo'};
@@ -714,5 +730,37 @@ async function openSolution(){
   h.innerHTML='';const bxs=mk('div','bxs'),bxe=buildBoxes(sol.items);bxs.append(bxe);const hasSuj=sol.items.some(x=>x.f==='suj'||x.f==='sujPac'||/^se(Imp|PR)/.test(x.f));const soTxt=(sol.so&&!/^(ninguno|no|-)$/i.test(sol.so)&&!hasSuj)?sol.so:(sol.source==='bank'&&!hasSuj&&sol.note&&/Sujeto omitido \(([^)]+)\)/.test(sol.note)?RegExp.$1:'');h.append(src);if(soTxt){const so=mk('div','soline','Sujeto omitido ('+soTxt+') · '+soTxt+'/SO');h.append(so)}h.append(bxs);fitBoxes(bxs,bxe);
   const ex=mk('div','note','En esta frase no sumas XP.'+(sol.note?' '+sol.note:''));ex.style.marginTop='8px';h.append(ex)}
 $('show').onclick=openSolution;$('h2').onclick=openSolution;
+
+/* ===== Pregunta a la IA ===== */
+const ASKHIST=[];
+const ASKCHIPS=['¿Cómo distingo CD de atributo?','¿Qué es un complemento de régimen?','Dame 3 frases con sujeto paciente','¿Cuándo es predicativo y cuándo atributo?'];
+async function askGrounded(prompt){
+  if(sampleFn){const r=await sampleFn.json(prompt+'\nResponde solo con JSON: {"texto":"..."}',{modelTier:'default',cache:false});return{texto:String((r&&r.texto)||''),fuentes:[],sinWeb:true}}
+  let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt,search:true})})}catch(e){throw{code:'upstream_error'}}
+  let j=null;try{j=await r.json()}catch(e){}
+  if(!r.ok||!j||!j.texto)throw{code:r.status===429?'rate_limited':'upstream_error',detail:(j&&j.error)||(r.status===404?'No se encuentra /api/ai':'')};
+  return j}
+function askPrompt(q){
+  const hist=ASKHIST.slice(-4).map(h=>(h.r==='u'?'Alumno: ':'Profesor: ')+h.t.slice(0,500)).join('\n');
+  return 'Eres profesor de Lengua Castellana de 4.º ESO y Bachillerato (España, Colegio El Valle). Un alumno te hace una duda de sintaxis. Se dice «grupo», no «sintagma»; usa la notación del colegio (GN/Suj, G.Prep/CCL, G.Adj/Atrib, GV/PV, NV, E, Mod…).\n'+
+  'MÉTODO: 1) Lee los APUNTES DEL COLEGIO de abajo: son la autoridad. 2) Busca en Google (RAE, gramáticas) para contrastar y completar. 3) Si una fuente general discrepa de los apuntes, responde como en el colegio y avisa en una línea de que otras fuentes lo llaman distinto. 4) Si ni los apuntes ni la web lo aclaran, dilo; no inventes.\n'+
+  'FORMATO (texto plano, claro y breve, máximo 180 palabras, sin tablas): «**Respuesta:** …», «**Según tus apuntes:** … (o «los apuntes no lo tratan»)», «**Contrastado en la web:** …». Pon un ejemplo corto si ayuda. Si el alumno pide frases, escribe cada frase en su propia línea empezando por «▶ » (solo la frase), con 8 a 16 palabras y una única interpretación, y explica en una línea qué practican.\n\n'+
+  'APUNTES DEL COLEGIO:\n'+AIRULES+'\nAnálisis del colegio parecidos a la duda:\n'+similarEx(q,5)+'\n\n'+(hist?'CONVERSACIÓN PREVIA:\n'+hist+'\n\n':'')+'DUDA DEL ALUMNO: '+q}
+function askRender(box,txt){
+  box.innerHTML='';
+  txt.split('\n').forEach(line=>{const l=line.trim();if(!l){return}
+    if(l.startsWith('▶')){const sent=l.replace(/^▶\s*/,'').replace(/\*\*/g,'');const d=mk('div','pr');d.append(mk('span',null,sent));const b=mk('button','btn','Practicar');b.onclick=()=>{$('amodal').hidden=true;$('txt').value=sent;$('use').click();window.scrollTo({top:0,behavior:'smooth'})};d.append(b);box.append(d);return}
+    const p=document.createElement('p');const parts=l.split(/\*\*/);parts.forEach((t,i)=>{if(!t)return;if(i%2){const s=document.createElement('strong');s.textContent=t;p.append(s)}else p.append(t)});box.append(p)})}
+async function askGo(q){q=(q||$('aq').value).trim();if(!q)return;$('aq').value='';
+  const log=$('alog');log.append(mk('div','am u',q));const bx=mk('div','am b');bx.textContent='Mirando tus apuntes y buscando en Google…';log.append(bx);log.scrollTop=log.scrollHeight;$('ago').disabled=true;
+  try{const r=await askGrounded(askPrompt(q));ASKHIST.push({r:'u',t:q},{r:'b',t:r.texto});askRender(bx,r.texto);
+    const sr=mk('span','src');if(r.fuentes&&r.fuentes.length){sr.append('Fuentes web: ');r.fuentes.forEach((f,i)=>{const a=document.createElement('a');a.href=f.uri;a.target='_blank';a.rel='noopener';a.textContent=f.title;if(i)sr.append(' · ');sr.append(a)})}else sr.textContent=r.sinWeb?'Aquí no hay búsqueda web (vista previa); en tu app sí.':'Sin fuentes web esta vez: respuesta basada en los apuntes. Contrástala si dudas.';bx.append(sr);
+    bx.append(mk('span','src','Respuesta de IA: puede fallar. Contrástala con tus apuntes.'))}
+  catch(e){bx.textContent=aiErr(e)}finally{$('ago').disabled=false;log.scrollTop=log.scrollHeight}}
+$('askbtn').onclick=()=>{$('amodal').hidden=false;if(!$('alog').children.length)$('alog').append((()=>{const d=mk('div','am b');d.textContent='Pregúntame cualquier duda de sintaxis. Te respondo con tus apuntes y lo contrasto en Google. También puedo inventarte frases para practicar.';return d})());$('aq').focus()};
+$('aclose').onclick=()=>{$('amodal').hidden=true};
+$('ago').onclick=()=>askGo();
+$('aq').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askGo()}});
+ASKCHIPS.forEach(c=>{const b=mk('button','chip',c);b.onclick=()=>askGo(c);$('achips').append(b)});
 </script>
 </body></html>
