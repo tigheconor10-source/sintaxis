@@ -830,11 +830,13 @@ async function openSolution(){
   const sol=await getSol(true);
   if(!sol){pan.hidden=true;return}
   if(!sol.items){h.innerHTML='';nt.textContent='Tu solucionario tiene esta frase, pero no he podido leer el análisis completo de él. Prueba con una frase del banco o pide la solución con otra frase.';return}
-  if(!S.gave){S.gave=true;S.streak=0;refreshStats()}
+  drawSolution(sol,false)}
+function drawSolution(sol,test){const pan=$('p-boxes'),nt=$('bxnote'),h=$('bx');pan.hidden=false;const tt=pan.querySelector('b');if(tt)tt.textContent=test?'Solución correcta':'Solución';$('bxclose').hidden=!!test;
+  if(!test&&!S.gave){S.gave=true;S.streak=0;refreshStats()}
   nt.textContent='';
   const src=mk('div','srcb '+sol.source);src.textContent=sol.source==='ai'?'Solución generada por IA: puede tener fallos.'+(sol.warn&&sol.warn.length?' Esta vez no ha salido del todo coherente ('+sol.warn[0]+').':'')+' Si dudas, contrástala con tus apuntes.':sol.source==='bank'?'Solución del banco de la app (revisada).':'Solución sacada de '+(sol.name?'«'+sol.name+'»':'tu solucionario')+'.';
   h.innerHTML='';const bxs=mk('div','bxs'),bxe=buildBoxes(completeTree(S.words,sol.items));bxs.append(bxe);const hasSuj=sol.items.some(x=>x.f==='suj'||x.f==='sujPac'||/^se(Imp|PR)/.test(x.f));const soTxt=(sol.so&&!/^(ninguno|no|-)$/i.test(sol.so)&&!hasSuj)?sol.so:(sol.source==='bank'&&!hasSuj&&sol.note&&/Sujeto omitido \(([^)]+)\)/.test(sol.note)?RegExp.$1:'');h.append(src);if(soTxt){const so=mk('div','soline','Sujeto omitido ('+soTxt+') · '+soTxt+'/SO');h.append(so)}h.append(bxs);fitBoxes(bxs,bxe);
-  const ex=mk('div','note','En esta frase no sumas XP.'+(sol.note?' '+sol.note:''));ex.style.marginTop='8px';h.append(ex)}
+  const ex=mk('div','note',(test?'':'En esta frase no sumas XP.')+(sol.note?(test?'':' ')+sol.note:''));ex.style.marginTop='8px';if(ex.textContent)h.append(ex)}
 $('show').onclick=openSolution;$('h2').onclick=openSolution;
 
 /* ===== Pregunta a la IA ===== */
@@ -922,10 +924,9 @@ async function tDeliver(){if(TEST.delivering)return;if(!S.anns.length){tMsg('Mar
     const wrongs=[],wk=new Set();S.anns.forEach(a=>{const st=g.st[a.id];if(st!=='bad'&&st!=='mix'&&st!=='unk')return;wk.add(a.s+'-'+a.e);const same=full.filter(x=>x.s===a.s&&x.e===a.e&&(!FN[x.f].apo||BTYPE.includes(x.f))&&!['nuc','mod','det'].includes(x.f));wrongs.push({seg:sg(a.s,a.e),mine:(a.fs||[]).length?combLabel(a.fs):a.txt,right:same.length?combLabel(same.map(x=>x.f)):''})});
     const mm=new Map();g.miss.forEach(x=>{if(['nuc','mod','det'].includes(x.f)||wk.has(x.s+'-'+x.e))return;const k=x.s+'-'+x.e;if(!mm.has(k))mm.set(k,{seg:sg(x.s,x.e),fs:[]});mm.get(k).fs.push(x.f)});
     const misses=[...mm.entries()].map(([k,m])=>{const [a0,b0]=k.split('-').map(Number);const fs=full.filter(x=>x.s===a0&&x.e===b0&&(!FN[x.f].apo||BTYPE.includes(x.f))&&!['nuc','mod','det'].includes(x.f)).map(x=>x.f);return{seg:m.seg,right:combLabel(fs.length?fs:m.fs)}}).slice(0,8);
-    S.ghosts=[];const seen=new Set();const addG=x=>{const k=x.s+'-'+x.e+'-'+x.f;if(seen.has(k))return;seen.add(k);S.ghosts.push(ghostOf(x))};
-    g.miss.forEach(addG);g.miss.forEach(m=>full.filter(x=>x.s===m.s&&x.e===m.e&&BTYPE.includes(x.f)).forEach(addG));S.anns.forEach(a=>{const st=g.st[a.id];if(st==='bad'||st==='mix')full.filter(x=>x.s===a.s&&x.e===a.e&&(!FN[x.f].apo||BTYPE.includes(x.f))&&!x.opt).forEach(addG)});renderAll();
+    S.ghosts=[];renderAll();
     TEST.res[TEST.i]={sent:S.sentence,wrongs,misses,...sc};TEST.delivered=true;tBar();
-    tMsg('Frase '+(TEST.i+1)+': '+n10(sc.sc)+' / 10 · verde = bien, rojo = mal, punteado = lo que faltaba.'+(sol.note?' '+sol.note:''));$('tbar').scrollIntoView({block:'nearest'})}
+    tMsg('Frase '+(TEST.i+1)+': '+n10(sc.sc)+' / 10 · verde = bien, rojo = mal. Debajo tienes la solución correcta.'+(sol.note?' '+sol.note:''));drawSolution(sol,true);$('p-boxes').scrollIntoView({behavior:'smooth',block:'start'})}
   catch(e){tMsg('Algo ha fallado al corregir. Pulsa «Entregar frase» otra vez.')}
   finally{TEST.delivering=false}}
 function tNext(){if(TEST.i<TEST.sents.length-1){TEST.i++;tLoadSentence();$('p-fb').innerHTML=''}else tFinish()}
