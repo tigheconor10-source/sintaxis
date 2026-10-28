@@ -844,10 +844,12 @@ const ASKHIST=[];
 const ASKCHIPS=['¿Cómo distingo CD de atributo?','¿Qué es un complemento de régimen?','Dame 3 frases con sujeto paciente','¿Cuándo es predicativo y cuándo atributo?'];
 async function askGrounded(prompt){
   if(sampleFn){const r=await sampleFn.json(prompt+'\nResponde solo con JSON: {"texto":"..."}',{modelTier:'default',cache:false});return{texto:String((r&&r.texto)||''),fuentes:[],sinWeb:true}}
-  let r;try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt,search:true})})}catch(e){throw{code:'upstream_error'}}
-  let j=null;try{j=await r.json()}catch(e){}
-  if(!r.ok||!j||!j.texto)throw{code:r.status===429?'rate_limited':'upstream_error',detail:(j&&j.error)||(r.status===404?'No se encuentra /api/ai':'')};
-  return j}
+  let r,j=null;
+  for(let t=0;t<3;t++){
+    try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt,search:true})});j=null;try{j=await r.json()}catch(e){}
+      if(r.ok&&j&&j.texto)return j;console.warn('IA:',j&&j.error)}catch(e){r=null}
+    await new Promise(z=>setTimeout(z,1500))}
+  throw{code:'upstream_error',detail:(j&&j.error)||''}}
 function askPrompt(q){
   const hist=ASKHIST.slice(-4).map(h=>(h.r==='u'?'Alumno: ':'Profesor: ')+h.t.slice(0,500)).join('\n');
   return 'Eres profesor de Lengua Castellana de 4.º ESO y Bachillerato (España, Colegio El Valle). Un alumno te hace una duda de sintaxis. Se dice «grupo», no «sintagma»; usa la notación del colegio (GN/Suj, G.Prep/CCL, G.Adj/Atrib, GV/PV, NV, E, Mod…).\n'+
