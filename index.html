@@ -853,25 +853,28 @@ async function askGrounded(prompt){
 function askPrompt(q){
   const hist=ASKHIST.slice(-4).map(h=>(h.r==='u'?'Alumno: ':'Profesor: ')+h.t.slice(0,500)).join('\n');
   return 'Eres profesor de Lengua Castellana de 4.º ESO y Bachillerato (España, Colegio El Valle). Un alumno te hace una duda de sintaxis. Se dice «grupo», no «sintagma»; usa la notación del colegio (GN/Suj, G.Prep/CCL, G.Adj/Atrib, GV/PV, NV, E, Mod…).\n'+
+  'PRIMERO: entiende qué concepto pregunta el alumno (CD, CI, atributo, G.Adj, nexo, etc.). Si es una duda corta tipo «qué es X», empieza DEFINIENDO X con una explicación sencilla y un ejemplo analizado, y cómo reconocerlo. No hables de otros conceptos (por ejemplo, no hables del «que» si pregunta por el CD). Las frases ▶ deben practicar exactamente ese concepto.\n'+
   'MÉTODO: 1) Lee los APUNTES DEL COLEGIO de abajo: son la autoridad. 2) Busca en la web (RAE, gramáticas) para contrastar y completar. 3) Si una fuente general discrepa de los apuntes, responde como en el colegio y avisa en una línea de que otras fuentes lo llaman distinto. 4) Si ni los apuntes ni la web lo aclaran, dilo; no inventes.\n'+
   'FORMATO (texto plano, claro y breve, máximo 180 palabras, sin tablas): «**Respuesta:** …», «**Según tus apuntes:** … (o «los apuntes no lo tratan»)», «**Contrastado:** …». Pon un ejemplo corto si ayuda. Si el alumno pide frases, escribe cada frase en su propia línea empezando por «▶ » (solo la frase), con 8 a 16 palabras y una única interpretación, y explica en una línea qué practican.\n\n'+
   'APUNTES DEL COLEGIO:\n'+AIRULES+'\nAnálisis del colegio parecidos a la duda:\n'+similarEx(q,5)+'\n\n'+(hist?'CONVERSACIÓN PREVIA:\n'+hist+'\n\n':'')+'DUDA DEL ALUMNO: '+q}
 function askRender(box,txt){
   box.innerHTML='';
   txt.split('\n').forEach(line=>{const l=line.trim();if(!l){return}
-    if(l.startsWith('▶')){const sent=l.replace(/^▶\s*/,'').replace(/\*\*/g,'');const d=mk('div','pr');d.append(mk('span',null,sent));const b=mk('button','btn','Practicar');b.onclick=()=>{$('amodal').hidden=true;$('txt').value=sent;$('use').click();window.scrollTo({top:0,behavior:'smooth'})};d.append(b);box.append(d);return}
+    if(l.startsWith('▶')){const sent=l.replace(/^▶\s*/,'').replace(/\*\*/g,'');const d=mk('div','pr');d.append(mk('span',null,sent));const b=mk('button','btn','Practicar');b.onclick=()=>{ASKBACK=true;$('askback').hidden=false;$('amodal').hidden=true;$('txt').value=sent;$('use').click();window.scrollTo({top:0,behavior:'smooth'})};d.append(b);box.append(d);return}
     const p=document.createElement('p');const parts=l.split(/\*\*/);parts.forEach((t,i)=>{if(!t)return;if(i%2){const s=document.createElement('strong');s.textContent=t;p.append(s)}else p.append(t)});box.append(p)})}
 async function askGo(q){q=(q||$('aq').value).trim();if(!q)return;$('aq').value='';
   const log=$('alog');log.append(mk('div','am u',q));const bx=mk('div','am b');bx.textContent='Pensando con tus apuntes…';log.append(bx);log.scrollTop=log.scrollHeight;$('ago').disabled=true;
   try{const r=await askGrounded(askPrompt(q));ASKHIST.push({r:'u',t:q},{r:'b',t:r.texto});askRender(bx,r.texto);
     const sr=mk('span','src');if(r.fuentes&&r.fuentes.length){sr.append('Fuentes: ');r.fuentes.forEach((f,i)=>{const a=document.createElement('a');a.href=f.uri;a.target='_blank';a.rel='noopener';a.textContent=f.title;if(i)sr.append(' · ');sr.append(a)})}else sr.textContent=r.sinWeb?'Vista previa sin fuentes externas.':'Sin fuentes web esta vez: respuesta basada en los apuntes. Contrástala si dudas.';bx.append(sr);
     bx.append(mk('span','src','Respuesta de IA: puede fallar. Contrástala con tus apuntes.'))}
-  catch(e){bx.textContent=aiErr(e)}finally{$('ago').disabled=false;log.scrollTop=log.scrollHeight}}
-$('askbtn').onclick=()=>{$('amodal').hidden=false;if(!$('alog').children.length)$('alog').append((()=>{const d=mk('div','am b');d.textContent='Pregúntame cualquier duda de sintaxis. Te respondo con tus apuntes y lo contrasto con otras fuentes. También puedo inventarte frases para practicar.';return d})());$('aq').focus()};
+  catch(e){bx.textContent=aiErr(e);if(e&&e.detail){const dt=document.createElement('details');dt.className='src';const sm=document.createElement('summary');sm.textContent='Ver detalle del error';dt.append(sm,mk('div',null,String(e.detail)));bx.append(dt)}}finally{$('ago').disabled=false;log.scrollTop=log.scrollHeight}}
+$('askbtn').onclick=()=>{$('amodal').hidden=false;$('askback').hidden=true;if(!$('alog').children.length)$('alog').append((()=>{const d=mk('div','am b');d.textContent='Pregúntame cualquier duda de sintaxis. Te respondo con tus apuntes y lo contrasto con otras fuentes. También puedo inventarte frases para practicar.';return d})());$('aq').focus()};
 $('aclose').onclick=()=>{$('amodal').hidden=true};
 $('ago').onclick=()=>askGo();
 $('aq').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askGo()}});
 ASKCHIPS.forEach(c=>{const b=mk('button','chip',c);b.onclick=()=>askGo(c);$('achips').append(b)});
+
+let ASKBACK=false;{const b=mk('button','btn pri','← Volver a la duda');b.id='askback';b.hidden=true;b.style.cssText='position:fixed;left:16px;bottom:16px;z-index:40;box-shadow:0 4px 16px rgba(0,0,0,.2)';b.onclick=()=>{$('amodal').hidden=false;b.hidden=true;$('alog').scrollTop=$('alog').scrollHeight};document.body.append(b)}
 
 /* ===== Test (práctica / teoría) ===== */
 const TEST={on:false,kind:'practica',sents:[],i:0,res:[],delivered:false};
