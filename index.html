@@ -167,19 +167,28 @@ body.fs .board-scroll{height:calc(100vh - 150px)}
 .acts{margin-top:12px}
 @media(max-width:700px){.board-scroll{height:calc(100vh - 300px)}.toolbar .tb{padding:6px 8px;font-size:.8rem}}
 body.s1 .stats>.pill{display:none}
-body.s1 #p-frase{max-width:760px;margin:8vh auto 0;width:100%;padding:24px}
-body.s1 #p-frase h2{font-size:1.6rem}
-body.s1 #txt{font-size:1.4rem;min-height:110px}
-body.s1 #p-frase .btn{padding:11px 18px;font-size:1rem}
+body.s1{background-image:radial-gradient(var(--dot) 1.3px,transparent 1.4px);background-size:24px 24px;background-position:0 0}
+body.s1 #p-frase{max-width:1040px;margin:26px auto 0;width:100%;padding:28px 30px;border-radius:18px;box-shadow:0 22px 44px -26px rgba(22,32,47,.38),0 2px 6px rgba(22,32,47,.06)}
+body.s1 #p-frase h2{font-size:1.75rem;letter-spacing:-.01em}
+body.s1 #txt{font-size:1.5rem;min-height:116px}
+body.s1 #p-frase .btn{padding:12px 20px;font-size:1.05rem}
 .hero,.how{display:none}
-body.s1 .hero{display:block;max-width:760px;margin:6vh auto 0;width:100%;text-align:left}
-body.s1 .hero h1{font:600 clamp(1.9rem,4.5vw,2.8rem)/1.15 var(--serif);margin:0 0 10px;text-wrap:balance}
-body.s1 .hero .u{font-style:italic;border-bottom:4px solid var(--f-verbo)}
-body.s1 .hero p{margin:0;color:var(--muted);font-size:1.05rem;max-width:56ch}
-body.s1 #p-frase{margin-top:22px}
-body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:760px;margin:6px auto 0;width:100%}
-.how div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
-.how b{font-family:var(--serif)}.how span{color:var(--muted);font-size:.9rem}
+body.s1 .hero{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:40px;align-items:center;max-width:1040px;margin:3vh auto 0;width:100%;text-align:left}
+body.s1 .hero h1{font:600 clamp(2.2rem,4.3vw,3.4rem)/1.1 var(--serif);letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance}
+body.s1 .hero .u{font-style:italic;background:linear-gradient(var(--f-verbo),var(--f-verbo)) 0 100%/100% 6px no-repeat;padding-bottom:4px}
+body.s1 .hero p{margin:0;color:var(--muted);font-size:1.2rem;line-height:1.55;max-width:46ch}
+.demo{margin:0;background:var(--board);border:1px solid var(--line);border-radius:18px;padding:26px 26px 18px;box-shadow:0 22px 44px -28px rgba(22,32,47,.4),0 2px 6px rgba(22,32,47,.06);background-image:radial-gradient(var(--dot) 1.2px,transparent 1.3px);background-size:20px 20px}
+.dg{display:grid;grid-template-columns:repeat(5,auto);column-gap:10px;row-gap:9px;justify-content:center}
+.dw{font:500 clamp(1.15rem,2.2vw,1.55rem)/1.2 var(--serif);text-align:center;color:var(--fg)}
+.dc{font:700 .85rem var(--sans);text-align:center;color:var(--muted);border-top:3px solid var(--line);padding-top:4px}
+.dc.v{color:var(--f-verbo);border-top-color:var(--f-verbo)}
+.dl{font:700 .9rem var(--sans);text-align:center;color:var(--c);border-top:3px solid var(--c);background:color-mix(in srgb,var(--c) 10%,transparent);border-radius:0 0 8px 8px;padding:4px 8px;transform-origin:left center;animation:dldraw .8s cubic-bezier(.16,1,.3,1) var(--d,.6s) both}
+@keyframes dldraw{from{opacity:0;transform:scaleX(.15)}to{opacity:1;transform:none}}
+.demo figcaption{margin-top:14px;text-align:center;font-size:.9rem;color:var(--muted)}
+body.s1 .how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;max-width:1040px;margin:34px auto 0;width:100%}
+.how div{border-top:4px solid var(--c,var(--line));padding-top:12px;display:flex;flex-direction:column;gap:4px}
+.how b{font:600 1.2rem var(--serif)}.how span{color:var(--muted);font-size:1rem;line-height:1.5}
+@media(max-width:900px){body.s1 .hero{grid-template-columns:minmax(0,1fr);gap:22px;margin-top:3vh}body.s1 .how{grid-template-columns:minmax(0,1fr);gap:16px}body.s1 #p-frase{padding:20px 18px}}
 .bxs{overflow-x:auto;padding:6px 0 2px}
 .bx{font-size:17px;display:grid;column-gap:8px;row-gap:9px;width:max-content;min-width:100%;padding:8px 4px}
 .bx .w{font-family:var(--serif);font-size:1.75em;text-align:center;padding:0 2px;color:var(--fg)}
@@ -208,12 +217,24 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
 <div class="wrap">
 <header class="top">
   <div class="brand"><small>App</small>Sintaxis</div>
-  <div class="stats"><button class="btn" id="askbtn">💬 Pregunta a la IA</button><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
+  <div class="stats"><button class="btn" id="askbtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg>Pregunta a la IA</button><button class="btn" id="guidebtn">Guía de sintaxis</button><span class="pill" id="lvl">Nivel 1</span><span class="pill"><span id="xp">0 XP</span><span class="xpbar"><i id="xpb"></i></span></span><span class="pill" id="streak">Racha 0</span></div>
 </header>
 
 <section class="hero" id="hero">
-  <h1>Aprende análisis sintáctico <span class="u">practicando</span></h1>
-  <p>Escribe una frase, márcala en una pizarra y comprueba tu análisis con el banco de la app, tus solucionarios o la IA.</p>
+  <div class="hero-t">
+    <h1>Aprende análisis sintáctico <span class="u">practicando</span></h1>
+    <p>Escribe una frase, márcala en una pizarra y comprueba tu análisis con el banco de la app, tus solucionarios o la IA.</p>
+  </div>
+  <figure class="demo" role="img" aria-label="Ejemplo de análisis: «Los alumnos estudian la lección.» Sujeto: los alumnos. Predicado verbal: estudian la lección. Complemento directo: la lección.">
+    <div class="dg" aria-hidden="true">
+      <span class="dw" style="grid-column:1;grid-row:1">Los</span><span class="dw" style="grid-column:2;grid-row:1">alumnos</span><span class="dw" style="grid-column:3;grid-row:1">estudian</span><span class="dw" style="grid-column:4;grid-row:1">la</span><span class="dw" style="grid-column:5;grid-row:1">lección.</span>
+      <span class="dc" style="grid-column:1;grid-row:2">Mod</span><span class="dc" style="grid-column:2;grid-row:2">N</span><span class="dc v" style="grid-column:3;grid-row:2">NV</span><span class="dc" style="grid-column:4;grid-row:2">Mod</span><span class="dc" style="grid-column:5;grid-row:2">N</span>
+      <span class="dl" style="grid-column:4/6;grid-row:3;--c:var(--f-arg);--d:.9s">GN/CD</span>
+      <span class="dl" style="grid-column:1/3;grid-row:4;--c:var(--f-suj);--d:1.15s">GN/Suj</span>
+      <span class="dl" style="grid-column:3/6;grid-row:4;--c:var(--f-verbo);--d:1.3s">GV/PV</span>
+    </div>
+    <figcaption>Así queda un análisis: cada parte con su color.</figcaption>
+  </figure>
 </section>
 <section class="card" id="p-frase">
   <div id="inp">
@@ -234,13 +255,13 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
 </section>
 
 <section class="how" id="how">
-  <div><b>1 · Frase</b><span>Escríbela tú o pide una a la IA.</span></div>
-  <div><b>2 · Pizarra</b><span>Selecciona palabras y escribe qué son debajo de la línea.</span></div>
-  <div><b>3 · Comprobar</b><span>Verde si está bien, rojo si no. Con pistas si las necesitas.</span></div>
+  <div style="--c:var(--f-verbo)"><b>1 · Frase</b><span>Escríbela tú o pide una a la IA.</span></div>
+  <div style="--c:var(--f-suj)"><b>2 · Pizarra</b><span>Selecciona palabras y escribe qué son debajo de la línea.</span></div>
+  <div style="--c:var(--ok)"><b>3 · Comprobar</b><span>Verde si está bien, rojo si no. Con pistas si las necesitas.</span></div>
 </section>
 <div class="work" id="work" hidden>
   <div class="toolbar" role="toolbar" aria-label="Herramientas de la pizarra">
-    <button class="tb" id="chg2">← Nueva frase</button>
+    <button class="tb" id="chg2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Nueva frase</button>
     <span class="sep"></span>
     <button class="tb" id="t-assign" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M5 3l14 8-6 2-3 6z"/></svg>Seleccionar</button>
     <button class="tb" id="t-pen" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg>Lápiz</button>
@@ -270,7 +291,7 @@ body.s1 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr
     </div>
   </div>
   <div class="fb" id="p-fb" aria-live="polite"></div>
-  <section class="card" id="p-boxes" hidden style="margin-top:12px"><div class="row" style="justify-content:space-between"><b style="font-size:1.05rem">Solución</b><button class="btn" id="bxclose">← Volver a mi respuesta</button></div><p class="note" id="bxnote" style="margin:6px 0 0"></p><div class="bxs" id="bx"></div></section>
+  <section class="card" id="p-boxes" hidden style="margin-top:12px"><div class="row" style="justify-content:space-between"><b style="font-size:1.05rem">Solución</b><button class="btn" id="bxclose"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Volver a mi respuesta</button></div><p class="note" id="bxnote" style="margin:6px 0 0"></p><div class="bxs" id="bx"></div></section>
   <details class="card refs" id="p-ref" style="margin-top:16px">
     <summary style="cursor:pointer;font-weight:700">Solucionarios oficiales (opcional)</summary>
     <p class="note" style="margin:8px 0">Sube un PDF, DOCX, TXT o una foto de la solución manuscrita (la IA la pasa a texto y tú la revisas). Se consulta primero y no gasta IA. Todo se procesa en tu navegador.</p>
@@ -503,7 +524,7 @@ $('words').addEventListener('pointermove',e=>{if(!dr||dr.touch||!(e.buttons&1))r
 window.addEventListener('pointerup',()=>{if(dr){if(!dr.moved)tap(dr.a);else renderSel(true)}dr=null});
 $('words').addEventListener('keydown',e=>{const w=e.target.closest('.w');if(!w)return;const i=+w.dataset.i;if(e.key==='Enter'||e.key===' '){e.preventDefault();tap(i)}else if(e.key==='ArrowRight'&&w.nextSibling)w.nextSibling.focus();else if(e.key==='ArrowLeft'&&w.previousSibling)w.previousSibling.focus()});
 function renderSel(focus){const r=selRange();const bar=$('selbar');document.querySelectorAll('.w').forEach((el,i)=>el.classList.toggle('sel',!!r&&i>=r[0]&&i<=r[1]));bar.innerHTML='';
-  if(!r){bar.textContent='Selecciona palabras (toca o arrastra). Se traza la línea y escribes debajo qué son, por ejemplo GPrep/CCL.'}else{const t=S.words.slice(r[0],r[1]+1).map(x=>x.t).join(' ');const s=document.createElement('strong');s.textContent='«'+t+'»';const b=document.createElement('button');b.className='btn';b.textContent='Cancelar';b.onclick=cancelDraft;const h=document.createElement('button');h.className='btn pri';h.textContent='💡 Ver respuesta de esto';h.title='Muestra qué es esta selección, sin ver el resto';h.onclick=hintSel;bar.append('Escribe qué es y pulsa Enter: ',s,h,b)}
+  if(!r){bar.textContent='Selecciona palabras (toca o arrastra). Se traza la línea y escribes debajo qué son, por ejemplo GPrep/CCL.'}else{const t=S.words.slice(r[0],r[1]+1).map(x=>x.t).join(' ');const s=document.createElement('strong');s.textContent='«'+t+'»';const b=document.createElement('button');b.className='btn';b.textContent='Cancelar';b.onclick=cancelDraft;const h=document.createElement('button');h.className='btn pri';h.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Ver respuesta de esto';h.title='Muestra qué es esta selección, sin ver el resto';h.onclick=hintSel;bar.append('Escribe qué es y pulsa Enter: ',s,h,b)}
   renderMarks();if(focus&&r){const i=$('draftIn');if(i)setTimeout(()=>{i.focus();i.setSelectionRange(i.value.length,i.value.length)},0)}}
 function cancelDraft(){S.sel=null;S.editId=null;S.draftTxt='';renderSel(false)}
 function commitDraft(){const t=(S.draftTxt||'').trim();const r=selRange();if(!r||!t)return;snap();const fs=parseLabel(t);if(S.editId){const a=S.anns.find(x=>x.id===S.editId);if(a){a.txt=t;a.fs=fs}}else S.anns.push({id:S.nid++,s:r[0],e:r[1],txt:t,fs});S.sel=null;S.draftTxt='';S.editId=null;changed()}
@@ -532,7 +553,7 @@ function renderMarks(){const ws=[...$('words').children];const box=$('marks');bo
   items.forEach(it=>{const st=it.k==='ann'?(S.st[it.id]||''):'';const cls=it.k+' '+(st==='ok'||st==='bad'?st:'');const top=it.lv*46;
     const br=document.createElement('div');br.className='br '+cls;br.style.cssText='--c:'+it.col+';left:'+it.x1+'px;width:'+(it.x2-it.x1)+'px;top:'+top+'px';box.appendChild(br);
     const lb=document.createElement('div');lb.className='lb '+cls;lb.style.cssText='--c:'+it.col+';left:'+it.lx+'px;top:'+(top+10)+'px';
-    if(it.k==='draft'){const inp=document.createElement('input');inp.id='draftIn';inp.type='text';inp.setAttribute('list','fnlist');inp.autocomplete='off';inp.placeholder='¿Qué es? Ej.: GPrep/CCL';inp.value=S.draftTxt;inp.setAttribute('aria-label','Función de la selección');inp.style.width=(it.lw-8)+'px';inp.oninput=()=>{S.draftTxt=inp.value};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commitDraft()}else if(e.key==='Escape'){e.preventDefault();cancelDraft()}};lb.appendChild(inp);const hb=document.createElement('button');hb.textContent='💡';hb.title='Ver respuesta de esta selección';hb.setAttribute('aria-label','Ver respuesta de esta selección');hb.onclick=hintSel;lb.appendChild(hb)}
+    if(it.k==='draft'){const inp=document.createElement('input');inp.id='draftIn';inp.type='text';inp.setAttribute('list','fnlist');inp.autocomplete='off';inp.placeholder='¿Qué es? Ej.: GPrep/CCL';inp.value=S.draftTxt;inp.setAttribute('aria-label','Función de la selección');inp.style.width=(it.lw-8)+'px';inp.oninput=()=>{S.draftTxt=inp.value};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();commitDraft()}else if(e.key==='Escape'){e.preventDefault();cancelDraft()}};lb.appendChild(inp);const hb=document.createElement('button');hb.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>';hb.title='Ver respuesta de esta selección';hb.setAttribute('aria-label','Ver respuesta de esta selección');hb.onclick=hintSel;lb.appendChild(hb)}
     else{const mark=st==='ok'?'✓ ':st==='bad'?'✗ ':st==='unk'?'? ':'';const t=document.createElement('span');t.className='lt';t.textContent=mark+it.txt;if(it.k==='ann'){t.title=st==='unk'?'No reconozco esta etiqueta. Clic para editar.':'Clic para editar';t.onclick=()=>startEdit(it.id)}lb.appendChild(t);
       if(it.k==='ann'){const x=document.createElement('button');x.textContent='×';x.title='Quitar';x.setAttribute('aria-label','Quitar '+it.txt);x.onclick=()=>removeAnn(it.id);lb.appendChild(x)}}
     box.appendChild(lb);
