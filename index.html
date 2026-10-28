@@ -243,6 +243,13 @@ body.s1 .how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px
 .qo{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;margin:0 0 8px;font-weight:600;color:var(--fg)}
 .qo.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,var(--surface));color:var(--ok)}
 .qo.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--surface));color:var(--bad)}
+.qo.sel{border-color:var(--ink);background:color-mix(in srgb,var(--ink) 9%,var(--surface))}
+.qdots{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 10px}
+.qd{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:.8rem;color:var(--muted)}
+.qd.on{background:color-mix(in srgb,var(--ink) 14%,var(--surface));color:var(--fg);border-color:var(--ink)}
+.qd.cur{outline:2px solid var(--fg);outline-offset:1px}
+.qnav{display:flex;justify-content:space-between;gap:10px}
+.qnav .btn:disabled{opacity:.4}
 .qe{font-size:.9rem;color:var(--muted);margin:8px 0}
 .tbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px}
 .tbar b{font:600 1.05rem var(--serif)}.tbar .muted{font-size:.85rem}
@@ -251,6 +258,8 @@ body.s1 .how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px
 .brk .r{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto;gap:10px;align-items:center;font-size:.88rem}
 .brk .bar{height:9px;border-radius:5px;background:var(--surface2);overflow:hidden}.brk .bar i{display:block;height:100%;background:var(--ok)}
 .brk .bar.p i{background:var(--bad)}
+#work.tlocked .board-scroll,#work.tlocked #selbar{pointer-events:none}
+#work.tlocked #selbar{opacity:.5}
 body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testing #chk,body.testing #aichk,body.testing #chg2,body.testing #hmenu,body.testing #selbar .btn.pri{display:none!important}
 </style>
 </head>
@@ -361,7 +370,7 @@ body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testin
 <div id="t-setup">
   <p class="muted" style="margin:6px 0 12px;font-size:.9rem">Test rápido con preguntas de tus apuntes. Elige cómo quieres practicar.</p>
   <div class="tkind" role="radiogroup" aria-label="Tipo de test">
-    <button class="tk on" role="radio" aria-checked="true" data-k="practica"><b>Práctica</b><span>2 frases en la pizarra, sin ayudas. Vale 2 puntos.</span></button>
+    <button class="tk on" role="radio" aria-checked="true" data-k="practica"><b>Práctica</b><span>2 frases en la pizarra, sin ayudas. Nota sobre 10.</span></button>
     <button class="tk" role="radio" aria-checked="false" data-k="teoria"><b>Teoría</b><span>10 preguntas A/B/C, 1 punto cada una. Nota sobre 10.</span></button>
   </div>
   <div class="row" style="margin-top:12px">
@@ -369,8 +378,8 @@ body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testin
     <label class="f" for="t-tema">Tema<select id="t-tema"><option value="">Cualquiera</option><option>Sujeto y predicado</option><option>Complementos del verbo (CD, CI, régimen, atributo)</option><option>Predicativo y atributo</option><option>Pasiva y complemento agente</option><option>Valores del «se»</option><option>Oraciones subordinadas</option></select></label>
   </div>
   <details class="crit" id="t-crit" style="margin-top:12px"><summary>Cómo se califica la práctica</summary>
-    <p>Basado en los criterios de la PAU (por ejemplo, Castilla y León): el análisis sintáctico vale <b>2 puntos</b> y se valora la identificación de las oraciones y sus nexos, la clasificación y la estructura de los grupos (categoría, función y estructura interna). Vale cualquier modelo de análisis si es claro.</p>
-    <p>En la app, <b>1 punto por frase</b>: 0,25 sujeto y predicado · 0,40 funciones de los complementos · 0,35 estructura interna (grupos, términos, enlaces, nexos). Cada etiqueta incorrecta resta 0,03 (máximo 0,15). Sin pistas ni «Mostrar respuesta».</p>
+    <p>Basado en los criterios de la PAU (por ejemplo, Castilla y León): el análisis sintáctico vale 2 puntos y se valora la identificación de las oraciones y sus nexos, la clasificación y la estructura de los grupos (categoría, función y estructura interna). Vale cualquier modelo de análisis si es claro. Aquí se pasa todo a <b>nota sobre 10</b>.</p>
+    <p>Cada frase es la mitad de la nota: <b>25 % sujeto y predicado · 40 % funciones de los complementos · 35 % estructura interna</b> (grupos, términos, enlaces, nexos). Cada etiqueta incorrecta resta 0,3 puntos de esa frase (máximo 1,5). Sin pistas ni «Mostrar respuesta».</p>
   </details>
   <div class="row" style="margin-top:14px"><button class="btn pri" id="tgo">Empezar test</button><span class="note" id="tmsg"></span></div>
 </div>
@@ -872,21 +881,37 @@ function tScore(sol,g){
   const bl=TBLK.map(b=>{const r=req.filter(x=>b.f.includes(x.f));return{k:b.k,n:b.n,w:b.w,t:r.length,ok:r.filter(x=>have.has(x.s+'-'+x.e+'-'+x.f)).length}});
   const act=bl.filter(b=>b.t);const ws=act.reduce((a,b)=>a+b.w,0)||1;let sc=act.reduce((a,b)=>a+b.w/ws*(b.ok/b.t),0);
   const pen=Math.min(.15,.03*g.bad);sc=Math.max(0,sc-pen);sc=Math.round(sc*20)/20;return{sc,bl,pen,bad:g.bad}}
+const n10=x=>f2(Math.round(x*100)/10);
 const f2=n=>(Math.round(n*100)/100).toString().replace('.',',');
 function tSetView(v){$('t-setup').hidden=v!=='setup';$('t-quiz').hidden=v!=='quiz';$('t-res').hidden=v!=='res'}
 function tOpen(){tSetView('setup');$('t-h').textContent='Test';$('tmsg').textContent='';$('tmodal').hidden=false}
 function tTopic(){const t=$('t-tema').value;return t?' Tema: '+t+'.':''}
-function tPracticeSents(){const k=TOPK[$('t-tema').value]||'';const MAP={comp:['regimen','locativo'],pred:['predicativo'],pas:['agente'],se:['se'],sub:['colegio']};
-  const long=x=>x.text.split(/\s+/).length>17;let pool=BANK.filter(x=>MAP[k]?MAP[k].includes(x.tema):!long(x));
-  if(pool.length<2)pool=pool.concat(BANK.filter(x=>!pool.includes(x)&&!long(x)));return shuf(pool).slice(0,2).map(x=>x.text)}
-function tGo(){if(TEST.kind==='practica'){TEST.sents=tPracticeSents();TEST.i=0;TEST.res=[];TEST.on=true;$('tmodal').hidden=true;document.body.classList.add('testing');tLoadSentence()}else tQuizStart()}
+const LSget=(k)=>{try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return[]}};
+const LSadd=(k,vals,max)=>{try{const a=LSget(k).concat(vals).slice(-max);localStorage.setItem(k,JSON.stringify(a))}catch(e){}};
+const withTimeout=(pr,ms)=>Promise.race([pr,new Promise((_,rej)=>setTimeout(()=>rej({code:'timeout'}),ms))]);
+const seed=()=>Math.random().toString(36).slice(2,7);
+function bankSents(){const k=TOPK[$('t-tema').value]||'';const MAP={comp:['regimen','locativo'],pred:['predicativo'],pas:['agente'],se:['se'],sub:['colegio']};
+  const long=x=>x.text.split(/\s+/).length>17;const used=LSget('sx_usedS');let pool=BANK.filter(x=>MAP[k]?MAP[k].includes(x.tema):!long(x));
+  pool=pool.concat(BANK.filter(x=>!pool.includes(x)&&!long(x)));const fresh=pool.filter(x=>!used.includes(x.text));const base=fresh.length>=2?fresh:pool;
+  const top=MAP[k]?base.filter(x=>MAP[k].includes(x.tema)):base;const pick=shuf(top).slice(0,2);if(pick.length<2)pick.push(...shuf(base.filter(x=>!pick.includes(x))).slice(0,2-pick.length));
+  LSadd('sx_usedS',pick.map(x=>x.text),30);return pick.map(x=>x.text)}
+async function tPracticeSents(){
+  try{const prev=LSget('sx_genS').slice(-8).join(' | ');const r=await withTimeout(askJSON('Eres profesor de Lengua Castellana ('+$('t-lvl').value+', España). Escribe 2 oraciones NUEVAS y DISTINTAS entre sí para un ejercicio de análisis sintáctico de examen (variante '+seed()+').'+tTopic()+' Cada una de 9 a 16 palabras, con una única interpretación posible, sin ambigüedades ni recursos raros. '+($('t-lvl').value==='ESO'?'Oraciones simples con complementos del verbo.':'La primera, una oración simple con varios complementos; la segunda, con una subordinada o más estructura.')+(prev?' No repitas ni imites estas: '+prev+'.':'')+' Responde solo con JSON: {"frases":["...","..."]}',{modelTier:'default',cache:false}),14000);
+    const f=(r&&r.frases||[]).map(x=>String(x).trim()).filter(x=>x.split(/\s+/).length>=5);if(f.length>=2){LSadd('sx_genS',f.slice(0,2),12);return{sents:f.slice(0,2),ai:true}}}catch(e){}
+  return{sents:bankSents(),ai:false}}
+async function tGo(){if(TEST.starting)return;TEST.starting=true;$('tgo').disabled=true;$('tmsg').textContent='Preparando el test…';
+  try{if(TEST.kind==='practica'){const r=await tPracticeSents();TEST.sents=r.sents;TEST.ai=r.ai;TEST.i=0;TEST.res=[];TEST.on=true;$('tmodal').hidden=true;document.body.classList.add('testing');tLoadSentence()}else await tQuizStart()}
+  finally{TEST.starting=false;$('tgo').disabled=false;$('tmsg').textContent=''}}
 function tLoadSentence(){TEST.delivered=false;$('txt').value=TEST.sents[TEST.i];$('use').click();tBar();window.scrollTo({top:0,behavior:'smooth'})}
-function tBar(){const b=$('tbar');b.hidden=false;b.innerHTML='';const l=mk('div');l.append(mk('b',null,'Test de práctica · Frase '+(TEST.i+1)+' de '+TEST.sents.length),mk('div','muted','Sin ayudas. Cada frase vale 1 punto.'));
+function tBar(){const b=$('tbar');b.hidden=false;b.innerHTML='';const l=mk('div');l.append(mk('b',null,'Test de práctica · Frase '+(TEST.i+1)+' de '+TEST.sents.length),mk('div','muted','Sin ayudas. Nota de cada frase sobre 10.'+(TEST.delivered?'':' Puedes cambiar tu respuesta hasta que la entregues.')));
   const r=mk('div','row');r.style.gap='8px';
-  if(!TEST.delivered){const e=mk('button','btn pri','Entregar frase');e.onclick=tDeliver;r.append(e)}
+  if(!TEST.delivered){const e=mk('button','btn pri','Entregar frase');e.onclick=tAskDeliver;r.append(e)}
   else{const n=mk('button','btn pri',TEST.i<TEST.sents.length-1?'Siguiente frase':'Ver resultado');n.onclick=tNext;r.append(n)}
-  const x=mk('button','btn','Salir del test');x.onclick=tExit;r.append(x);b.append(l,r)}
-function tExit(){TEST.on=false;document.body.classList.remove('testing');$('tbar').hidden=true;showEntry()}
+  const x=mk('button','btn','Salir del test');x.onclick=tAskExit;r.append(x);b.append(l,r);$('work').classList.toggle('tlocked',!!TEST.delivered)}
+function tExit(){TEST.on=false;$('work').classList.remove('tlocked');document.body.classList.remove('testing');$('tbar').hidden=true;showEntry()}
+function tConfirm(msg,yes,no,onYes){const b=$('tbar');b.innerHTML='';const l=mk('div');l.append(mk('b',null,msg));const r=mk('div','row');r.style.gap='8px';const y=mk('button','btn pri',yes);y.onclick=onYes;const n=mk('button','btn',no);n.onclick=tBar;r.append(y,n);b.append(l,r)}
+function tAskDeliver(){if(!S.anns.length){tMsg('Marca algo en la frase antes de entregarla.');return}tConfirm('¿Entregar esta frase? Después no podrás cambiar tu respuesta.','Sí, entregar','Seguir revisando',()=>{tBar();tDeliver()})}
+function tAskExit(){tConfirm('¿Salir del test? Perderás tu progreso.','Sí, salir','Seguir con el test',tExit)}
 function tMsg(t){const b=$('tbar');let m=b.querySelector('.tmsg');if(!m){m=mk('div','tmsg muted');b.append(m);m.style.flexBasis='100%'}m.textContent=t}
 async function tDeliver(){if(TEST.delivering)return;if(!S.anns.length){tMsg('Marca algo en la frase antes de entregarla.');return}
   TEST.delivering=true;tMsg('Corrigiendo…');
@@ -900,27 +925,27 @@ async function tDeliver(){if(TEST.delivering)return;if(!S.anns.length){tMsg('Mar
     S.ghosts=[];const seen=new Set();const addG=x=>{const k=x.s+'-'+x.e+'-'+x.f;if(seen.has(k))return;seen.add(k);S.ghosts.push(ghostOf(x))};
     g.miss.forEach(addG);g.miss.forEach(m=>full.filter(x=>x.s===m.s&&x.e===m.e&&BTYPE.includes(x.f)).forEach(addG));S.anns.forEach(a=>{const st=g.st[a.id];if(st==='bad'||st==='mix')full.filter(x=>x.s===a.s&&x.e===a.e&&(!FN[x.f].apo||BTYPE.includes(x.f))&&!x.opt).forEach(addG)});renderAll();
     TEST.res[TEST.i]={sent:S.sentence,wrongs,misses,...sc};TEST.delivered=true;tBar();
-    tMsg('Frase '+(TEST.i+1)+': '+f2(sc.sc)+' / 1 · verde = bien, rojo = mal, punteado = lo que faltaba.'+(sol.note?' '+sol.note:''));$('tbar').scrollIntoView({block:'nearest'})}
+    tMsg('Frase '+(TEST.i+1)+': '+n10(sc.sc)+' / 10 · verde = bien, rojo = mal, punteado = lo que faltaba.'+(sol.note?' '+sol.note:''));$('tbar').scrollIntoView({block:'nearest'})}
   catch(e){tMsg('Algo ha fallado al corregir. Pulsa «Entregar frase» otra vez.')}
   finally{TEST.delivering=false}}
 function tNext(){if(TEST.i<TEST.sents.length-1){TEST.i++;tLoadSentence();$('p-fb').innerHTML=''}else tFinish()}
-function tFinish(){TEST.on=false;document.body.classList.remove('testing');$('tbar').hidden=true;showEntry();
+function tFinish(){TEST.on=false;$('work').classList.remove('tlocked');document.body.classList.remove('testing');$('tbar').hidden=true;showEntry();
   const tot=TEST.res.reduce((a,r)=>a+(r?r.sc:0),0);const box=$('t-res');box.innerHTML='';$('t-h').textContent='Resultado del test';
-  box.append(mk('div','big',f2(tot)+' / 2'),mk('div','muted','Nota final: '+f2(Math.round(tot*50)/10)+' / 10 · '+(tot>=1?'aprobado en análisis sintáctico.':'todavía por debajo del aprobado: repasa las correcciones.')));
-  TEST.res.forEach((r,i)=>{if(!r)return;const h=mk('div');h.style.marginTop='14px';h.append(mk('b',null,'Frase '+(i+1)+': '+f2(r.sc)+' / 1'),mk('div','muted','«'+r.sent+'»'));const bk=mk('div','brk');
+  const fin=tot/TEST.res.length;box.append(mk('div','big',n10(fin)+' / 10'),mk('div','muted','Nota media de las '+TEST.res.length+' frases · '+(fin>=.5?'aprobado en análisis sintáctico.':'todavía por debajo del aprobado: repasa las correcciones.')));
+  TEST.res.forEach((r,i)=>{if(!r)return;const h=mk('div');h.style.marginTop='14px';h.append(mk('b',null,'Frase '+(i+1)+': '+n10(r.sc)+' / 10'),mk('div','muted','«'+r.sent+'»'));const bk=mk('div','brk');
     r.bl.forEach(b=>{if(!b.t)return;const row=mk('div','r');const bar=mk('div','bar'+(b.ok/b.t<.5?' p':''));const fill=document.createElement('i');fill.style.width=Math.round(100*b.ok/b.t)+'%';bar.append(fill);row.append(mk('span',null,b.n),bar,mk('span','muted',b.ok+'/'+b.t));bk.append(row)});
     h.append(bk);const cr=mk('div','cor');h.append(mk('b',null,'Correcciones'));
     r.wrongs.forEach(w=>cr.append(mk('div','c bad','«'+w.seg+'»: pusiste '+w.mine+(w.right?' → correcto: '+w.right:' → ese tramo no es un elemento del análisis'))));
     r.misses.forEach(m=>cr.append(mk('div','c','Te faltó «'+m.seg+'»: '+m.right)));
     if(!r.wrongs.length&&!r.misses.length)cr.append(mk('div','c ok','Sin errores ni elementos pendientes.'));
-    if(r.bad)cr.append(mk('div','muted','Etiquetas incorrectas: '+r.bad+' (restan '+f2(r.pen)+').'));h.append(cr);box.append(h)});
+    if(r.bad)cr.append(mk('div','muted','Etiquetas incorrectas: '+r.bad+' (restan '+n10(r.pen)+' de 10).'));h.append(cr);box.append(h)});
   const imp=mk('div');imp.style.marginTop='16px';const loc=[];const tot2={};TEST.res.forEach(r=>r&&r.bl.forEach(b=>{if(!b.t)return;tot2[b.k]=tot2[b.k]||{t:0,ok:0};tot2[b.k].t+=b.t;tot2[b.k].ok+=b.ok}));
   const TIP={sp:'Repasa cómo se identifica el sujeto (verbo → «¿quién?») y dónde empieza el predicado.',fn:'Practica las funciones de los complementos: CD (lo/la), CI (le/les), régimen y circunstanciales.',es:'Revisa la estructura interna: enlace (E) y término (T) en los G.Prep, núcleos (N) y modificadores.'};
   Object.keys(tot2).forEach(k=>{if(tot2[k].ok/tot2[k].t<.7)loc.push(TIP[k])});if(!loc.length)loc.push('Muy bien. Sigue practicando con frases con subordinadas y verbos de régimen.');
   const lst=(arr)=>{const u=mk('ul');u.style.cssText='margin:6px 0 0;padding-left:18px;font-size:.9rem';arr.forEach(x=>u.append(mk('li',null,x)));return u};
   const ih=mk('b',null,'Puntos a mejorar');const ib=mk('div');ib.append(lst(loc));const tag=mk('div','muted','Preparando consejos con IA…');tag.style.fontSize='.8rem';imp.append(ih,ib,tag);box.append(imp);
   const b=mk('div','row');b.style.marginTop='16px';const again=mk('button','btn pri','Otro test');again.onclick=tOpen;const c=mk('button','btn','Cerrar');c.onclick=()=>{$('tmodal').hidden=true};b.append(again,c);box.append(b);tSetView('res');$('tmodal').hidden=false;
-  const resumen=TEST.res.map((r,i)=>r?'Frase '+(i+1)+' «'+r.sent+'» ('+f2(r.sc)+'/1). Errores: '+(r.wrongs.map(w=>'«'+w.seg+'» puso '+w.mine+' y era '+(w.right||'otra cosa')).join('; ')||'ninguno')+'. Faltó: '+(r.misses.map(m=>'«'+m.seg+'» '+m.right).join('; ')||'nada')+'.':'').join('\n');
+  const resumen=TEST.res.map((r,i)=>r?'Frase '+(i+1)+' «'+r.sent+'» ('+n10(r.sc)+'/10). Errores: '+(r.wrongs.map(w=>'«'+w.seg+'» puso '+w.mine+' y era '+(w.right||'otra cosa')).join('; ')||'ninguno')+'. Faltó: '+(r.misses.map(m=>'«'+m.seg+'» '+m.right).join('; ')||'nada')+'.':'').join('\n');
   askJSON('Eres profesor de Lengua (4.º ESO / Bachillerato, España). Un alumno acaba un test de análisis sintáctico con este resultado:\n'+resumen+'\nUsa estos criterios del colegio (se dice «grupo»):\n'+AIRULES+'\nDa de 2 a 4 PUNTOS A MEJORAR concretos y útiles (máximo 25 palabras cada uno), citando lo que falló y cómo comprobarlo. Responde solo con JSON: {"puntos":["..."]}',{modelTier:'default',cache:false}).then(r=>{const p=(r&&r.puntos||[]).map(String).filter(Boolean).slice(0,4);if(p.length){ib.innerHTML='';ib.append(lst(p));tag.textContent='Consejos generados con IA a partir de tus errores.'}else tag.remove()}).catch(()=>{tag.textContent='Consejos automáticos (la IA no está disponible ahora).'})}
 const TQ=[
 ['sp','¿Cómo se identifica el sujeto de una oración?',['Es siempre el primer grupo','Concuerda en número y persona con el verbo','Siempre lleva artículo'],1,'Cambia el verbo a singular o plural: lo que cambia con él es el sujeto.'],
@@ -966,15 +991,29 @@ const TQ=[
 const TOPK={'':'','Sujeto y predicado':'sp','Complementos del verbo (CD, CI, régimen, atributo)':'comp','Predicativo y atributo':'pred','Pasiva y complemento agente':'pas','Valores del «se»':'se','Oraciones subordinadas':'sub'};
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 /* teoría */
-const QZ={qs:[],i:0,ok:0,fails:[]};
-function tQuizStart(){const k=TOPK[$('t-tema').value]||'';const own=shuf(TQ.filter(q=>!k||q[0]===k)),rest=shuf(TQ.filter(q=>k&&q[0]!==k));
-  QZ.qs=own.concat(rest).slice(0,10).map(q=>{const c=q[2][q[3]];const o=shuf(q[2]);return{q:q[1],opciones:o,correcta:o.indexOf(c),explicacion:q[4]}});QZ.i=0;QZ.ok=0;QZ.fails=[];$('t-h').textContent='Test de teoría';tSetView('quiz');tQuestion()}
-function tQuestion(){const q=QZ.qs[QZ.i],box=$('t-quiz');box.innerHTML='';box.append(mk('div','qn','Pregunta '+(QZ.i+1)+' de '+QZ.qs.length),mk('div','qq',q.q));let done=false;
-  q.opciones.forEach((o,k)=>{const b=mk('button','qo','ABCDEF'[k]+') '+o);b.onclick=()=>{if(done)return;done=true;const right=k===q.correcta;b.classList.add(right?'ok':'bad');if(!right){box.querySelectorAll('.qo')[q.correcta].classList.add('ok');QZ.fails.push(q.q)}else QZ.ok++;
-    if(q.explicacion)box.append(mk('div','qe',q.explicacion));const n=mk('button','btn pri',QZ.i<QZ.qs.length-1?'Siguiente':'Ver nota');n.onclick=()=>{if(QZ.i<QZ.qs.length-1){QZ.i++;tQuestion()}else tQuizEnd()};box.append(n)};box.append(b)})}
-function tQuizEnd(){const nota=QZ.ok;const box=$('t-res');box.innerHTML='';$('t-h').textContent='Resultado del test';
-  box.append(mk('div','big',f2(nota)+' / 10'),mk('div','muted',QZ.ok+' de '+QZ.qs.length+' correctas (1 punto cada una).'));
-  if(QZ.fails.length){const h=mk('div');h.style.marginTop='12px';h.append(mk('b',null,'Para repasar:'));QZ.fails.forEach(f=>h.append(mk('div','qe','· '+f)));box.append(h)}
+const QZ={qs:[],i:0,ok:0,fails:[],ans:[]};
+async function tQuizStart(){const k=TOPK[$('t-tema').value]||'';let qs=null,ai=false;
+  try{const prev=LSget('sx_genQ').slice(-14);const r=await withTimeout(askJSON('Eres profesor de Lengua Castellana ('+$('t-lvl').value+', España, Colegio El Valle). Crea 10 preguntas NUEVAS de test de TEORÍA de sintaxis (3 opciones A, B y C; una sola correcta; variante '+seed()+') basadas en estos apuntes. Se dice «grupo», no «sintagma».'+tTopic()+' Mezcla tipos: identificar funciones, sustituciones (lo/le), tipos de predicado, pasiva, «se», subordinadas, grupos y núcleos. Distractores plausibles, sin ambigüedad.'+(prev.length?' Ya preguntadas, NO las repitas: '+prev.join(' | ')+'.':'')+'\nAPUNTES:\n'+AIRULES+'\nResponde solo con JSON: {"preguntas":[{"q":"...","opciones":["a","b","c"],"correcta":0,"explicacion":"una frase"}]}',{modelTier:'default',cache:false}),16000);
+    const v=(r&&r.preguntas||[]).filter(q=>q&&q.q&&Array.isArray(q.opciones)&&q.opciones.length>=3&&Number.isInteger(q.correcta)&&q.correcta>=0&&q.correcta<q.opciones.length).slice(0,10);
+    if(v.length>=8){qs=v.map(q=>{const strip=x=>String(x).replace(/^\s*[A-Ca-c]\s*[\)\.\:\-–]\s*/,'').trim();const o=q.opciones.slice(0,3).map(strip);const c=strip(q.opciones[q.correcta]);const sh=shuf(o);return{q:String(q.q),opciones:sh,correcta:Math.max(0,sh.indexOf(c)),explicacion:String(q.explicacion||'')}}).filter(q=>q.opciones.length===3);ai=qs.length>=8}}catch(e){}
+  if(!ai){const used=LSget('sx_usedQ');let own=TQ.filter(q=>(!k||q[0]===k)&&!used.includes(q[1]));let rest=TQ.filter(q=>(!k||q[0]!==k)&&!used.includes(q[1]));if(own.length+rest.length<10){own=TQ.filter(q=>!k||q[0]===k);rest=TQ.filter(q=>k&&q[0]!==k)}
+    const sel=shuf(own).concat(shuf(rest)).slice(0,10);LSadd('sx_usedQ',sel.map(q=>q[1]),40);qs=sel.map(q=>{const c=q[2][q[3]];const o=shuf(q[2]);return{q:q[1],opciones:o,correcta:o.indexOf(c),explicacion:q[4]}})}
+  else LSadd('sx_genQ',qs.map(q=>q.q),40);
+  QZ.qs=qs;QZ.ai=ai;QZ.i=0;QZ.ok=0;QZ.fails=[];QZ.ans=[];$('t-h').textContent='Test de teoría';tSetView('quiz');tQuestion()}
+const ARW={l:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',r:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'};
+function tQuestion(){const q=QZ.qs[QZ.i],box=$('t-quiz');box.innerHTML='';const n=QZ.qs.length;
+  box.append(mk('div','qn','Pregunta '+(QZ.i+1)+' de '+n+(QZ.ai?' · generada con IA':' · del banco de la app')),mk('div','qq',q.q));
+  q.opciones.forEach((o,k)=>{const b=mk('button','qo'+(QZ.ans[QZ.i]===k?' sel':''),'ABCDEF'[k]+') '+o);b.onclick=()=>{QZ.ans[QZ.i]=k;tQuestion()};box.append(b)});
+  const dots=mk('div','qdots');for(let k=0;k<n;k++){const d=mk('button','qd'+(QZ.ans[k]!=null?' on':'')+(k===QZ.i?' cur':''),String(k+1));d.setAttribute('aria-label','Ir a la pregunta '+(k+1));d.onclick=()=>{QZ.i=k;tQuestion()};dots.append(d)}
+  const nav=mk('div','qnav');const prev=mk('button','btn');prev.innerHTML=ARW.l+'Anterior';prev.disabled=QZ.i===0;prev.onclick=()=>{QZ.i--;tQuestion()};
+  const last=QZ.i===n-1;const nx=mk('button','btn pri');if(last){nx.textContent='Entregar test';nx.onclick=tQuizAsk}else{nx.innerHTML='Siguiente'+ARW.r;nx.onclick=()=>{QZ.i++;tQuestion()}}
+  nav.append(prev,nx);box.append(dots,nav);box.append(mk('div','qe','Puedes volver atrás y cambiar tus respuestas hasta que entregues el test.'))}
+function tQuizAsk(){const un=QZ.qs.length-QZ.ans.filter(x=>x!=null).length;if(!un)return tQuizEnd();const box=$('t-quiz');box.innerHTML='';box.append(mk('div','qq','Te quedan '+un+' pregunta'+(un>1?'s':'')+' sin contestar. ¿Entregar igualmente?'));const r=mk('div','row');const y=mk('button','btn pri','Sí, entregar');y.onclick=tQuizEnd;const nn=mk('button','btn','Seguir revisando');nn.onclick=tQuestion;r.append(y,nn);box.append(r)}
+function tQuizEnd(){const n=QZ.qs.length;let ok=0;QZ.qs.forEach((q,i)=>{if(QZ.ans[i]===q.correcta)ok++});const box=$('t-res');box.innerHTML='';$('t-h').textContent='Resultado del test';
+  box.append(mk('div','big',f2(Math.round(ok/n*100)/10)+' / 10'),mk('div','muted',ok+' de '+n+' correctas.'));
+  QZ.qs.forEach((q,i)=>{const h=mk('div');h.style.marginTop='14px';h.append(mk('div','qn','Pregunta '+(i+1)),mk('div','qq',q.q));
+    q.opciones.forEach((o,k)=>{const c=k===q.correcta?' ok':(QZ.ans[i]===k?' bad':'');h.append(mk('div','qo'+c,'ABCDEF'[k]+') '+o))});
+    h.append(mk('div','qe',(QZ.ans[i]==null?'Sin contestar. ':'')+(q.explicacion||'')));box.append(h)});
   const b=mk('div','row');b.style.marginTop='16px';const again=mk('button','btn pri','Otro test');again.onclick=tOpen;const c=mk('button','btn','Cerrar');c.onclick=()=>{$('tmodal').hidden=true};b.append(again,c);box.append(b);tSetView('res')}
 document.querySelectorAll('.tk').forEach(b=>b.onclick=()=>{TEST.kind=b.dataset.k;document.querySelectorAll('.tk').forEach(x=>{const on=x===b;x.classList.toggle('on',on);x.setAttribute('aria-checked',on)});$('t-crit').hidden=TEST.kind!=='practica'});
 $('testbtn').onclick=tOpen;$('tclose').onclick=()=>{$('tmodal').hidden=true};$('tgo').onclick=tGo;
