@@ -124,8 +124,8 @@ export default async function handler(req, res) {
   const mk = (plain, ms) => {
     const gem = gKey && (() => callGemini({ key: gKey, prompt, img, search, plain, deadline: Date.now() + ms }));
     const gpt = oKey && (() => callOpenAI({ key: oKey, prompt, img, search, plain, deadline: Date.now() + ms }));
-    // ChatGPT primero y Gemini de respaldo. Cambia con AI_PRIMARY=gemini|openai.
-    const pref = (process.env.AI_PRIMARY || 'openai').toLowerCase();
+    // Gemini primero y ChatGPT de respaldo. Cambia con AI_PRIMARY=gemini|openai.
+    const pref = (process.env.AI_PRIMARY || 'gemini').toLowerCase();
     return (pref === 'gemini' ? [gem, gpt] : [gpt, gem]).filter(Boolean);
   };
   const errors = [];
