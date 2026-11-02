@@ -5,7 +5,10 @@ export const config = { maxDuration: 60 };
 const RETRY = [404, 408, 409, 429, 500, 502, 503, 504];
 const clean = (t) => String(t || '').replace(/^```(?:json)?\s*|\s*```$/g, '').trim();
 
-async function geminiModels(key) {
+let MC = null;
+async function geminiModels(key, fast) {
+  if (fast) return [process.env.GEMINI_MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'].filter(Boolean);
+  if (MC && Date.now() - MC.t < 600000) return MC.l;
   const fixed = [process.env.GEMINI_MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean);
   try {
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', { headers: { 'x-goog-api-key': key } });
@@ -18,22 +21,25 @@ async function geminiModels(key) {
     // Los modelos «lite» primero: tienen mucho más cupo gratis al día (los flash normales solo ~20/día).
     const lite = live.filter((m) => /lite/i.test(m));
     const rest = live.filter((m) => !/lite/i.test(m));
-    return [...new Set([...fixed.slice(0, 1), ...lite.slice(0, 2), ...fixed.slice(1, 3), ...rest.slice(0, 2), ...fixed.slice(3)])];
+    const l = [...new Set([...fixed.slice(0, 1), ...lite.slice(0, 2), ...fixed.slice(1, 3), ...rest.slice(0, 2), ...fixed.slice(3)])];
+    MC = { t: Date.now(), l };
+    return l;
   } catch (e) {
     return fixed;
   }
 }
 
-async function callGemini({ key, prompt, img, search, plain, deadline }) {
+async function callGemini({ key, prompt, img, search, plain, deadline, fast }) {
   const txt = search || plain;
   let last = 'Gemini sin respuesta';
   const parts = [{ text: prompt }];
   if (img && img.data) parts.push({ inlineData: { mimeType: String(img.mime || 'image/jpeg'), data: String(img.data) } });
-  for (const model of await geminiModels(key)) {
+  for (const model of await geminiModels(key, fast)) {
     if (Date.now() > deadline) break;
     try {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
+        signal: AbortSignal.timeout(fast ? 6000 : 25000),
         headers: { 'content-type': 'application/json', 'x-goog-api-key': key },
         body: JSON.stringify(plain
           ? { contents: [{ role: 'user', parts }], generationConfig: { temperature: 0.3 } }
@@ -62,7 +68,7 @@ async function callGemini({ key, prompt, img, search, plain, deadline }) {
   return { ok: false, error: last };
 }
 
-async function callOpenAI({ key, prompt, img, search, plain, deadline }) {
+async function callOpenAI({ key, prompt, img, search, plain, deadline, fast }) {
   const txt = search || plain;
   let last = 'ChatGPT sin respuesta';
   const content = [{ type: 'text', text: prompt }];
@@ -71,7 +77,7 @@ async function callOpenAI({ key, prompt, img, search, plain, deadline }) {
     ? [process.env.OPENAI_MODEL, 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4.1', 'gpt-5-mini']
     : search
     ? ['gpt-4o-search-preview', 'gpt-4o-mini-search-preview', process.env.OPENAI_MODEL, 'gpt-4.1-mini', 'gpt-4o-mini']
-    : [process.env.OPENAI_MODEL, 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4.1'];
+    : fast ? [process.env.OPENAI_MODEL, 'gpt-4.1-mini'] : [process.env.OPENAI_MODEL, 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4.1'];
   for (const model of [...new Set(models.filter(Boolean))]) {
     if (Date.now() > deadline) break;
     const isSearch = !plain && /search/.test(model);
@@ -124,9 +130,10 @@ export default async function handler(req, res) {
   if (!prompt) return res.status(400).json({ error: 'prompt vacío' });
   const img = req.body && req.body.image;
   const search = !!(req.body && req.body.search);
+  const fast = !!(req.body && req.body.fast);
   const mk = (plain, ms) => {
-    const gem = gKey && (() => callGemini({ key: gKey, prompt, img, search, plain, deadline: Date.now() + ms }));
-    const gpt = oKey && (() => callOpenAI({ key: oKey, prompt, img, search, plain, deadline: Date.now() + ms }));
+    const gem = gKey && (() => callGemini({ key: gKey, prompt, img, search, plain, fast, deadline: Date.now() + ms }));
+    const gpt = oKey && (() => callOpenAI({ key: oKey, prompt, img, search, plain, fast, deadline: Date.now() + ms }));
     // Gemini primero y ChatGPT de respaldo. Cambia con AI_PRIMARY=gemini|openai.
     const pref = (process.env.AI_PRIMARY || 'gemini').toLowerCase();
     return (pref === 'gemini' ? [gem, gpt] : [gpt, gem]).filter(Boolean);
@@ -140,9 +147,9 @@ export default async function handler(req, res) {
     }
     return null;
   };
-  let body = await pass(false, search ? 12000 : 20000);
+  let body = await pass(false, fast ? 9000 : search ? 12000 : 20000);
   // Si la búsqueda falla en ambas, se responde igualmente sin búsqueda (nunca error).
-  if (!body && search) body = await pass(true, 18000);
+  if (!body && search && !fast) body = await pass(true, 18000);
   if (body) return res.status(200).json(body);
   return res.status(503).json({ error: errors.join(' | ') });
 }
