@@ -301,6 +301,7 @@ body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testin
 @media(max-width:400px){.stats #lvl{display:none}}
 @media(hover:none){.btn,.tb{-webkit-tap-highlight-color:transparent}}
 </style>
+<style>#aibusy{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:var(--ink,#2347c9);color:#fff;font:600 14px Figtree,system-ui,sans-serif;box-shadow:0 6px 24px rgba(0,0,0,.25);max-width:calc(100vw - 32px)}#aibusy[hidden]{display:none}#aibusy i{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:aispin .8s linear infinite;flex:none}@keyframes aispin{to{transform:rotate(360deg)}}</style>
 </head>
 <body>
 <div class="wrap">
@@ -425,7 +426,9 @@ body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testin
 <div id="t-quiz" hidden></div>
 <div id="t-res" hidden></div>
 </div></div>
-<script>
+<style>#sxf{white-space:normal;overflow:visible;border-top:1px solid #8884;margin-top:36px;padding:18px 16px 40px;text-align:center;font:14px/1.9 Figtree,system-ui,sans-serif;opacity:.85}#sxf a{display:inline-block;margin:0 8px;white-space:nowrap;color:inherit}
+#ckb{position:fixed;left:12px;right:12px;bottom:12px;max-width:560px;margin:auto;background:Canvas;color:CanvasText;border:1px solid #8886;border-radius:14px;padding:14px 16px;box-shadow:0 8px 30px rgba(0,0,0,.3);font:14px/1.5 Figtree,system-ui,sans-serif;z-index:99999}#ckb[hidden]{display:none}#ckb div{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}#ckb button{font:600 14px Figtree,system-ui,sans-serif;padding:9px 16px;border-radius:9px;border:1px solid #2347c9;cursor:pointer;background:transparent;color:inherit}#ckb button.p{background:#2347c9;color:#fff}</style><footer id="sxf"><a href="/aviso-legal">Aviso legal</a><a href="/privacidad">Privacidad</a><a href="/cookies">Cookies</a><a href="/contacto">Contacto</a><a href="/sobre-nosotros">Sobre nosotros</a><a href="#" onclick="ckOpen();return false">Configurar cookies</a><br>© 2026 Sintaxlab · sintaxlab.es</footer><div id="ckb" hidden role="dialog" aria-label="Cookies"><b>Cookies</b><br>Usamos cookies técnicas necesarias y, si lo aceptas, cookies de publicidad y medición de terceros (Google). Puedes cambiar tu decisión cuando quieras. <a href="/cookies">Más información</a><div><button class="p" onclick="ckSet('yes')">Aceptar todas</button><button onclick="ckSet('no')">Solo necesarias</button></div></div>
+<script>(function(){var k='sx_cookies';function g(){try{return localStorage.getItem(k)}catch(e){return null}}window.ckSet=function(v){try{localStorage.setItem(k,v)}catch(e){}document.getElementById('ckb').hidden=true;window.dispatchEvent(new Event('sx-consent'))};window.ckOpen=function(){document.getElementById('ckb').hidden=false};window.sxConsent=function(){return g()==='yes'};if(!g())document.getElementById('ckb').hidden=false})();</script><script>
 // <pure>
 const FAM={verbo:'--f-verbo',suj:'--f-suj',arg:'--f-arg',adj:'--f-adj',nom:'--f-nom',se:'--f-se',dis:'--f-dis',apo:'--f-apo'};
 const GROUPS=[['Núcleo y sujeto',['verbo','suj','sujPac']],['Argumentos (los pide el verbo)',['cd','ci','creg','atr','predSuj','predCD','cla']],['Adjuntos (opcionales)',['ccNeg','cct','ccl','ccm','ccc','ccf','ccCant','ccComp','ccInst','ag']],['Dentro del grupo',['cn','ady','ap','cadj','cadv']],['«se» con función (CD o CI)',['seRefl','seRec','seSus']],['«se» sin función',['sePron','seVM','seDat']],['«se» como marca de la oración',['sePR','seImp']],['Disjuntos',['modOrac','conn']],['Tipo de grupo (no puntúa)',['gn','gprep','gadj','gadv']],['Partes del grupo (no puntúa)',['det','nuc','mod','enl','ter','nx','gv','pv','pn','ssub','subadj']]];
@@ -709,6 +712,11 @@ $('t-str').onclick=e=>{S.str=!S.str;e.currentTarget.setAttribute('aria-pressed',
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',()=>setTimeout(drawAll,50));
 new MutationObserver(drawAll).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!/TEXTAREA|INPUT/.test(e.target.tagName)){e.preventDefault();undo()}if(e.key==='Escape'){$('hmenu').hidden=true;$('helpb').setAttribute('aria-expanded','false')}});
+/* indicador de carga de la IA: contador de segundos */
+(function(){const of=window.fetch.bind(window);let n=0,t0=0,iv=null,el=null;
+function show(){if(!el){el=document.createElement('div');el.id='aibusy';el.setAttribute('role','status');el.innerHTML='<i></i><span></span>';document.body.appendChild(el)}el.hidden=false;t0=Date.now();const up=()=>{const s=Math.round((Date.now()-t0)/1000);el.lastChild.textContent='La IA está pensando… '+s+' s'+(s<8?' · suele tardar unos 8 s':s<20?' · un momento más':' · casi, no cierres la página')};up();iv=setInterval(up,500)}
+function hide(){clearInterval(iv);if(el)el.hidden=true}
+window.fetch=function(u,o){const mine=typeof u==='string'&&u.indexOf('/api/ai')===0&&o&&o.method==='POST';if(!mine)return of(u,o);if(!n++)show();const d=()=>{if(!--n)hide()};return of(u,o).then(r=>{d();return r},e=>{d();throw e})}})();
 /* AI (Claude vía capability sample; punto de enganche para un proxy de Gemini) */
 let sampleFn=null;
 (async()=>{try{sampleFn=window.claude&&window.claude.use?await window.claude.use('sample'):null}catch(e){sampleFn=null}})();
