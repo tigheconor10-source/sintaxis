@@ -325,6 +325,29 @@ body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testin
 .aipage .am{max-width:100%;font-size:1rem}.aipage .am.u{border-radius:18px 18px 4px 18px}.aipage .am.b{background:transparent;padding-left:0}
 .aipage .am.b::before{content:"";display:block;width:24px;height:18px;margin-bottom:6px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 30'%3E%3Crect width='22' height='7' rx='3.5' fill='%232A56C6'/%3E%3Crect y='11.5' width='29' height='7' rx='3.5' fill='%239A6A1A'/%3E%3Crect y='23' width='40' height='7' rx='3.5' fill='%237C3AED'/%3E%3C/svg%3E") no-repeat center/contain}
 @media(max-width:700px){.aibar .btn{font-size:.85rem;padding:6px 10px}}
+
+.aibox .btn{display:none}
+.aiplus,.aisend{flex:none;width:42px;height:42px;border-radius:50%;border:0;display:grid;place-items:center;cursor:pointer;transition:transform .12s,opacity .15s,background .15s}
+.aiplus{background:transparent;color:var(--muted)}.aiplus:hover{background:var(--surface2);color:var(--ink)}
+.aisend{background:linear-gradient(135deg,#2A56C6,#7C3AED);color:#fff;box-shadow:0 3px 10px rgba(80,60,200,.35)}.aisend:hover:not(:disabled){transform:scale(1.06)}
+.aisend:disabled{background:var(--surface2);color:var(--muted);box-shadow:none;cursor:default}
+.aisend.stop{background:var(--text,#1c2333);color:var(--bg,#fff)}
+.aibox{align-items:flex-end;padding:7px 8px 7px 8px}.aibox textarea{padding:10px 4px}
+.aibox:focus-within{border-color:#7C3AED;box-shadow:0 6px 24px rgba(124,58,237,.18)}
+.afile{display:flex;align-items:center;gap:10px;margin:0 8px 8px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;font-size:.88rem;max-width:fit-content}
+.afile[hidden]{display:none}.afile img{width:44px;height:44px;object-fit:cover;border-radius:8px}.afile .ic{width:44px;height:44px;border-radius:8px;display:grid;place-items:center;background:var(--surface2);font-weight:800;font-size:.75rem;color:var(--ink)}
+.afile button{border:0;background:var(--surface2);border-radius:50%;width:24px;height:24px;cursor:pointer;color:var(--muted)}
+.am.u .att{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:.82rem;opacity:.9}.am.u .att img{max-width:180px;max-height:120px;border-radius:10px;display:block}
+.aifoot.err{color:#c0392b;font-weight:600}
+.aimodel{position:relative;flex:none;align-self:center}
+.aimbtn{display:flex;align-items:center;gap:4px;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:.9rem;padding:8px 10px;border-radius:20px;cursor:pointer}.aimbtn:hover{background:var(--surface2);color:var(--ink)}
+.aimenu{position:absolute;left:0;bottom:calc(100% + 10px);min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 32px rgba(20,30,60,.2);padding:6px;z-index:30}
+.aimenu button{display:flex;flex-direction:column;align-items:flex-start;width:100%;border:0;background:transparent;font:inherit;color:inherit;text-align:left;padding:9px 12px;border-radius:11px;cursor:pointer;gap:1px}.aimenu button:hover,.aimenu button.on{background:var(--surface2)}
+.aimenu button span{font-size:.8rem;color:var(--muted)}.aimenu button.on b::after{content:" ✓";color:#7C3AED}
+.aimic.rec{color:#fff;background:#e0364b;animation:aipulse 1.2s infinite}@keyframes aipulse{50%{box-shadow:0 0 0 7px rgba(224,54,75,.2)}}
+.aisend{width:40px;height:40px;transition:transform .12s,background .15s,box-shadow .15s}.aisend:active:not(:disabled){transform:scale(.92)}
+.aipage.drag .aibox{border-color:#7C3AED;border-style:dashed}
+body.aiopen #aibusy{display:none!important}
 </style>
 </head>
 <body>
@@ -428,8 +451,8 @@ body.testing .lb.draft button,body.testing #helpb,body.testing #show,body.testin
 </div>
 <div id="amodal" class="aipage empty" hidden role="dialog" aria-label="Sintaxlab IA">
 <div class="aibar"><a class="aibrand" href="/" aria-label="Sintaxlab, inicio"><svg width="28" height="21" viewBox="0 0 40 30" aria-hidden="true" style="flex:none"><rect x="0" y="0" width="22" height="7" rx="3.5" fill="#2A56C6"/><rect x="0" y="11.5" width="29" height="7" rx="3.5" fill="#9A6A1A"/><rect x="0" y="23" width="40" height="7" rx="3.5" fill="#7C3AED"/></svg><span>Sintax<span class="lab">lab</span></span><em>IA</em></a><button class="btn" id="aclose">← Volver al analizador</button></div>
-<div class="aimain"><div class="aihero"><svg width="54" height="40.5" viewBox="0 0 40 30" aria-hidden="true" style="flex:none"><rect x="0" y="0" width="22" height="7" rx="3.5" fill="#2A56C6"/><rect x="0" y="11.5" width="29" height="7" rx="3.5" fill="#9A6A1A"/><rect x="0" y="23" width="40" height="7" rx="3.5" fill="#7C3AED"/></svg><h1>Sintaxlab IA</h1><p class="aisub">¿Por dónde empezamos?</p><p class="muted">Tu profe de sintaxis: responde con los apuntes del colegio y te inventa frases para practicar.</p></div><div id="alog" class="alog"></div></div>
-<div class="aidock"><div class="aibox"><textarea id="aq" rows="1" maxlength="400" placeholder="Pregunta a Sintaxlab IA: una duda o «ponme una frase de CD»"></textarea><button class="btn pri" id="ago" aria-label="Enviar">↑</button></div><div class="row" id="achips"></div><p class="aifoot">Sintaxlab IA puede cometer errores. Contrástalo con tus apuntes; si difieren, manda el colegio.</p></div>
+<div class="aimain" id="aimain"><div class="aihero"><svg width="54" height="40.5" viewBox="0 0 40 30" aria-hidden="true" style="flex:none"><rect x="0" y="0" width="22" height="7" rx="3.5" fill="#2A56C6"/><rect x="0" y="11.5" width="29" height="7" rx="3.5" fill="#9A6A1A"/><rect x="0" y="23" width="40" height="7" rx="3.5" fill="#7C3AED"/></svg><h1>Sintaxlab IA</h1><p class="aisub">¿Por dónde empezamos?</p><p class="muted">Tu profe de sintaxis: responde con los apuntes del colegio y te inventa frases para practicar.</p></div><div id="alog" class="alog"></div></div>
+<div class="aidock"><div id="afile" class="afile" hidden></div><div class="aibox"><div class="aimodel" id="amodelw"><button type="button" class="aimbtn" id="amodel" aria-haspopup="true"><span id="amodelt">Flow</span><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="aimenu" id="amenu" hidden><button type="button" data-m="lite"><b>Flash</b><span>Básico · el más rápido</span></button><button type="button" data-m="flow"><b>Flow</b><span>Equilibrado · recomendado</span></button><button type="button" data-m="pro"><b>Pro</b><span>Potente · razona más</span></button></div></div><textarea id="aq" rows="1" maxlength="1500" placeholder="Pregunta a Sintaxlab IA"></textarea><button type="button" class="aiplus aimic" id="amic" aria-label="Dictar por voz" title="Dictar por voz"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg></button><button type="button" class="aisend" id="ago" aria-label="Enviar" title="Enviar" disabled><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div><input type="file" id="afi" accept="image/*,application/pdf,.pdf,.txt,.md,text/plain" hidden><div class="row" id="achips"></div><p class="aifoot">Sintaxlab IA puede cometer errores. Contrástalo con tus apuntes; si difieren, manda el colegio.</p></div>
 </div>
 <div id="tmodal" class="gmodal" hidden><div class="gbox abox tbox"><div class="row" style="justify-content:space-between"><h2 style="margin:0" id="t-h">Test</h2><button class="btn" id="tclose">Cerrar</button></div>
 <div id="t-setup">
@@ -954,23 +977,34 @@ function drawSolution(sol,test){const pan=$('p-boxes'),nt=$('bxnote'),h=$('bx');
   nt.textContent='';
   const src=mk('div','srcb '+sol.source);src.textContent=sol.source==='ai'?'Solución generada por IA: puede tener fallos.'+(sol.warn&&sol.warn.length?' Esta vez no ha salido del todo coherente ('+sol.warn[0]+').':'')+' Si dudas, contrástala con tus apuntes.':sol.source==='bank'?'Solución del banco de la app (revisada).':'Solución sacada de '+(sol.name?'«'+sol.name+'»':'tu solucionario')+'.';
   h.innerHTML='';const bxs=mk('div','bxs'),bxe=buildBoxes(completeTree(S.words,sol.items));bxs.append(bxe);const hasSuj=sol.items.some(x=>x.f==='suj'||x.f==='sujPac'||/^se(Imp|PR)/.test(x.f));const soTxt=(sol.so&&!/^(ninguno|no|-)$/i.test(sol.so)&&!hasSuj)?sol.so:(sol.source==='bank'&&!hasSuj&&sol.note&&/Sujeto omitido \(([^)]+)\)/.test(sol.note)?RegExp.$1:'');h.append(src);if(soTxt){const so=mk('div','soline','Sujeto omitido ('+soTxt+') · '+soTxt+'/SO');h.append(so)}h.append(bxs);fitBoxes(bxs,bxe);
-  const ex=mk('div','note',(test?'':'En esta frase no sumas XP.')+(sol.note?(test?'':' ')+sol.note:''));ex.style.marginTop='8px';if(ex.textContent)h.append(ex)}
+  const ex=mk('div','note',(test?'':'En esta frase no sumas XP.')+(sol.note?(test?'':' ')+sol.note:''));ex.style.marginTop='8px';if(ex.textContent)h.append(ex);
+  const tb=mk('div','row');tb.style.cssText='gap:8px;margin-top:10px;flex-wrap:wrap';
+  const mkb=(t,fn)=>{const b=mk('button','btn',t);b.onclick=fn;tb.append(b);return b};
+  const snap=async()=>{if(!window.html2canvas)await new Promise((ok,ko)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';sc.onload=ok;sc.onerror=ko;document.head.append(sc)});const bg=getComputedStyle(document.body).backgroundColor;return html2canvas(bxs,{backgroundColor:bg,scale:2})};
+  mkb('Descargar imagen',async()=>{try{const c=await snap();const a=document.createElement('a');a.download='solucion-sintaxlab.png';a.href=c.toDataURL('image/png');a.click()}catch(e){alert('No se pudo crear la imagen.')}});
+  const cb=mkb('Copiar imagen',async()=>{try{const c=await snap();const bl=await new Promise(r=>c.toBlob(r,'image/png'));await navigator.clipboard.write([new ClipboardItem({'image/png':bl})]);cb.textContent='¡Copiada!';setTimeout(()=>cb.textContent='Copiar imagen',1800)}catch(e){alert('Tu navegador no deja copiar la imagen. Usa Descargar imagen.')}});
+  const eb=mkb('Editar solución',()=>{if(bxs.dataset.ed){bxs.querySelectorAll('[contenteditable]').forEach(e=>e.removeAttribute('contenteditable'));delete bxs.dataset.ed;eb.textContent='Editar solución';return}
+    if(!confirm('¿Seguro que quieres editar la solución?'))return;if(!confirm('¿Estás completamente seguro? Cambiarás la solución de la app solo en esta pantalla.'))return;
+    bxs.dataset.ed='1';bxs.querySelectorAll('.bb,.w').forEach(e=>{e.setAttribute('contenteditable','true');e.spellcheck=false});eb.textContent='Terminar edición'});
+  h.append(tb)}
 $('show').onclick=openSolution;$('h2').onclick=openSolution;
 
 /* ===== Pregunta a la IA ===== */
 const ASKHIST=[];
 const ASKCHIPS=['Ponme una frase para practicar','Frase tipo PAU con subordinada','Explícame el «se»: voz media e impersonal','¿Cómo distingo CD de atributo?'];
-async function askGrounded(prompt){
-  if(sampleFn){const r=await sampleFn.json(prompt+'\nResponde solo con JSON: {"texto":"..."}',{modelTier:'default',cache:false});return{texto:String((r&&r.texto)||''),fuentes:[],sinWeb:true}}
+let AIMODEL='flow';
+async function askGrounded(prompt,image,signal){
+  if(sampleFn&&!image){const r=await sampleFn.json(prompt+'\nResponde solo con JSON: {"texto":"..."}',{modelTier:'default',cache:false});return{texto:String((r&&r.texto)||''),fuentes:[],sinWeb:true}}
   let r,j=null;
   for(let t=0;t<3;t++){
-    try{r=await fetch('/api/ai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt,search:true})});j=null;try{j=await r.json()}catch(e){}
-      if(r.ok&&j&&j.texto)return j;console.warn('IA:',j&&j.error)}catch(e){r=null}
+    if(signal&&signal.aborted)throw{code:'cancelled'};
+    try{r=await fetch('/api/ai',{method:'POST',signal,headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign(image?{prompt,search:true,image}:{prompt,search:true},AIMODEL==='lite'?{fast:true}:AIMODEL==='pro'?{pro:true}:{}))});j=null;try{j=await r.json()}catch(e){}
+      if(r.ok&&j&&j.texto)return j;console.warn('IA:',j&&j.error)}catch(e){if(signal&&signal.aborted)throw{code:'cancelled'};r=null}
     await new Promise(z=>setTimeout(z,1500))}
   throw{code:'upstream_error',detail:(j&&j.error)||''}}
 function askPrompt(q){
   const hist=ASKHIST.slice(-4).map(h=>(h.r==='u'?'Alumno: ':'Profesor: ')+h.t.slice(0,500)).join('\n');
-  return 'Eres profesor de Lengua Castellana de 4.º ESO y Bachillerato (España, Colegio El Valle). Un alumno te hace una duda de sintaxis. Se dice «grupo», no «sintagma»; usa la notación del colegio (GN/Suj, G.Prep/CCL, G.Adj/Atrib, GV/PV, NV, E, Det., Mod…; los determinantes (el, la, mi, este, algunos, dos…) llevan Det. y los adjetivos que modifican al núcleo llevan Mod).\n'+
+  return 'Eres profesor de Lengua Castellana de 4.º ESO y Bachillerato (España). Un alumno te hace una duda de sintaxis. Se dice «grupo», no «sintagma»; usa la notación del colegio (GN/Suj, G.Prep/CCL, G.Adj/Atrib, GV/PV, NV, E, Det., Mod…; los determinantes (el, la, mi, este, algunos, dos…) llevan Det. y los adjetivos que modifican al núcleo llevan Mod).\n'+
   'PRIMERO: entiende qué concepto pregunta el alumno (CD, CI, atributo, G.Adj, nexo, etc.). Si es una duda corta tipo «qué es X», empieza DEFINIENDO X con una explicación sencilla y un ejemplo analizado, y cómo reconocerlo. No hables de otros conceptos (por ejemplo, no hables del «que» si pregunta por el CD). Las frases ▶ deben practicar exactamente ese concepto.\n'+
   'MÉTODO: 1) Lee los APUNTES DEL COLEGIO de abajo: son la autoridad. 2) Busca en la web (RAE, gramáticas) para contrastar y completar. 3) Si una fuente general discrepa de los apuntes, responde como en el colegio y avisa en una línea de que otras fuentes lo llaman distinto. 4) Si ni los apuntes ni la web lo aclaran, dilo; no inventes.\n'+
   'FORMATO (texto plano, claro y breve, máximo 180 palabras, sin tablas): «**Respuesta:** …», «**Según tus apuntes:** … (o «los apuntes no lo tratan»)», «**Contrastado:** …». Pon un ejemplo corto si ayuda. Si el alumno pide frases, escribe cada frase en su propia línea empezando por «▶ » (solo la frase), con 8 a 16 palabras y una única interpretación, y explica en una línea qué practican.\n\n'+
@@ -980,23 +1014,58 @@ function askRender(box,txt){
   txt.split('\n').forEach(line=>{const l=line.trim();if(!l){return}
     if(l.startsWith('▶')){const sent=l.replace(/^▶\s*/,'').replace(/\*\*/g,'');const d=mk('div','pr');d.append(mk('span',null,sent));const b=mk('button','btn','Practicar');b.onclick=()=>{ASKBACK=true;$('askback').hidden=false;aiClose();$('txt').value=sent;$('use').click();window.scrollTo({top:0,behavior:'smooth'})};d.append(b);box.append(d);return}
     const p=document.createElement('p');const parts=l.split(/\*\*/);parts.forEach((t,i)=>{if(!t)return;if(i%2){const s=document.createElement('strong');s.textContent=t;p.append(s)}else p.append(t)});box.append(p)})}
-async function askGo(q){q=(q||$('aq').value).trim();if(!q)return;$('aq').value='';$('aq').style.height='auto';$('amodal').classList.remove('empty');
-  const log=$('alog');log.append(mk('div','am u',q));const bx=mk('div','am b');bx.textContent='Pensando con tus apuntes…';log.append(bx);log.scrollTop=log.scrollHeight;$('ago').disabled=true;
-  try{const r=await askGrounded(askPrompt(q));ASKHIST.push({r:'u',t:q},{r:'b',t:r.texto});askRender(bx,r.texto);
+let ASKFILE=null,ASKCTL=null;
+const UPSVG='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',STOPSVG='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.5" fill="currentColor"/></svg>';
+function aiState(){const b=$('ago');b.classList.toggle('stop',!!ASKCTL);b.innerHTML=ASKCTL?STOPSVG:UPSVG;b.title=b.ariaLabel=ASKCTL?'Parar':'Enviar';b.disabled=!ASKCTL&&!($('aq').value.trim()||ASKFILE)}
+function aiNote(m,err){const f=document.querySelector('.aifoot');if(!f)return;if(!f.dataset.o)f.dataset.o=f.textContent;f.textContent=m;f.classList.toggle('err',!!err);clearTimeout(aiNote.t);aiNote.t=setTimeout(()=>{f.textContent=f.dataset.o;f.classList.remove('err')},4500)}
+function aiFileUI(){const w=$('afile');w.innerHTML='';w.hidden=!ASKFILE;if(ASKFILE){if(ASKFILE.thumb){const im=document.createElement('img');im.src=ASKFILE.thumb;im.alt='';w.append(im)}else w.append(mk('div','ic',ASKFILE.mime==='application/pdf'?'PDF':'TXT'));w.append(mk('span',null,ASKFILE.name.length>34?ASKFILE.name.slice(0,31)+'…':ASKFILE.name));const x=mk('button',null,'✕');x.type='button';x.setAttribute('aria-label','Quitar archivo');x.onclick=()=>{ASKFILE=null;aiFileUI();aiState()};w.append(x)}aiState()}
+const rd=(f,m)=>new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=ko;m==='text'?r.readAsText(f):r.readAsDataURL(f)});
+async function imgJpeg(f,max){const url=await rd(f);const im=await new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=url});const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.85).split(',')[1]}
+async function aiPick(f){if(!f)return;try{const t=f.type||'',n=f.name||'archivo';
+  if(t.startsWith('image/')){const d=await imgJpeg(f,1600);ASKFILE={name:n,mime:'image/jpeg',data:d,thumb:'data:image/jpeg;base64,'+d}}
+  else if(t==='application/pdf'||/\.pdf$/i.test(n)){if(f.size>3e6){aiNote('El PDF pesa más de 3 MB. Sube una foto de la página o un PDF más pequeño.',1);return}ASKFILE={name:n,mime:'application/pdf',data:(await rd(f)).split(',')[1]}}
+  else if(t.startsWith('text/')||/\.(txt|md)$/i.test(n)){ASKFILE={name:n,mime:'text/plain',text:(await rd(f,'text')).slice(0,6000)}}
+  else{aiNote('Formato no admitido. Sube una imagen, un PDF o un .txt.',1);return}
+  aiFileUI();$('aq').focus()}catch(e){aiNote('No he podido leer ese archivo. Prueba con otro.',1)}}
+async function askGo(q){q=(q||$('aq').value).trim();const F=ASKFILE;if(!q&&!F)return;if(!q)q='Mira el archivo adjunto y ayúdame.';if(ASKCTL)return;$('aq').value='';$('aq').style.height='auto';ASKFILE=null;aiFileUI();$('amodal').classList.remove('empty');
+  const log=$('alog');const um=mk('div','am u');if(F){const at=mk('div','att');if(F.thumb){const im=document.createElement('img');im.src=F.thumb;im.alt='';at.append(im)}else at.append('📎 '+F.name);um.append(at)}um.append(document.createTextNode(q));log.append(um);
+  const bx=mk('div','am b');const t0=Date.now();const tick=()=>{bx.textContent=(F?'Leyendo tu archivo y tus apuntes… ':'Pensando con tus apuntes… ')+Math.round((Date.now()-t0)/1000)+' s'};tick();const iv=setInterval(tick,1000);log.append(bx);window.scrollTo(0,0);$('aimain').scrollTop=$('aimain').scrollHeight;
+  ASKCTL=new AbortController();aiState();
+  let extra='';if(F&&F.text)extra='\n\nARCHIVO ADJUNTO ('+F.name+'):\n'+F.text;else if(F)extra='\n\nEl alumno adjunta un archivo ('+F.name+'): léelo. Si tiene un ejercicio o frases de análisis sintáctico, respóndelo con los apuntes del colegio y la notación del colegio; si no se lee bien, dilo.';
+  try{const r=await askGrounded(askPrompt(q)+extra,F&&F.data?{mime:F.mime,data:F.data}:null,ASKCTL.signal);ASKHIST.push({r:'u',t:q},{r:'b',t:r.texto});askRender(bx,r.texto);
     const sr=mk('span','src');if(r.fuentes&&r.fuentes.length){sr.append('Fuentes: ');r.fuentes.forEach((f,i)=>{const a=document.createElement('a');a.href=f.uri;a.target='_blank';a.rel='noopener';a.textContent=f.title;if(i)sr.append(' · ');sr.append(a)})}else sr.textContent=r.sinWeb?'Vista previa sin fuentes externas.':'Sin fuentes web esta vez: respuesta basada en los apuntes. Contrástala si dudas.';bx.append(sr);
     bx.append(mk('span','src','Respuesta de IA: puede fallar. Contrástala con tus apuntes.'))}
-  catch(e){bx.textContent=aiErr(e);if(e&&e.detail){const dt=document.createElement('details');dt.className='src';const sm=document.createElement('summary');sm.textContent='Ver detalle del error';dt.append(sm,mk('div',null,String(e.detail)));bx.append(dt)}}finally{$('ago').disabled=false;log.scrollTop=log.scrollHeight}}
-const aiOpen=()=>{$('amodal').hidden=false;$('askback').hidden=true;$('amodal').classList.toggle('empty',!$('alog').children.length);try{if(location.hash!=='#ia')history.pushState(null,'','#ia')}catch(e){}setTimeout(()=>$('aq').focus(),50)};
-const aiClose=()=>{$('amodal').hidden=true;try{if(location.hash==='#ia')history.replaceState(null,'',location.pathname+location.search)}catch(e){}};
+  catch(e){bx.textContent=aiErr(e);if(e&&e.detail){const dt=document.createElement('details');dt.className='src';const sm=document.createElement('summary');sm.textContent='Ver detalle del error';dt.append(sm,mk('div',null,String(e.detail)));bx.append(dt)}}finally{clearInterval(iv);ASKCTL=null;aiState();const m=$('aimain');m.scrollTop=m.scrollHeight}}
+const aiOpen=()=>{$('amodal').hidden=false;$('askback').hidden=true;$('amodal').classList.toggle('empty',!$('alog').children.length);try{if(location.hash!=='#ia')history.pushState(null,'','#ia')}catch(e){}document.body.classList.add('aiopen');setTimeout(()=>$('aq').focus(),50)};
+const aiClose=()=>{$('amodal').hidden=true;document.body.classList.remove('aiopen');try{if(location.hash==='#ia')history.replaceState(null,'',location.pathname+location.search)}catch(e){}};
 $('askbtn').onclick=aiOpen;$('aclose').onclick=aiClose;
 window.addEventListener('hashchange',()=>{if(location.hash==='#ia')aiOpen();else if(!$('amodal').hidden)$('amodal').hidden=true});
 if(location.hash==='#ia')setTimeout(aiOpen,0);
 const aqFit=()=>{const t=$('aq');t.style.height='auto';t.style.height=Math.min(t.scrollHeight,140)+'px'};$('aq').addEventListener('input',aqFit);
-$('ago').onclick=()=>askGo();
+$('ago').onclick=()=>{if(ASKCTL){ASKCTL.abort();return}askGo()};$('afi').onchange=e=>{aiPick(e.target.files[0]);e.target.value=''};
+$('aq').addEventListener('input',aiState);
+$('aq').addEventListener('paste',e=>{const f=[...(e.clipboardData&&e.clipboardData.files||[])][0];if(f){e.preventDefault();aiPick(f)}});
+{const pg=$('amodal');['dragenter','dragover'].forEach(v=>pg.addEventListener(v,e=>{e.preventDefault();pg.classList.add('drag')}));['dragleave','drop'].forEach(v=>pg.addEventListener(v,e=>{e.preventDefault();pg.classList.remove('drag')}));pg.addEventListener('drop',e=>aiPick(e.dataTransfer.files[0]))}
+aiState();
 $('aq').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askGo()}});
 ASKCHIPS.forEach(c=>{const b=mk('button','chip',c);b.onclick=()=>askGo(c);$('achips').append(b)});
 
 let ASKBACK=false;{const b=mk('button','btn pri','← Volver a la duda');b.id='askback';b.hidden=true;b.style.cssText='position:fixed;left:16px;bottom:16px;z-index:40;box-shadow:0 4px 16px rgba(0,0,0,.2)';b.onclick=()=>{aiOpen();b.hidden=true};document.body.append(b)}
+
+{const w=$('amodelw'),m=$('amenu'),sel=()=>m.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.m===AIMODEL));
+try{const v=localStorage.getItem('sxmodel');if(/^(lite|flow|pro)$/.test(v))AIMODEL=v}catch(e){}
+const nm={lite:'Flash',flow:'Flow',pro:'Pro'};const upd=()=>{$('amodelt').textContent=nm[AIMODEL];sel()};upd();
+$('amodel').onclick=e=>{e.stopPropagation();m.hidden=!m.hidden};
+m.onclick=e=>{const b=e.target.closest('button');if(!b)return;AIMODEL=b.dataset.m;try{localStorage.setItem('sxmodel',AIMODEL)}catch(x){}upd();m.hidden=true};
+document.addEventListener('click',e=>{if(!w.contains(e.target))m.hidden=true})}
+{const SR=window.SpeechRecognition||window.webkitSpeechRecognition,mic=$('amic');let rec=null;
+if(!SR){mic.onclick=()=>aiNote('Tu navegador no permite dictado por voz. Prueba con Chrome o Safari.',1)}
+else mic.onclick=()=>{if(rec){rec.stop();return}const r=new SR();rec=r;r.lang='es-ES';r.interimResults=true;r.continuous=false;const base=$('aq').value;let fin='';
+ mic.classList.add('rec');
+ r.onresult=e=>{let t='';for(const x of e.results)t+=x[0].transcript;$('aq').value=(base?base+' ':'')+t;$('aq').dispatchEvent(new Event('input'))};
+ r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed')aiNote('Permite el micrófono en el navegador para dictar.',1)};
+ r.onend=()=>{rec=null;mic.classList.remove('rec');aiState()};
+ try{r.start()}catch(e){rec=null;mic.classList.remove('rec')}}}
 
 /* ===== Test (práctica / teoría) ===== */
 const TEST={on:false,kind:'practica',sents:[],i:0,res:[],delivered:false};
@@ -1121,7 +1190,7 @@ const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math
 /* teoría */
 const QZ={qs:[],i:0,ok:0,fails:[],ans:[]};
 async function tQuizStart(){const k=TOPK[$('t-tema').value]||'';let qs=null,ai=false;
-  try{const prev=LSget('sx_genQ').slice(-14);const r=await withTimeout(askJSON('Eres profesor de Lengua Castellana ('+$('t-lvl').value+', España, Colegio El Valle). Crea 10 preguntas NUEVAS de test de TEORÍA de sintaxis (3 opciones A, B y C; una sola correcta; variante '+seed()+') basadas en estos apuntes. Se dice «grupo», no «sintagma».'+tTopic()+' Mezcla tipos: identificar funciones, sustituciones (lo/le), tipos de predicado, pasiva, «se», subordinadas, grupos y núcleos. Distractores plausibles, sin ambigüedad.'+(prev.length?' Ya preguntadas, NO las repitas: '+prev.join(' | ')+'.':'')+'\nAPUNTES:\n'+AIRULES+'\nResponde solo con JSON: {"preguntas":[{"q":"...","opciones":["a","b","c"],"correcta":0,"explicacion":"una frase"}]}',{modelTier:'default',cache:false}),16000);
+  try{const prev=LSget('sx_genQ').slice(-14);const r=await withTimeout(askJSON('Eres profesor de Lengua Castellana ('+$('t-lvl').value+', España). Crea 10 preguntas NUEVAS de test de TEORÍA de sintaxis (3 opciones A, B y C; una sola correcta; variante '+seed()+') basadas en estos apuntes. Se dice «grupo», no «sintagma».'+tTopic()+' Mezcla tipos: identificar funciones, sustituciones (lo/le), tipos de predicado, pasiva, «se», subordinadas, grupos y núcleos. Distractores plausibles, sin ambigüedad.'+(prev.length?' Ya preguntadas, NO las repitas: '+prev.join(' | ')+'.':'')+'\nAPUNTES:\n'+AIRULES+'\nResponde solo con JSON: {"preguntas":[{"q":"...","opciones":["a","b","c"],"correcta":0,"explicacion":"una frase"}]}',{modelTier:'default',cache:false}),16000);
     const v=(r&&r.preguntas||[]).filter(q=>q&&q.q&&Array.isArray(q.opciones)&&q.opciones.length>=3&&Number.isInteger(q.correcta)&&q.correcta>=0&&q.correcta<q.opciones.length).slice(0,10);
     if(v.length>=8){qs=v.map(q=>{const strip=x=>String(x).replace(/^\s*[A-Ca-c]\s*[\)\.\:\-–]\s*/,'').trim();const o=q.opciones.slice(0,3).map(strip);const c=strip(q.opciones[q.correcta]);const sh=shuf(o);return{q:String(q.q),opciones:sh,correcta:Math.max(0,sh.indexOf(c)),explicacion:String(q.explicacion||'')}}).filter(q=>q.opciones.length===3);ai=qs.length>=8}}catch(e){}
   if(!ai){const used=LSget('sx_usedQ');let own=TQ.filter(q=>(!k||q[0]===k)&&!used.includes(q[1]));let rest=TQ.filter(q=>(!k||q[0]!==k)&&!used.includes(q[1]));if(own.length+rest.length<10){own=TQ.filter(q=>!k||q[0]===k);rest=TQ.filter(q=>k&&q[0]!==k)}

@@ -6,7 +6,8 @@ const RETRY = [404, 408, 409, 429, 500, 502, 503, 504];
 const clean = (t) => String(t || '').replace(/^```(?:json)?\s*|\s*```$/g, '').trim();
 
 let MC = null;
-async function geminiModels(key, fast) {
+async function geminiModels(key, fast, pro) {
+  if (pro) return [...new Set([process.env.GEMINI_PRO_MODEL, 'gemini-2.5-pro', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest'].filter(Boolean))];
   if (fast) return [process.env.GEMINI_MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'].filter(Boolean);
   if (MC && Date.now() - MC.t < 600000) return MC.l;
   const fixed = [process.env.GEMINI_MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean);
@@ -29,12 +30,12 @@ async function geminiModels(key, fast) {
   }
 }
 
-async function callGemini({ key, prompt, img, search, plain, deadline, fast }) {
+async function callGemini({ key, prompt, img, search, plain, deadline, fast, pro }) {
   const txt = search || plain;
   let last = 'Gemini sin respuesta';
   const parts = [{ text: prompt }];
   if (img && img.data) parts.push({ inlineData: { mimeType: String(img.mime || 'image/jpeg'), data: String(img.data) } });
-  for (const model of await geminiModels(key, fast)) {
+  for (const model of await geminiModels(key, fast, pro)) {
     if (Date.now() > deadline) break;
     try {
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
@@ -71,6 +72,7 @@ async function callGemini({ key, prompt, img, search, plain, deadline, fast }) {
 async function callOpenAI({ key, prompt, img, search, plain, deadline, fast }) {
   const txt = search || plain;
   let last = 'ChatGPT sin respuesta';
+  if (img && /pdf/i.test(String(img.mime))) return { ok: false, error: 'ChatGPT no lee PDF aquí' };
   const content = [{ type: 'text', text: prompt }];
   if (img && img.data) content.push({ type: 'image_url', image_url: { url: `data:${img.mime || 'image/jpeg'};base64,${img.data}` } });
   const models = plain
@@ -131,8 +133,9 @@ export default async function handler(req, res) {
   const img = req.body && req.body.image;
   const search = !!(req.body && req.body.search);
   const fast = !!(req.body && req.body.fast);
+  const pro = !!(req.body && req.body.pro);
   const mk = (plain, ms) => {
-    const gem = gKey && (() => callGemini({ key: gKey, prompt, img, search, plain, fast, deadline: Date.now() + ms }));
+    const gem = gKey && (() => callGemini({ key: gKey, prompt, img, search, plain, fast, pro, deadline: Date.now() + ms }));
     const gpt = oKey && (() => callOpenAI({ key: oKey, prompt, img, search, plain, fast, deadline: Date.now() + ms }));
     // Gemini primero y ChatGPT de respaldo. Cambia con AI_PRIMARY=gemini|openai.
     const pref = (process.env.AI_PRIMARY || 'gemini').toLowerCase();
