@@ -7,10 +7,10 @@ const clean = (t) => String(t || '').replace(/^```(?:json)?\s*|\s*```$/g, '').tr
 
 let MC = null;
 async function geminiModels(key, fast, pro) {
-  if (pro) return [...new Set([process.env.GEMINI_PRO_MODEL, 'gemini-2.5-pro', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest'].filter(Boolean))];
-  if (fast) return [process.env.GEMINI_MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'].filter(Boolean);
+  if (pro) return [...new Set([process.env.GEMINI_PRO_MODEL, 'gemini-3.5-pro', 'gemini-pro-latest', 'gemini-3.5-flash', 'gemini-2.5-pro', 'gemini-flash-latest', 'gemini-2.5-flash', 'gemini-flash-lite-latest'].filter(Boolean))];
+  if (fast) return [process.env.GEMINI_MODEL, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite'].filter(Boolean);
   if (MC && Date.now() - MC.t < 600000) return MC.l;
-  const fixed = [process.env.GEMINI_MODEL, 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean);
+  const fixed = [process.env.GEMINI_MODEL, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-2.5-flash-lite', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash'].filter(Boolean);
   try {
     const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=100', { headers: { 'x-goog-api-key': key } });
     const d = await r.json();
